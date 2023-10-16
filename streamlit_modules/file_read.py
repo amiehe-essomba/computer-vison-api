@@ -83,11 +83,13 @@ def file_read(st, uploaded_file : any, show: bool = True, factor : float = None)
                     else:
                         with tabs[i]:
                             st.header(list_types[i])
-                            shutil.copy(files['video'][video_id], "temp.mp4")
-                            st.video("temp.mp4", format="video/mp4")
+                            #shutil.copy(files['video'][video_id], "temp.mp4")
+                            st.video(files['video'][video_id], format="video/mp4")
                             video_reader, *details = read_video(files['video'][video_id])
                             files['video_reader'][video_id] = video_reader
                             files['details'][video_id] = details[0]
+                            #shutil.rmtree(files['video'][video_id], ignore_errors=True)
+                           
                         video_id += 1
         else :
             if list_types:

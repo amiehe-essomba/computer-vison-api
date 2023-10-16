@@ -78,7 +78,7 @@ def get_colors_for_classes(num_classes):
 
     return colors
 
-def draw_boxes(image, boxes, box_classes, class_names, scores=None, use_classes : list = [], df = {}):
+def draw_boxes(image, boxes, box_classes, class_names, scores=None, use_classes : list = [], df = {}, with_score : bool = True):
     """
     Draw bounding boxes on image.
 
@@ -96,13 +96,13 @@ def draw_boxes(image, boxes, box_classes, class_names, scores=None, use_classes 
         A copy of `image` modified with given bounding boxes.
     """
 
-    
     font = ImageFont.truetype(
         font='font/FiraMono-Medium.otf',
         size=np.floor(3e-2 * image.size[1] + 0.5).astype('int32'))
     thickness   = (image.size[0] + image.size[1]) // 300
     colors      = get_colors_for_classes(len(class_names))
 
+    
     for i, c in list(enumerate(box_classes)):
         box_class   = class_names[c]
         box         = boxes[i]
@@ -112,8 +112,20 @@ def draw_boxes(image, boxes, box_classes, class_names, scores=None, use_classes 
             label   = '{} {:.2f}'.format(box_class, score)
         else: label = '{}'.format(box_class)
 
-        if label.split()[0] in use_classes:
-            
+        
+        _label_ = label.split()
+        if len(_label_) <= 2 : 
+            if with_score : pass 
+            else : label = _label_[0]
+        else:
+            string = ""
+            for i, s in enumerate(_label_[:-1]) : string = string + s + " " if (i != len(_label_)-2) else string  + s
+            _label_ = [string, _label_[-1]]
+
+            if with_score : pass 
+            else: label = string
+  
+        if _label_[0] in use_classes:
             draw        = ImageDraw.Draw(image)
             label_size  = draw.textlength(text=label, font=font)
             top, left, bottom, right = box
@@ -126,8 +138,8 @@ def draw_boxes(image, boxes, box_classes, class_names, scores=None, use_classes 
             df['left'].append(left)
             df['bottom'].append(bottom)
             df['right'].append(right)
-            df['score'].append(float(label.split()[1]))
-            df['label'].append(label.split()[0])
+            df['score'].append(float(_label_[1]))
+            df['label'].append(_label_[0])
 
 
             """
@@ -136,12 +148,37 @@ def draw_boxes(image, boxes, box_classes, class_names, scores=None, use_classes 
             else:  text_origin = np.array([left, top + 1])
             """
 
-            text_origin = np.array([left, top - 20])
+            if (top - 20) >= 0 : text_origin = np.array([left, top - 20])
+            else:
+                idd = 0
+                while (top - 20 + idd) < 0:
+                    idd += 1
+                text_origin = np.array([left, top - 20 + idd])
             # My kingdom for a good redistributable image drawing library.
             for i in range(thickness):
-                draw.rectangle(
-                    [left + i, top + i, right - i, bottom - i], outline=colors[c]
-                    )
+                try:
+                    draw.rectangle(
+                        [left + i, top + i, right - i, bottom - i], outline=colors[c]
+                        )
+                except ValueError:
+                    done = None 
+                    if left + i >= right - i:
+                        draw.rectangle(
+                            [left + i, top + i, left + i + abs(left-right), bottom - i], outline=colors[c]
+                            )
+                        done = True 
+
+                    if top + i >= bottom - i :
+                        if done is True : 
+                            draw.rectangle(
+                                [left + i, top - i, left + i + abs(left-right), top + i + abs(top-bottom)], outline=colors[c]
+                                )
+                        else:
+                            draw.rectangle(
+                                [left + i, top - i, right - i, top + i + abs(top-bottom)], outline=colors[c]
+                                )
+
+                        
             draw.rectangle(
                 [tuple(text_origin), tuple(text_origin + (label_size, 20))],
                 fill=colors[c]
@@ -168,7 +205,9 @@ def total_precess(st, prediction, estimator, video, df, details, **kwargs):
     frame_count         = 0
     fps                 = video.get_meta_data()['fps']
     (start, end, step)  = details
+    import streamlit as st
 
+    response = st.checkbox("with score")
     run = button_style(st=st, name='run')
 
     if run:   
@@ -186,7 +225,9 @@ def total_precess(st, prediction, estimator, video, df, details, **kwargs):
                                     image_file=[(frame, frame_data)], anchors=kwargs['anchors'], 
                                     class_names=kwargs['Class_names'], img_size=(608, 608),
                                     max_boxes=kwargs['max_boxes'], score_threshold=kwargs['score_threshold'], 
-                                    iou_threshold=kwargs['iou_threshold'], data_dict=df,shape=shape[:-1], file_type='video')
+                                    iou_threshold=kwargs['iou_threshold'], data_dict=df,shape=shape[:-1], 
+                                    file_type='video', with_score = response
+                                    )
                 
                 storage.append(image_predicted)
 

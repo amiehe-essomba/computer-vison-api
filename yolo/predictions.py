@@ -21,7 +21,8 @@ def prediction(
         image_path      : str   = '',
         action          : bool  = False,
         shape           : tuple = (),
-        file_type       : str   = 'image'
+        file_type       : str   = 'image',
+        with_score      : bool  = True
         ):
 
     out_scores, out_boxes, out_classes  = [[], [], []]
@@ -45,7 +46,7 @@ def prediction(
                                         image.size[0]], max_boxes, score_threshold, iou_threshold)
 
                 # Draw bounding boxes on the image file
-                draw_image = draw_boxes(image=image, boxes=out_boxe, box_classes=out_classe, 
+                draw_image = draw_boxes(image=image, boxes=out_boxe, box_classes=out_classe, with_score=with_score, 
                                         class_names=class_names, scores=out_score, use_classes=use_classes, df=data_dict)
                 
                 r = shape[0] / shape[1] 
@@ -67,8 +68,9 @@ def prediction(
                     draw_image = resize(draw_image, output_shape=shape).astype("float32")
                                 
                 # Draw bounding boxes on the image file
-                draw_image = draw_boxes(image=image, boxes=out_boxe, box_classes=out_classe, 
-                                        class_names=class_names, scores=out_score, use_classes=use_classes, df=data_dict)
+                #draw_image = draw_boxes(image=image, boxes=out_boxe, box_classes=out_classe, 
+                #                        class_names=class_names, scores=out_score, use_classes=use_classes, df=data_dict)
+                
                 draw_image = resize(draw_image, output_shape=shape)
 
                 # saving section

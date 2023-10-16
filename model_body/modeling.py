@@ -26,7 +26,7 @@ def modeling(st):
     st.write(f'<h1 class="body-text">Class Score</h1>', unsafe_allow_html=True)
 
     t=r'''
-    \begin{equation}
+    \begin{align}
         scores = pc \times 
         \begin{pmatrix}
             1. \\
@@ -55,7 +55,7 @@ def modeling(st):
             pc \times c79 \\
             pc \times c80
         \end{pmatrix} 
-    \end{equation}
+    \end{align}
     '''
     st.latex(t)
 
@@ -66,6 +66,10 @@ def modeling(st):
     \end{equation}
     '''
     )
+
+    st.write(f'<h1 class="body-text">Yolo Filter Boxes</h1>', unsafe_allow_html=True)
+    st.write(f'<h1 class="body-text">IoU</h1>', unsafe_allow_html=True)
+    st.write(f'<h1 class="body-text">Non-Max Suppression</h1>', unsafe_allow_html=True)
 
 def transform(st, text):
     s = text

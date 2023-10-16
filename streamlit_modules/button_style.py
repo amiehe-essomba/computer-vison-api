@@ -1,5 +1,5 @@
 def button_style(st, name: str = "run", class_ : str = "custom-button"):
-    import streamlit as st
+    #import streamlit as st
 
     # Define a custom CSS class for our button
     button_style = """
@@ -34,5 +34,9 @@ def button_style(st, name: str = "run", class_ : str = "custom-button"):
         unsafe_allow_html=True
     )
 
-    run = st.button(name)
+    col, _, _, _, _ = st.columns(5)
+
+    with col:
+        run = st.button(name)
+
     return run

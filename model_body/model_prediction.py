@@ -176,11 +176,11 @@ def pred(st):
     else: pass
 
 def Image(st, yolo_model_path, df, col, shape, **kwargs):
+    
     with col:
-        # create run button
-        run = button_style(st=st, name='run')
+        response = st.checkbox('with score')
 
-    if run:
+    if button_style(st=st, name='run'):
         tf.get_logger().setLevel(logging.ERROR)
         yolo_model = tf.keras.models.load_model(yolo_model_path, compile=False)
         df = {'label' : [], 'score':[], 'top':[], "left":[], "bottom":[], 'right':[]}
@@ -189,7 +189,7 @@ def Image(st, yolo_model_path, df, col, shape, **kwargs):
             yolo_model=yolo_model, use_classes=kwargs['class_names'],
             image_file=kwargs['image_file'], anchors=kwargs['anchors'], class_names=kwargs['Class_names'], img_size=(608, 608),
             max_boxes=kwargs['max_boxes'], score_threshold=kwargs['score_threshold'], iou_threshold=kwargs['iou_threshold'], data_dict=df,
-            shape=shape, file_type='image'
+            shape=shape, file_type='image', with_score=response
         )
         
         resume(st=st, df=df, **{"image_predicted" : image_predicted})
@@ -227,7 +227,7 @@ def resume(st, df : dict, file_type: str='image', **kwargs):
 
         if file_type == 'image': st.image(kwargs['image_predicted'])
         else :
-            st.write(f"frame rate per second' : {kwargs['fps']}") 
+            st.write(f"frame rate per second : {kwargs['fps']}") 
             st.video(kwargs['video_reader'])
 
         if df['label']:

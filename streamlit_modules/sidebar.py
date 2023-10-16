@@ -74,7 +74,6 @@ def sidebar(streamlit = st):
         "Project description", 
         "Introduction",
         "Modelling",
-        "Model performance",
         "prediction",
         "Conclusion"
         )
