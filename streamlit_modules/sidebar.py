@@ -46,6 +46,7 @@ def example(st, file : str = "./video/yolo_pred.mp4"):
     video_file = open(file, 'rb')
     video_bytes = video_file.read()
     st.sidebar.video(video_bytes, format="video/mp4")
+    video_file.close()
 
 def sidebar(streamlit = st):
     yolo_feedback_contrain, contain_feedback = None, None 

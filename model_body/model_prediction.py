@@ -113,7 +113,9 @@ def pred(st):
             if show : show = True 
 
             type_of_file = st.selectbox('File type', options=('image', 'video'), index=None)
-            url = st.text_input("Insert your url here please :")
+            if type_of_file:
+                url = st.text_input("Insert your url here please :")
+            else: url = ""
 
             if url:
                 if type_of_file == 'image':
@@ -161,6 +163,7 @@ def pred(st):
                             yolo_model = tf.keras.models.load_model(yolo_model_path, compile=False)
                             df = {'label' : [], 'score':[], 'top':[], "left":[], "bottom":[], 'right':[]}
                             Image(st=st, yolo_model_path=yolo_model_path, df=df, col=cp_col3, shape=shape, **items) 
+                            
                         else: pass
                     else: pass 
 

@@ -17,14 +17,19 @@ import yad2k.models.keras_yolo
 import logging
 from yolo import video_settings as vs 
 from model_body.model_prediction import pred
+from model_body.project import project
+from model_body.intro import intro
+from model_body.modeling import modeling
+
 
 def head(st = st):
     yolo_model_path = './yolo_model/' 
     
     yolo_logo = links('loyo_logo')
     git_page  = links('git_page')
+    
     st.markdown(f'<a href="{git_page}" target="_blank"><img src="{yolo_logo}" width="450" height="200"></a>', unsafe_allow_html=True)
-
+    
     # Définir le style CSS personnalisé
     custom_css = styles()
 
@@ -42,7 +47,14 @@ def head(st = st):
     if contain_feedback:
         if contain_feedback == "prediction":
             pred(st=st)
+        if contain_feedback == "Project description":
+            project(st=st)
+        if contain_feedback == "Introduction":
+            intro(st=st)
+        if contain_feedback == "Modelling":
+            modeling(st=st)
         else: pass 
+
     else: pass 
 
 if __name__ == '__main__':
