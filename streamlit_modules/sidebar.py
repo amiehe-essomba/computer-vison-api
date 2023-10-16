@@ -3,7 +3,7 @@ from streamlit_modules.sidebar_styles import sidebar_styles as ss
 import streamlit as st
 from streamlit_modules.info import info
 
-def example(st, file : str = "yolo_pred.mp4"):
+def example(st, file : str = "./video/yolo_pred.mp4"):
     """
     import tempfile
     import moviepy.editor as mb

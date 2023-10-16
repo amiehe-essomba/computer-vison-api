@@ -188,7 +188,6 @@ def Image(st, yolo_model_path, df, col, shape, **kwargs):
             max_boxes=kwargs['max_boxes'], score_threshold=kwargs['score_threshold'], iou_threshold=kwargs['iou_threshold'], data_dict=df,
             shape=shape, file_type='image'
         )
-        tf.keras.models.save_model(yolo_model, filepath='./model_body/m', save_format="h5")
         
         resume(st=st, df=df, **{"image_predicted" : image_predicted})
     else: pass
