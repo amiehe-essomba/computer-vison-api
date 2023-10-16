@@ -6,6 +6,13 @@ __pycache__/
 # C extensions
 *.so
 
+
+yolo_model/
+#video/
+#yad2k/
+image/
+computer-vision-env/
+
 # Distribution / packaging
 .Python
 build/
