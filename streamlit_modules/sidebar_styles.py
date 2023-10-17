@@ -28,15 +28,15 @@ def sidebar_styles():
         background-color: white; /* Couleur de l'arrière-plan */
         padding: 5px; /* Marge intérieure pour le texte */
         border-radius: 5px; /* Coins arrondis */
-        font-size: 10px; /* Taille de police */
+        font-size: 13px; /* Taille de police */
         font-weight: lighter; /* Gras */
         text-align: left; /* Alignement du texte */
-        text-transform: uppercase; /* Texte en majuscules capitalize, lowercase*/
+        text-transform: proper; /* Texte en majuscules capitalize, lowercase*/
         text-decoration: none; /* Souligné underline overline */
         box-shadow: 2px 2px 5px 0 rgba(0, 0, 0, 0.2); /* Ombre */
         border: 2px solid #555; /* Bordure */
         margin: 0px; /* Marge extérieure */
-        width:  250px; /* Largeur du conteneur */
+        width:  300px; /* Largeur du conteneur */
         height: 150px; /* longueur */
         line-height: 1.5; /* Hauteur de ligne */
         }

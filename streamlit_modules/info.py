@@ -7,7 +7,7 @@ def info():
     to tackling complex problems using advanced data processing and machine and deep learning techniques. 
     '''
     rest = '''
-     My journey has enabled me to develop vital skills such as data analysis, predictive modeling, 
+    My journey has enabled me to develop vital skills such as data analysis, predictive modeling, 
     the implementation of machine learning algorithms, and the creation of innovative solutions 
     to address real-world challenges. My objective is to implement intelligent data strategies to optimize 
     processes and enhance business decision-making, thereby making a significant contribution 

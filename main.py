@@ -21,6 +21,7 @@ from model_body.model_prediction import pred
 from model_body.project import project
 from model_body.intro import intro
 from model_body.modeling import modeling
+from model_body.conclusion import conclusion
 
 def head_img(st):
     file = Image.open('./images/img_pred.jpg', 'r')
@@ -57,6 +58,8 @@ def head(st = st):
             intro(st=st)
         if contain_feedback == "Modelling":
             modeling(st=st)
+        if contain_feedback == "Conclusion":
+            conclusion(st=st)
         else: pass 
     else :
         if yolo_feedback_contrain is not None:   

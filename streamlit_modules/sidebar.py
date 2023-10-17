@@ -78,7 +78,6 @@ def sidebar(streamlit = st):
         "Conclusion"
         )
     
-    
     # get feedback storage in contain_feedback
     index            = None 
     contain_feedback = streamlit.sidebar.radio('all contains', options=contains, disabled=False, index=index)
@@ -107,15 +106,18 @@ def sidebar(streamlit = st):
     # section about author
     streamlit.sidebar.write('<h3 class="sidebar-text">About Author</h3>', unsafe_allow_html=True)
     # my name 
-    streamlit.sidebar.write('<h5 class="author">Dr. Iréné Amiehe Essomba </h5>', unsafe_allow_html=True)
+    #streamlit.sidebar.write('<h5 class="author">Dr. Iréné Amiehe Essomba </h5>', unsafe_allow_html=True)
     # git and linkidin links apge 
     linkidin_page   = links('linkinding_page')
     # my picture took in my linkidin page 
     my_photo        = links('my_picture')
     col1_, col2_      = streamlit.sidebar.columns(2)
+
     with col1_:
         streamlit.sidebar.markdown(f'<a href="{linkidin_page}" target="_blank"><img src="{my_photo}" width="125" height="125"></a>', unsafe_allow_html=True)
     
+    streamlit.sidebar.write('<h5 class="author">Dr. Iréné Amiehe Essomba, Ph.D </h5>', unsafe_allow_html=True)
+
     with col2_:
         # Bibliograpy section 
         streamlit.sidebar.markdown(f'<p class="author-info ">{info()}</p>', unsafe_allow_html=True)
@@ -126,12 +128,15 @@ def sidebar(streamlit = st):
 
     logo_git        = links('logo_git')
     logo_linkidin   = links('logo_linkidin')
+    email           = links('email')
+    mail            = 'essomba.irene@yahoo.com'
     streamlit.sidebar.markdown(
         f'<div style="text-align: left;">'
-        f'<a href="{linkidin_page}" target="_blank"><img src="{logo_linkidin}" width="20"></a>'
-        f'<a href="{git_page}" target="_blank"><img src="{logo_git}" width="20"></a>'
+        f'<a href="{linkidin_page}" target="_blank"><img src="{logo_linkidin}" width="30"></a>'
+        f'<a href="{git_page}" target="_blank"><img src="{logo_git}" width="30"></a>'
+        f'<a class="email" href="mailto:{mail}"><img class="logo"  src="{email}" width="30"></a>'
         f'</div>', 
         unsafe_allow_html=True
         )
-    
+      
     return [contain_feedback, yolo_feedback_contrain]

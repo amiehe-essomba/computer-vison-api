@@ -22,6 +22,7 @@ def links(name : str = ''):
     if name == 'computer-vis':
         string = "https://th.bing.com/th/id/OIP.e-aXUAZhsVAedoTjGaLJ2gAAAA?pid=ImgDet&w=415&h=345&rs=1"
 
-    
+    if name == 'email':
+        string = 'https://th.bing.com/th/id/OIP.ugDgTkIwn4zkgnWbA2MMKQHaHI?pid=ImgDet&rs=1'
     
     return string
