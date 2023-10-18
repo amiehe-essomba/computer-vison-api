@@ -1,6 +1,7 @@
 def IoU(
         box_xy1 : tuple = (), 
-        box_xy2 : tuple = ()
+        box_xy2 : tuple = (),
+        return_box : bool = False
         ):
 
     """
@@ -54,4 +55,5 @@ def IoU(
     iou             = (bonding_box_surface) / global_surface 
 
 
-    return iou
+    if return_box is None :  return iou
+    else: return iou, [xi1, yi1, xi2, yi2]

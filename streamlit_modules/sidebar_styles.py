@@ -37,8 +37,10 @@ def sidebar_styles():
         border: 2px solid #555; /* Bordure */
         margin: 0px; /* Marge extérieure */
         width:  300px; /* Largeur du conteneur */
-        height: 150px; /* longueur */
+        height: 170px; /* longueur */
         line-height: 1.5; /* Hauteur de ligne */
+        font-family: Arial, sans-serif; /* font family*/
+        text-align: justify;
         }
     }
     """

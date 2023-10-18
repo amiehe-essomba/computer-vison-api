@@ -49,7 +49,7 @@ def head(st = st):
     [contain_feedback, yolo_feedback_contrain] = sidebar(streamlit=st)
     #st.write('<h1 class="custom-text-under"></h1>', unsafe_allow_html=True)
     
-    if contain_feedback:
+    if contain_feedback :
         if contain_feedback == "prediction":
             pred(st=st)
         if contain_feedback == "Project description":
@@ -62,7 +62,7 @@ def head(st = st):
             conclusion(st=st)
         else: pass 
     else :
-        if yolo_feedback_contrain is not None:   
+        if yolo_feedback_contrain :  
             st.code(code(yolo_feedback_contrain), language='python', line_numbers=True)    
         else: head_img(st=st)
 

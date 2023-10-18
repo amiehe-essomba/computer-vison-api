@@ -92,7 +92,7 @@ def sidebar(streamlit = st):
                 "yolo boxes to corners", "yolo evaluation", "yolo model")
     # get the feedback
     if contain_feedback:  disable = True
-    else: disable = False
+    else: disable = True
     
     yolo_feedback_contrain = streamlit.sidebar.selectbox('Computer Vision modules', options=yolo_contrains, disabled=disable, index=None)
     

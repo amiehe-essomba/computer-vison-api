@@ -1,5 +1,8 @@
 def modeling(st):
     import streamlit as st
+    import numpy as np
+    from yolo.iou import IoU
+    from PIL import Image, ImageDraw
 
     st.write('<style>{}</style>'.format(styles()), unsafe_allow_html=True)
     st.write(f'<h1 class="header-text">Data modelling and understanding</h1>', unsafe_allow_html=True)
@@ -110,7 +113,10 @@ def modeling(st):
         """
     transform(st, p2)
 
-    if st.toggle('See how it works'):
+    #if st.toggle('See how it works'):
+    #    filter_box_test(st=st)
+    
+    with st.expander("HAVE A LOOK HERE."):
         filter_box_test(st=st)
 
     st.write(f'<h1 class="body-text">YOLO IoU(Intersection over Union)</h1>', unsafe_allow_html=True)
@@ -150,10 +156,10 @@ def modeling(st):
         should be tailored to the specific requirements and goals of the computer vision task at hand.
         """
     transform(st, p2)
-    transform(st, iou=True, text=iou_schema())
-
-    yes = st.toggle('See how it works.')
-    if yes : iou_test(st=st)
+    
+    with st.expander("HAVE A LOOK HERE."):
+        transform(st, iou=True, text=iou_schema())
+        iou_test(st=st)
 
     st.write(f'<h1 class="body-text">YOLO Non-Max Suppression</h1>', unsafe_allow_html=True)
     non_max = links('non-max')
@@ -174,6 +180,46 @@ def modeling(st):
         important in real-world applications of computer vision.
         """
     transform(st, p2)
+
+    st.write(f'<h1 class="body-text">Python modules acces</h1>', unsafe_allow_html=True)
+
+    with st.expander("IoU Problems"):
+        reset = True
+        if reset:
+            np.random.seed(None)
+            box1 = iuo_solution()
+            box2 = iuo_solution()
+
+        st.text(f'box1 : {box1}')
+        st.text(f"box2 : {box2}")
+        col1, col2 = st.columns(2)
+        num = st.number_input('answer')
+
+        with col1:
+            reset = st.button('reset', key=10)
+        with col2:
+            run = st.button('run')
+        iou = IoU(box_xy1=box1, box_xy2=box2, return_box=None)
+
+        if run:
+            if round(num, 4) == round(iou, 4):
+                st.text(f'Congratulation, iou = {round(iou, 4)}')
+            else:
+                st.text(f'wrong, expected iou : {round(iou, 4)}')
+                st.write("Try again.")
+          
+def iuo_solution():
+    import numpy as np 
+    ix1, iy1 = np.random.randint((100, 100))
+    ix2, iy2 = np.random.randint((100, 100))
+    
+    if ix1 > ix2 :  x1, x2 = ix2, ix1 
+    else: x1, x2 = ix1, ix2
+
+    if iy1 > iy2 : y1, y2 = iy2, iy1
+    else: y1, y2 = iy1, iy2
+
+    return (x1, y1, x2, y2)
 
 def transform(st, text, iou: bool = False):
     s = text
@@ -279,6 +325,8 @@ def iou_test(st):
     import streamlit as st 
     import pandas as pd 
     from yolo.iou import IoU
+    from PIL import Image, ImageDraw
+    import numpy as np 
 
     (x1, x2, y1, y2) = boxes(st=st, name='box1')
 
@@ -302,16 +350,29 @@ def iou_test(st):
             (w, h), box1, box2      = w_h(box1=box1, box2=box2, factor=factor)
             image                   = draw_boxes(box1=box1, box2=box2, w=w, h=h, width=width, bg=(0, 0, 0))
             
-            st.image(image)
-
-            run = st.button('run IoU')
-
-            if run:
-                try:
-                    iou     = IoU(box_xy1=box1, box_xy2=box2)
-                    st.write('IoU :', round(iou, 5))
-                except ZeroDivisionError:
-                    st.warning("Division by zero", icon="⚠️") 
+            try:
+                iou, box_iou  = IoU(box_xy1=box1, box_xy2=box2, return_box=True)
+                
+                if iou == 0.0 : st.image(image)
+                else:
+                    if box_iou[0] > box_iou[2] : 
+                        x1, x2 = box_iou[0], box_iou[2]
+                        box_iou[0] = x2 
+                        box_iou[2] = x1 
+                    if box_iou[1] > box_iou[3]:
+                        y1, y2 = box_iou[1], box_iou[3]
+                        box_iou[1] = y2 
+                        box_iou[3] = y1
+                    img = Image.fromarray(image)
+                    draw = ImageDraw.Draw(img)
+                    draw.rectangle(box_iou, outline=(0, 0, 255), width=width, fill=(255, 255, 255))
+                    image  =  np.array(img)
+                    st.image(image)
+                
+                run = st.button('run IoU')
+                if run : st.write('IoU :', round(iou, 5))
+            except ZeroDivisionError:
+                st.warning("Division by zero", icon="⚠️") 
           
 def draw_boxes(box1, box2, w: float, h : float, color = [(255, 0, 0), (0, 255, 0)], width = 2, bg: str = ""):
     from PIL import Image, ImageDraw
@@ -358,19 +419,19 @@ def w_h(box1, box2, factor):
 
 def iou_schema():
     s="""
-    IoU Schema\n
+    IoU Schema\n\n
     (box x1, box1 y1)(min)
-    +---------------------------------------------+
-    |                 box 1                       |
-    |                                             |
-    |      (box2 x1, (box2 y1)(min)               |
+    +-------------------------------------+
+    |                 box 1               |
+    |                                     |
+    |      (box2 x1, (box2 y1)(min)       |
     |        +----------------------------+-------+
-    |        |///////   IoU Here  /////// |       |
-    +--------+------------------------------------+ (box1 x2, box1 y2) (max) 
-             |                            |
-             |        box 2               |
-             |                            |
-             +----------------------------+ (box2 x2, box2 y2) (max)
+    |        |//////////   IoU Here  //////////// | 
+    +--------+----------------------------+-------+ (box1 x2, box1 y2) (max) 
+             |                                    |
+             |        box 2                       |
+             |                                    |
+             +------------------------------------+ (box2 x2, box2 y2) (max)
     """
 
     return s 
@@ -394,18 +455,20 @@ def filter_box_test(st):
     with col4:
         threshold = st.slider('threshold', min_value=0.1, max_value=1.0, step=0.05, value=0.5)
     
-    f_, w_ = st.columns(2)
+    f_, w_, c_ = st.columns(3)
     with f_:
         factor    = st.slider('scale factor', min_value=1, max_value=100, step=5, value=10) 
     with w_:
-        width     = st.slider('scale factor', min_value=1, max_value=10, step=1, value=2)
+        width     = st.slider('line width', min_value=1, max_value=10, step=1, value=2)
+    with c_:
+        seed      = st.slider('random state', min_value=1, max_value=100, step=1, value=3)
 
-    (w, h), scores, boxes, classes, image, _ = genarate_data(img_size, n_box, n_classes, threshold, factor)
+    (w, h), scores, boxes, classes, image, _ = genarate_data(img_size, n_box, n_classes, threshold, factor, seed)
 
     image = db(boxes=boxes, w=w, h=h, width=width)
     if st.checkbox("show image") : st.image(image)
 
-def genarate_data(img_size, n_box, n_classes, threshold, factor):
+def genarate_data(img_size, n_box, n_classes, threshold, factor, seed):
     import numpy as np 
     import streamlit as st 
     from PIL import Image
@@ -413,6 +476,7 @@ def genarate_data(img_size, n_box, n_classes, threshold, factor):
     from model_body.filter_box_draw import draw_boxes as db
     import tensorflow as tf
 
+    np.random.seed(seed=seed)
     boxes           = np.random.randn(img_size, img_size, n_box, 4)
     box_confidence  = np.random.randn(img_size, img_size, n_box, 1)
     box_class_prob  = np.random.randn(img_size, img_size, n_box, n_classes)
