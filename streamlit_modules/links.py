@@ -8,7 +8,7 @@ def links(name : str = ''):
         string = "https://logospng.org/download/linkedin/logo-linkedin-icon-1536.png"
     
     if name == 'git_page': 
-        string = "https://github.com/amiehe-essomba/computer-vision"
+        string = "https://github.com/amiehe-essomba/computer-vison-api"
     
     if name == 'linkinding_page':
         string = "https://www.linkedin.com/in/amiehe-essomba/"

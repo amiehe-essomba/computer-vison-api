@@ -30,7 +30,7 @@ def draw_boxes(boxes, w, h, width):
         font='font/FiraMono-Medium.otf',
         size=np.floor(3e-2 * image.size[1] + 0.5).astype('int32'))
     thickness   = (image.size[0] + image.size[1]) // 300
-    colors      = get_colors_for_classes(100)
+    colors      = get_colors_for_classes(boxes.shape[0])
 
     for i in range(boxes.shape[0]):
         x1, y1, x2, y2  = boxes[i]

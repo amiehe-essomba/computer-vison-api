@@ -300,13 +300,13 @@ def boxes(st, name : str, box: tuple = (0.0, 0.5, 5.0, 5.0)):
 
     X1, Y1, X2, Y2 = st.columns(4)
     with X1:
-        x1 = st.number_input(f"{name} x1", min_value=0.0, max_value=100.0, value=box[0])
+        x1 = st.slider(f"{name} x1", min_value=0.0, max_value=100.0, value=box[0])
     with Y1:
-        y1 = st.number_input(f"{name} y1", min_value=0.0, max_value=100.0, value=box[1])
+        y1 = st.slider(f"{name} y1", min_value=0.0, max_value=100.0, value=box[1])
     with X2:
-        x2 = st.number_input(f"{name} x2", min_value=0.0, max_value=100.0, value=box[2])
+        x2 = st.slider(f"{name} x2", min_value=0.0, max_value=100.0, value=box[2])
     with Y2:
-        y2 = st.number_input(f"{name} y2", min_value=0.0, max_value=100.0, value=box[3])
+        y2 = st.slider(f"{name} y2", min_value=0.0, max_value=100.0, value=box[3])
 
     return (x1, x2, y1, y2)
 
@@ -347,8 +347,9 @@ def iou_test(st):
             with w_:
                 width   = st.slider('line width', max_value=8, min_value=1, step=1, value=2)
 
+            fill_box    = st.checkbox('fill', value=False)
             (w, h), box1, box2      = w_h(box1=box1, box2=box2, factor=factor)
-            image                   = draw_boxes(box1=box1, box2=box2, w=w, h=h, width=width, bg=(0, 0, 0))
+            image                   = draw_boxes(box1=box1, box2=box2, w=w, h=h, width=width, bg=(0, 0, 0), fill_box=fill_box)
             
             try:
                 iou, box_iou  = IoU(box_xy1=box1, box_xy2=box2, return_box=True)
@@ -365,24 +366,30 @@ def iou_test(st):
                         box_iou[3] = y1
                     img = Image.fromarray(image)
                     draw = ImageDraw.Draw(img)
-                    draw.rectangle(box_iou, outline=(0, 0, 255), width=width, fill=(255, 255, 255))
+                    if fill_box:  fill = (0, 0, 255)
+                    else : fill = (255, 255, 255)
+                    draw.rectangle(box_iou, outline=(0, 0, 255), width=width, fill=fill)
                     image  =  np.array(img)
-                    st.image(image)
+                   
+                    if st.checkbox('Show image') : st.image(image)
                 
                 run = st.button('run IoU')
                 if run : st.write('IoU :', round(iou, 5))
             except ZeroDivisionError:
                 st.warning("Division by zero", icon="⚠️") 
           
-def draw_boxes(box1, box2, w: float, h : float, color = [(255, 0, 0), (0, 255, 0)], width = 2, bg: str = ""):
+def draw_boxes(box1, box2, w: float, h : float, color = [(255, 0, 0), (0, 255, 0)], 
+               width = 2, bg: str = "", fill_box : bool = False):
     from PIL import Image, ImageDraw
     import numpy as np 
 
     image = Image.new('RGB', (w, h), color=bg)  
 
     draw = ImageDraw.Draw(image)
-    draw.rectangle(box1, outline=color[0], width=width)
-    draw.rectangle(box2, outline=color[1], width=width)
+    if fill_box:  fill = color
+    else:  fill = (None, None)
+    draw.rectangle(box1, outline=color[0], width=width, fill=fill[0])
+    draw.rectangle(box2, outline=color[1], width=width, fill=fill[1])
 
     image_array = np.array(image)
 
@@ -511,7 +518,4 @@ def genarate_data(img_size, n_box, n_classes, threshold, factor, seed):
     (w, h), box1, box2 = w_h(box1, box2, factor)
 
     return (w, h), scores, boxes, classes, image, boxes_
-
-
-
 

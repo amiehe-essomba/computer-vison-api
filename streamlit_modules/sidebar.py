@@ -94,7 +94,8 @@ def sidebar(streamlit = st):
     if contain_feedback:  disable = True
     else: disable = True
     
-    yolo_feedback_contrain = streamlit.sidebar.selectbox('Computer Vision modules', options=yolo_contrains, disabled=disable, index=None)
+    yolo_feedback_contrain = streamlit.sidebar.selectbox('Computer Vision modules', options=yolo_contrains, 
+                                                         disabled=disable, index=None, placeholder='Make your choice')
     
     example(st=streamlit)
 
