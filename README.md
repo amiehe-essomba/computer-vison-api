@@ -46,6 +46,7 @@ font-family: Arial, sans-serif;
 text-align: justify;>
 Through a comprehensive approach encompassing data collection, model training, real-time detection, decision-making, and advanced reporting mechanisms, this project seeks to create an intelligent traffic control system that goes beyond traditional traffic management. By detecting vehicles, pedestrians, and traffic lights in real time and dynamically adapting traffic signal timings, this system aims to prevent accidents, reduce traffic congestion, and contribute to a safer and more efficient road infrastructure.
 </p>
+
 <p color: black;  
 background-color: white; 
 font-size: 25px;  
@@ -55,6 +56,7 @@ font-family: Arial, sans-serif;
 text-align: justify;>
 This project is not only a testament to the power of cutting-edge technology but also a commitment to the safety and well-being of individuals on the road. By leveraging computer vision, it offers a promising solution to one of society's most pressing challenges—road safety enhancement in the face of ever-increasing traffic demands.
 </p>
+
 ## CONTRIBUTING
 pull requests are welcome. Fore major changes, please open an issue first to discuss what you would like to change.
 That's very impotant.
