@@ -11,9 +11,7 @@
 
 
 ## PROJECT DESCRIPTION
-> Learn more about [Project Description](https://vision-api.streamlit.app/)
-
-> Example of a code
+> Learn more about project description [here](https://vision-api.streamlit.app/)
 
 ## INTRODUCTION
 
@@ -31,6 +29,12 @@ Through a comprehensive approach encompassing data collection, model training, r
 This project is not only a testament to the power of cutting-edge technology but also a commitment to the safety and well-being of individuals on the road. By leveraging computer vision, it offers a promising solution to one of society's most pressing challenges—road safety enhancement in the face of ever-increasing traffic demands.
 </p>
 
+## MODELLING
+> Learn more about the modelling [here](https://vision-api.streamlit.app/)
+
+## PREDICTION
+> Learn more about the prediction [here](https://vision-api.streamlit.app/)
+
 ## CONTRIBUTING
 pull requests are welcome. Fore major changes, please open an issue first to discuss what you would like to change.
 That's very impotant.
@@ -39,6 +43,24 @@ Please make sure to update tests as appropriate.
 >For more details read the [contribution guidelines](https://github.com/amiehe-essomba/computer-vision/blob/computer-vision/CONTRIBUTING.md).
 
 ## RUNNING PROJECT
+This project has been doployed on the [Streamlit Platform](https://vision-api.streamlit.app/). You can run the code directly on Streamlit, and see how the code performs very well. 
+
+## CONCLUSION:
+<p color: black;  
+background-color: white; 
+font-size: 25px;  
+font-weight: bolder;  
+text-decoration: underline;  
+font-family: Arial, sans-serif;  
+text-align: justify;>
+My computer vision project represents a significant contribution to how we use technology to interact with the world around us, especially in the fields of road traffic and road safety. You have demonstrated how smart cameras and computer vision systems can play a crucial role in monitoring and optimizing road traffic, thereby contributing to traffic flow improvement.
+
+Road safety is a major concern in our societies, and my work has shown how computer vision can be used to detect traffic violations, improve traffic light management and contribute to safer driving environments. My efforts in this area have the potential to save lives especially from road accidents and by increasing safety
+
+Additionally, by helping to ease traffic flow, I have paved the way for more effective traffic management systems, including tackling congestion and improving the efficiency of our transportation networks. My work illustrates the power of smart cameras and computer vision to solve complex and challenging problems, contributing to smarter, more livable cities.
+</p>
+
+<img width="400px" height="500px" src="https://i.pinimg.com/originals/18/e1/11/18e1110635dc82318910603571fe4e5a.jpg"></img>
 
 ## 🤵 Author 
 __**Amiehe Essomba**__ 
@@ -48,13 +70,11 @@ __**Amiehe Essomba**__
 - [Website](https://pypi.org/user/amiehe/ "pypi")
 - [Twitter](https://twitter.com/irene_essomba?t=dyzm9cjFPhktK4NEtiqtmw&s=09 "@Essomba" )
 
-
 ## 🤝 Support 
 Give a ⭐ if you like this project!
 
 ## License 
 Copyrihght © 2023 __**Dr. Iréné Amiehe Essomba**__
-
 
 This project is licensed under [MIT License]()
 
