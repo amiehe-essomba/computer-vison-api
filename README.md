@@ -1,17 +1,17 @@
 # <!-- TITLE --> __```OBJECT DETECTION WITH YOLO MODEL ```__
 #### <!-- AUTHOR --> - Author : __Dr. Amiehe-Essomba__ (c) 2023
-<img width="800px" height="500px" src="images/img_pred.jpg"></img>
+<img width="450px" height="250px" src="images/img_pred.jpg"></img>
 
 
 ## BUILT WITH 
 - __**Python**__ 
 - __**Jupyter NoteBook**__ 
 
-> Learn more about  [You Only Look One (YOLO)]() For Object detection 
+> Learn more about  [You Only Look One (YOLO)]("https://pjreddie.com/darknet/yolo/") For Object detection 
 
 
 ## PROJECT DESCRIPTION
-> Learn more about [Project Description]()
+> Learn more about [Project Description](https://vision-api.streamlit.app/)
 
 > Example of a code
 
