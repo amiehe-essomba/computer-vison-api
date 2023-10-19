@@ -11,7 +11,7 @@
 
 
 ## PROJECT DESCRIPTION
-> Learn more about project description [here](https://vision-api.streamlit.app/)
+> Learn about project description [here](https://vision-api.streamlit.app/)
 
 ## INTRODUCTION
 
@@ -30,10 +30,10 @@ This project is not only a testament to the power of cutting-edge technology but
 </p>
 
 ## MODELLING
-> Learn more about the modelling [here](https://vision-api.streamlit.app/)
+> Learn about the modelling [here](https://vision-api.streamlit.app/)
 
 ## PREDICTION
-> Learn more about the prediction [here](https://vision-api.streamlit.app/)
+> Learn about the prediction [here](https://vision-api.streamlit.app/)
 
 ## CONTRIBUTING
 pull requests are welcome. Fore major changes, please open an issue first to discuss what you would like to change.
@@ -44,6 +44,12 @@ Please make sure to update tests as appropriate.
 
 ## RUNNING PROJECT
 This project has been doployed on the [Streamlit Platform](https://vision-api.streamlit.app/). You can run the code directly on Streamlit, and see how the code performs very well. 
+The code takes:
+
+> images
+> videos 
+> links 
+
 
 ## CONCLUSION:
 <p color: black;  
@@ -58,6 +64,8 @@ My computer vision project represents a significant contribution to how we use t
 Road safety is a major concern in our societies, and my work has shown how computer vision can be used to detect traffic violations, improve traffic light management and contribute to safer driving environments. My efforts in this area have the potential to save lives especially from road accidents and by increasing safety
 
 Additionally, by helping to ease traffic flow, I have paved the way for more effective traffic management systems, including tackling congestion and improving the efficiency of our transportation networks. My work illustrates the power of smart cameras and computer vision to solve complex and challenging problems, contributing to smarter, more livable cities.
+
+
 </p>
 
 <img width="400px" height="500px" src="https://i.pinimg.com/originals/18/e1/11/18e1110635dc82318910603571fe4e5a.jpg"></img>
