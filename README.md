@@ -7,7 +7,7 @@
 - __**Python**__ 
 - __**Jupyter NoteBook**__ 
 
-> Learn more about  [You Only Look One (YOLO)]("https://pjreddie.com/darknet/yolo/") For Object detection 
+> Learn more about  [You Only Look One (YOLO)](https://pjreddie.com/darknet/yolo/) For Object detection 
 
 
 ## PROJECT DESCRIPTION
