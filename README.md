@@ -1,4 +1,4 @@
-# <!-- TITLE --> __```OBJECT DETECTION WITH YOLO MODEL ```__
+# <!-- TITLE --> __``` REAL TIME OBJECT DETECTION WITH YOLO MODEL ```__
 #### <!-- AUTHOR --> - Author : __Dr. Amiehe-Essomba__ (c) 2023
 <img width="800px" height="600px" src="images/img_pred.jpg"></img>
 
