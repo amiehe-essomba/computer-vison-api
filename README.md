@@ -50,7 +50,7 @@ In the streatmlit platform th code takes:
 > videos 
 > links 
 
-You can also use this [notebook]() to see how it works.
+You can also use this [notebook](https://github.com/amiehe-essomba/computer-vison-api/blob/vis/main.ipynb) to see how it works.
 Enjoy !!!!
 
 
