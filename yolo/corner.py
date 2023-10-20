@@ -11,7 +11,6 @@ def yolo_boxes_to_corners(box_xy, box_wh):
     
     Convert YOLO box predictions to bounding box corners.
     """
-    
     box_mins  = box_xy - (box_wh / 2.)
     box_maxes = box_xy + (box_wh / 2.)
 

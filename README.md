@@ -44,11 +44,14 @@ Please make sure to update tests as appropriate.
 
 ## RUNNING PROJECT
 This project has been doployed on the [Streamlit Platform](https://vision-api.streamlit.app/). You can run the code directly on Streamlit, and see how the code performs very well. 
-The code takes:
+In the streatmlit platform th code takes:
 
 > images
 > videos 
 > links 
+
+You can also use this [notebook]() to see how it works.
+Enjoy !!!!
 
 
 ## CONCLUSION:
