@@ -4,7 +4,7 @@ from keras import backend
 def space_to_depth(x, block_size):
     return tf.nn.space_to_depth(x, block_size=block_size)
 
-def create_yolo_model_for_cmputer_vision(input_shape : tuple, num_classes : int = 2, num_anchors : int = 1):
+def create_yolo_model_for_cmputer_vision(input_shape : tuple):
     input_1 = tf.keras.layers.Input(shape=input_shape, name='input_1')
 
     # Feature extraction layers
@@ -110,5 +110,4 @@ def create_yolo_model_for_cmputer_vision(input_shape : tuple, num_classes : int 
     
     model = tf.keras.models.Model(inputs=input_1, outputs=conv2d_22, name='yolo_model')
     
-
     return model
