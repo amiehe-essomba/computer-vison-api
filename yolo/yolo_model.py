@@ -106,7 +106,7 @@ def create_yolo_model_for_cmputer_vision(input_shape : tuple, num_classes : int 
        
     # Detection layers
     conv2d_22 = tf.keras.layers.Conv2D(425, (1, 1), 
-                        strides=(1, 1), padding='same', activation="softmax", name="conv2d_22")(leaky_re_lu_21)
+                        strides=(1, 1), padding='same',  name="conv2d_22")(leaky_re_lu_21)
     
     model = tf.keras.models.Model(inputs=input_1, outputs=conv2d_22, name='yolo_model')
     
