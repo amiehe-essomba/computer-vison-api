@@ -1,7 +1,6 @@
 # <!-- TITLE --> __``` REAL TIME OBJECT DETECTION WITH YOLO MODEL ```__
 #### <!-- AUTHOR --> - Author : __Dr. Amiehe-Essomba__ (c) 2023
-<img width="800px" height="600px" src="images/img_pred.jpg"></img>
-
+![Sample Video](/video/yolo_pred_gif.gif)
 
 ## BUILT WITH 
 - __**Python**__ 
@@ -34,6 +33,8 @@ This project is not only a testament to the power of cutting-edge technology but
 
 ## PREDICTION
 > Learn about the prediction [here](https://vision-api.streamlit.app/)
+
+<img width="800px" height="600px" src="images/img_pred.jpg"></img>
 
 ## CONTRIBUTING
 pull requests are welcome. Fore major changes, please open an issue first to discuss what you would like to change.
@@ -70,6 +71,7 @@ Additionally, by helping to ease traffic flow, I have paved the way for more eff
 
 
 </p>
+
 
 <img width="400px" height="500px" src="https://i.pinimg.com/originals/18/e1/11/18e1110635dc82318910603571fe4e5a.jpg"></img>
 
