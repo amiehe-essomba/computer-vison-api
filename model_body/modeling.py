@@ -138,9 +138,12 @@ def modeling(st):
         Mathematically, this is expressed as:
         """
     transform(st, p2)
-    p2 ="""
-        IoU = Area of Intersection / Area of Union
-        """
+    t = r'''
+    \begin{equation}
+     IoU = \dfrac{Area of Intersection}{Area of Union} 
+     \end{equation}
+    '''
+    st.latex(t)
     transform(st, p2)
     p2 ="""
         This metric provides a quantifiable assessment of how much overlap exists between the predicted 
@@ -181,7 +184,7 @@ def modeling(st):
         """
     transform(st, p2)
 
-    st.write(f'<h1 class="body-text">Python modules acces</h1>', unsafe_allow_html=True)
+    st.write(f'<h1 class="body-text">Unlock Python modules by solving this issue </h1>', unsafe_allow_html=True)
 
     with st.expander("IoU Problems"):
         reset = True
