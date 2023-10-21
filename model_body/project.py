@@ -103,7 +103,8 @@ def ressources(st):
     st.markdown(f'<a class="header-text-under" href="https://pjreddie.com/darknet/yolo/">The official YOLO website</a>', unsafe_allow_html=True)
     st.markdown(f'<a class="header-text-under" href="https://arxiv.org/abs/1612.08242">Joseph Redmon, Ali Farhadi</a>', unsafe_allow_html=True)
     st.markdown(f'<a class="header-text-under" href="https://arxiv.org/abs/1612.08242">YOLO9000: Better, Faster, Stronger</a>', unsafe_allow_html=True)
-    
+    st.markdown(f'<a class="header-text-under" href="https://learnopencv.com/ultralytics-yolov8/#How-to-Use-YOLOv8?">YOLOv8 Ultralytics: State-of-the-Art YOLO Models</a>', unsafe_allow_html=True)
+
 
 def styles():
      custom_css_title = """

@@ -23,9 +23,9 @@ def yolo_head(feats, anchors, num_classes):
     box_class_pred : tensor
         Probability distribution estimate for each box over class labels.
     """
-    num_anchors = len(anchors)
+    num_anchors     = len(anchors)
     # Reshape to batch, height, width, num_anchors, box_params.
-    anchors_tensor = K.reshape(K.variable(anchors), [1, 1, 1, num_anchors, 2])
+    anchors_tensor  = K.reshape(K.variable(anchors), [1, 1, 1, num_anchors, 2])
 
     # Static implementation for fixed models.
     # TODO: Remove or add option for static implementation.
@@ -33,20 +33,20 @@ def yolo_head(feats, anchors, num_classes):
     # conv_dims = K.variable([conv_width, conv_height])
 
     # Dynamic implementation of conv dims for fully convolutional model.
-    conv_dims = K.shape(feats)[1:3]  # assuming channels last
+    conv_dims           = K.shape(feats)[1:3]  # assuming channels last
     # In YOLO the height index is the inner most iteration.
-    conv_height_index = K.arange(0, stop=conv_dims[0])
-    conv_width_index = K.arange(0, stop=conv_dims[1])
-    conv_height_index = K.tile(conv_height_index, [conv_dims[1]])
+    conv_height_index   = K.arange(0, stop=conv_dims[0])
+    conv_width_index    = K.arange(0, stop=conv_dims[1])
+    conv_height_index   = K.tile(conv_height_index, [conv_dims[1]])
 
     # TODO: Repeat_elements and tf.split doesn't support dynamic splits.
     # conv_width_index = K.repeat_elements(conv_width_index, conv_dims[1], axis=0)
-    conv_width_index = K.tile(
+    conv_width_index    = K.tile(
         K.expand_dims(conv_width_index, 0), [conv_dims[0], 1])
-    conv_width_index = K.flatten(K.transpose(conv_width_index))
-    conv_index = K.transpose(K.stack([conv_height_index, conv_width_index]))
-    conv_index = K.reshape(conv_index, [1, conv_dims[0], conv_dims[1], 1, 2])
-    conv_index = K.cast(conv_index, K.dtype(feats))
+    conv_width_index    = K.flatten(K.transpose(conv_width_index))
+    conv_index          = K.transpose(K.stack([conv_height_index, conv_width_index]))
+    conv_index          = K.reshape(conv_index, [1, conv_dims[0], conv_dims[1], 1, 2])
+    conv_index          = K.cast(conv_index, K.dtype(feats))
 
     feats = K.reshape(
         feats, [-1, conv_dims[0], conv_dims[1], num_anchors, num_classes + 5])
@@ -60,14 +60,14 @@ def yolo_head(feats, anchors, num_classes):
     # feats = Reshape(
     #     (conv_dims[0], conv_dims[1], num_anchors, num_classes + 5))(feats)
 
-    box_xy = K.sigmoid(feats[..., :2])
-    box_wh = K.exp(feats[..., 2:4])
-    box_confidence = K.sigmoid(feats[..., 4:5])
+    box_xy          = K.sigmoid(feats[..., :2])
+    box_wh          = K.exp(feats[..., 2:4])
+    box_confidence  = K.sigmoid(feats[..., 4:5])
     box_class_probs = K.softmax(feats[..., 5:])
 
     # Adjust preditions to each spatial grid point and anchor size.
     # Note: YOLO iterates over height index before width index.
-    box_xy = (box_xy + conv_index) / conv_dims
-    box_wh = box_wh * anchors_tensor / conv_dims
+    box_xy          = (box_xy + conv_index) / conv_dims
+    box_wh          = box_wh * anchors_tensor / conv_dims
 
     return box_xy, box_wh, box_confidence, box_class_probs
