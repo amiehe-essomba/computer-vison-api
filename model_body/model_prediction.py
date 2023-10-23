@@ -192,7 +192,7 @@ def Image(st, yolo_model_path, df, col, shape, model_type, **kwargs):
 
     if button_style(st=st, name='run'):
 
-        if model_type == 'my_model':
+        if model_type == 'my model':
             tf.get_logger().setLevel(logging.ERROR)
             yolo_model = tf.keras.models.load_model(yolo_model_path, compile=False)
             df = {'label' : [], 'score':[], 'top':[], "left":[], "bottom":[], 'right':[]}
