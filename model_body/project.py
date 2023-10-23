@@ -16,10 +16,11 @@ def title():
 
 def objectives(st):
     s = """
-    The primary objective of this project is to reduce the number of traffic accidents 
-    by optimizing traffic signal management using smart cameras and the YOLO (You Only Look Once) model. 
-    It aims to create an intelligent traffic control system capable of detecting vehicles and 
-    pedestrians, analyzing their behavior, and dynamically regulating traffic to prevent collisions.
+    The main goal of this project is to utilize Optical Character Recognition (OCR) 
+    technology alongside smart cameras and the YOLO (You Only Look Once) model to enhance
+    traffic signal management and ultimately decrease the occurrence of traffic accidents. 
+    This project seeks to establish an intelligent traffic control system capable of identifying 
+    vehicles and pedestrians, analyzing their actions, and dynamically adjusting traffic flow to proactively prevent collisions.
     """
     st.write(f'<h1 class="body-text">Objective:</h1>', unsafe_allow_html=True)
     st.markdown(f'<p class="header-text-under">{s}</p>', unsafe_allow_html=True)
@@ -54,7 +55,7 @@ def train(st):
 
     s = """
         The YOLO model integrated into the smart cameras analyzes real-time images and 
-        videos captured to detect vehicles, pedestrians, and traffic lights. It also 
+        videos captured to detect vehicles, pedestrians, and traffic lights and so on. It also 
         identifies potentially dangerous movements and behaviors.
         """
     st.write(f'<h1 class="body-text">Real-Time Detection:</h1>', unsafe_allow_html=True)
@@ -89,6 +90,7 @@ def train(st):
     st.markdown(
         '''
         <ol>
+        <li class="header-text-under">Road safety.</li>
         <li class="header-text-under">Reduction in the number of traffic accidents.</li>
         <li class="header-text-under">Decreased traffic congestion.</li>
         <li class="header-text-under">Improved safety for pedestrians and drivers.</li>
@@ -104,7 +106,7 @@ def ressources(st):
     st.markdown(f'<a class="header-text-under" href="https://arxiv.org/abs/1612.08242">Joseph Redmon, Ali Farhadi</a>', unsafe_allow_html=True)
     st.markdown(f'<a class="header-text-under" href="https://arxiv.org/abs/1612.08242">YOLO9000: Better, Faster, Stronger</a>', unsafe_allow_html=True)
     st.markdown(f'<a class="header-text-under" href="https://learnopencv.com/ultralytics-yolov8/#How-to-Use-YOLOv8?">YOLOv8 Ultralytics: State-of-the-Art YOLO Models</a>', unsafe_allow_html=True)
-
+    st.markdown(f'<a class="header-text-under" href="https://docs.ultralytics.com/datasets/">YOLOv8  Datasets</a>', unsafe_allow_html=True)
 
 def styles():
      custom_css_title = """

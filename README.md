@@ -32,7 +32,7 @@ This project is not only a testament to the power of cutting-edge technology but
 ### OBJECT DETECTION
 <img width="400px" height="300px" src="images/img_pred.jpg"></img>
 
-### Segmentic Image Segmentation
+### Semantic Image Segmentation
 <img width="400px" height="300px" src="images/img_seg.png"></img>
 
 ### OCR of Plates & Object Detection & Tracking Object

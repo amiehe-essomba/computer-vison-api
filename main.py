@@ -69,7 +69,7 @@ def head(st = st):
         else: 
             st.write('<h2 class="custom-text-under">Object Detection</h2>', unsafe_allow_html=True)
             head_img(st=st)
-            st.write('<h2 class="custom-text-under">Segmentic Image Segmentation</h2>', unsafe_allow_html=True)
+            st.write('<h2 class="custom-text-under">Semantic Image Segmentation</h2>', unsafe_allow_html=True)
             head_img(st=st, path='./images/img_seg.png')
             st.write('<h2 class="custom-text-under"> OCR of Plates & Object Detection</h2>', unsafe_allow_html=True)
             head_img(st=st, path='./images/tracked.jpg')

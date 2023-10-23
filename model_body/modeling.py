@@ -210,7 +210,21 @@ def modeling(st):
             else:
                 st.text(f'wrong, expected iou : {round(iou, 4)}')
                 st.write("Try again.")
-          
+
+    st.write(f'<h1 class="body-text">Models</h1>', unsafe_allow_html=True)
+    st.markdown(
+        '''
+        <ol>
+        <li class="header-text-under">my model -- Object Detection.</li>
+        <li class="header-text-under">yolov8n -- Object Detection.</li>
+        <li class="header-text-under">ocr+yolov8n -- Object Detection & OCR & Object Tracking.</li>
+        <li class="header-text-under">yolov5n -- Object Detection.</li>
+        <li class="header-text-under">yolov8n-seg -- Semantic Image Segmentation.</li>
+        <li class="header-text-under">yolov8n-pose -- Object Detection & Pose.</li>
+        </ol>
+        '''
+        , unsafe_allow_html=True)
+
 def iuo_solution():
     import numpy as np 
     ix1, iy1 = np.random.randint((100, 100))
