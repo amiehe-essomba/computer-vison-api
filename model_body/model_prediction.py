@@ -8,6 +8,8 @@ from streamlit_modules.button_style import button_style
 import plotly.express as px
 import logging
 from yolo import video_settings as vs 
+from yolo.utils.tools import draw_boxes_v8
+from skimage.transform import resize
 
 def pred(st):
     import streamlit as st 
@@ -23,7 +25,7 @@ def pred(st):
     with col3:
         if show : desable_scale = False 
         else:  desable_scale  = True
-        scale_factor = st.slider(label='image scale factor', min_value=0, max_value=10, step=1, value=None, disabled=desable_scale)
+        model_type = st.selectbox(label='models', options=('yolov8', "yolov5", 'yolov8n-seg', 'yolov8n-pose' 'my model'), disabled=desable_scale)
 
 
     if label_select:
@@ -37,7 +39,7 @@ def pred(st):
                     if show : show = True 
                     # get the informations about the video or image s
                     # video, image, image shape, and more ...
-                    all_files = file_read(st, uploaded_file=uploaded_file, show=show, factor=scale_factor)
+                    all_files = file_read(st, uploaded_file=uploaded_file, show=show, factor=None)
                     [iou_threshold, score_threshold, max_boxes] = vs.slider_model(st=st)
 
                     # classses and anchors 
@@ -96,7 +98,7 @@ def pred(st):
                                     if file_type == 'image':
                                         items['image_file'] = [all_files['image'][index]]
                                         shape = all_files['image_shape'][index][:-1]
-                                        Image(st=st, yolo_model_path=yolo_model_path, df=df, col=cp_col5, shape=shape, **items)
+                                        Image(st=st, yolo_model_path=yolo_model_path, df=df, col=cp_col5, shape=shape, model_type=model_type, **items)
                                     else:
                                         details = all_files['details'][index]
                                         details = vs.slider_video(st, *details)
@@ -175,24 +177,85 @@ def pred(st):
             #st.video()
     else: pass
 
-def Image(st, yolo_model_path, df, col, shape, **kwargs):
-    
+def Image(st, yolo_model_path, df, col, shape, model_type, **kwargs):
+    import numpy as np 
+
     with col:
         response = st.checkbox('with score')
 
     if button_style(st=st, name='run'):
-        tf.get_logger().setLevel(logging.ERROR)
-        yolo_model = tf.keras.models.load_model(yolo_model_path, compile=False)
-        df = {'label' : [], 'score':[], 'top':[], "left":[], "bottom":[], 'right':[]}
+        if model_type == 'my_model':
+            tf.get_logger().setLevel(logging.ERROR)
+            yolo_model = tf.keras.models.load_model(yolo_model_path, compile=False)
+            df = {'label' : [], 'score':[], 'top':[], "left":[], "bottom":[], 'right':[]}
 
-        image_predicted = prediction(
-            yolo_model=yolo_model, use_classes=kwargs['class_names'],
-            image_file=kwargs['image_file'], anchors=kwargs['anchors'], class_names=kwargs['Class_names'], img_size=(608, 608),
-            max_boxes=kwargs['max_boxes'], score_threshold=kwargs['score_threshold'], iou_threshold=kwargs['iou_threshold'], data_dict=df,
-            shape=shape, file_type='image', with_score=response
-        )
+            image_predicted = prediction(
+                yolo_model=yolo_model, use_classes=kwargs['class_names'],
+                image_file=kwargs['image_file'], anchors=kwargs['anchors'], class_names=kwargs['Class_names'], img_size=(608, 608),
+                max_boxes=kwargs['max_boxes'], score_threshold=kwargs['score_threshold'], iou_threshold=kwargs['iou_threshold'], data_dict=df,
+                shape=shape, file_type='image', with_score=response
+            )
+            resume(st=st, df=df, **{"image_predicted" : image_predicted})
+        if model_type == 'yolov8':
+            from ultralytics import YOLO
+
+            yolo_model_v8   = YOLO('./yolov8/yolov8n.pt')
+            frame           = kwargs['image_file'][0][0]
+            detections      = yolo_model_v8(frame)[0]
+            boxes           = []
+            box_classes     = []
+            scores          = []
+
+            for detection in detections.boxes.data.tolist():
+                x1, y1, x2, y2, score, class_id = detection
+                box_classes.append(int(class_id))
+                boxes.append([x1, y1, x2, y2])
+                scores.append(score)
+            
+            scores          = tf.constant(scores, dtype=tf.float32)
+            box_classes     = tf.constant(box_classes, dtype=tf.int32)
+            boxes           = tf.constant(boxes, dtype=tf.float32)
+            class_names     = kwargs['Class_names']
+            use_classes     = kwargs['class_names']
+
+            image_predicted = draw_boxes_v8(image=frame, boxes=boxes, box_classes=box_classes, scores=scores, with_score=response,
+                                                            class_names=class_names, use_classes=use_classes, df=df)
+
+            image_predicted = resize(image_predicted, output_shape=shape)
+            resume(st=st, df=df, **{"image_predicted" : image_predicted})
         
-        resume(st=st, df=df, **{"image_predicted" : image_predicted})
+        if model_type == 'yolov8-seg':
+            from ultralytics import YOLO
+
+            yolo_model_v8   = YOLO('./yolov8/yolov8n-seg.pt')
+            frame           = kwargs['image_file'][0][0]
+            detections      = yolo_model_v8(frame)[0]
+            boxes           = []
+            box_classes     = []
+            scores          = []
+            print(detections, '@@@@@@@@@@@')
+            
+            for detection in detections.boxes.data.tolist():
+                x1, y1, x2, y2, score, class_id = detection
+                box_classes.append(int(class_id))
+                boxes.append([x1, y1, x2, y2])
+                scores.append(score)
+            
+            scores          = tf.constant(scores, dtype=tf.float32)
+            box_classes     = tf.constant(box_classes, dtype=tf.int32)
+            boxes           = tf.constant(boxes, dtype=tf.float32)
+            class_names     = kwargs['Class_names']
+            use_classes     = kwargs['class_names']
+
+            image_predicted = draw_boxes_v8(image=frame, boxes=boxes, box_classes=box_classes, scores=scores, with_score=response,
+                                                            class_names=class_names, use_classes=use_classes, df=df)
+
+            image_predicted = resize(image_predicted, output_shape=shape)
+            resume(st=st, df=df, **{"image_predicted" : image_predicted})
+
+        if model_type == 'yolov5':
+            st.wrilte("YOLOV5 is not yet implimented.")
+            
     else: pass
 
 def Video(st, prediction, yolo_model, video, df, details, **kwargs):
@@ -231,17 +294,17 @@ def resume(st, df : dict, file_type: str='image', **kwargs):
             st.video(kwargs['video_reader'])
 
         if df['label']:
-            fig_col1, fig_col2 = st.columns(2)
+            #fig_col1, fig_col2 = st.columns(2)
             data_frame = pd.DataFrame(df)
             data_frame.rename(columns={'label':'classes'}, inplace=True)
             data_frame['label'] = [1 for i in range(len(data_frame.iloc[:, 0]))]
 
-            with fig_col1:
-                st.dataframe(data=data_frame.style.highlight_max(axis=0, color='skyblue', subset=['classes', 'score']))
+            #with fig_col1:
             
+            st.dataframe(data=data_frame.style.highlight_max(axis=0, color='skyblue', subset=['classes', 'score']))
             fig = px.pie(data_frame, names='classes', values='label', title='pie chart')
 
-            with fig_col2:                                                
-                st.plotly_chart(fig, use_container_width=True)
+            #with fig_col2:                                                
+            st.plotly_chart(fig, use_container_width=True)
 
         else: pass 

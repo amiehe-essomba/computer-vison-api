@@ -189,6 +189,87 @@ def draw_boxes(image, boxes, box_classes, class_names, scores=None, use_classes 
 
     return np.array(image)
 
+def draw_boxes_v8(image, boxes, box_classes, class_names, scores=None, use_classes : list = [], df = {}, with_score : bool = True):
+    """
+    Draw bounding boxes on image.
+
+    Draw bounding boxes with class name and optional box score on image.
+
+    Args:
+        image: An `array` of shape (width, height, 3) with values in [0, 1].
+        boxes: An `array` of shape (num_boxes, 4) containing box corners as
+            (y_min, x_min, y_max, x_max).
+        box_classes: A `list` of indicies into `class_names`.
+        class_names: A `list` of `string` class names.
+        `scores`: A `list` of scores for each box.
+
+    Returns:
+        A copy of `image` modified with given bounding boxes.
+    """
+
+    font = ImageFont.truetype(
+        font='font/FiraMono-Medium.otf',
+        size=np.floor(3e-2 * image.size[1] + 0.5).astype('int32'))
+    thickness   = (image.size[0] + image.size[1]) // 300
+    colors      = get_colors_for_classes(len(class_names))
+
+    
+    for i, c in list(enumerate(box_classes)):
+        box_class   = class_names[c]
+        box         = boxes[i]
+        
+        if isinstance(scores.numpy(), np.ndarray):
+            score   = scores.numpy()[i]
+            label   = '{} {:.2f}'.format(box_class, score)
+        else: label = '{}'.format(box_class)
+
+        
+        _label_ = label.split()
+        if len(_label_) <= 2 : 
+            if with_score : pass 
+            else : label = _label_[0]
+        else:
+            string = ""
+            for i, s in enumerate(_label_[:-1]) : string = string + s + " " if (i != len(_label_)-2) else string  + s
+            _label_ = [string, _label_[-1]]
+
+            if with_score : pass 
+            else: label = string
+  
+        if _label_[0] in use_classes:
+            draw        = ImageDraw.Draw(image)
+            label_size  = draw.textlength(text=label, font=font)
+            left, top, right, bottom = box
+         
+            df['top'].append(np.round(np.float32(top), 2) ) 
+            df['left'].append(np.round( np.float32(left), 2))
+            df['bottom'].append(np.round(np.float32(bottom), 2))
+            df['right'].append(np.round( np.float32(right), 2))
+            df['score'].append(float(_label_[1]))
+            df['label'].append(_label_[0])
+
+            if (top - 20) >= 0 : text_origin = np.array([left, top - 20])
+            else:
+                idd = 0
+                while (top - 20 + idd) < 0:
+                    idd += 1
+                text_origin = np.array([left, top - 20 + idd])
+            # My kingdom for a good redistributable image drawing library.
+            #for i in range(thickness):
+            draw.rectangle(
+                [left, top, right, bottom], outline=colors[c], width=2
+                )
+                      
+            draw.rectangle(
+                [tuple(text_origin), tuple(text_origin + (label_size, 20))],
+                fill=colors[c]
+                )
+            draw.text(text_origin, label, fill=(0, 0, 0), font=font)
+            del draw
+        else : pass 
+
+    return np.array(image)
+
 def read_video(image):
     import imageio
     video_reader    = imageio.get_reader(image, mode='?')

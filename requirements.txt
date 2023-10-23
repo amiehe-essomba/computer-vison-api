@@ -11,3 +11,5 @@ scikit-image==0.22.0
 plotly==5.17.0
 opencv-python==4.8.1.78
 moviepy==1.0.3
+easyocr==1.7.1
+ultralytics==8.0.200
