@@ -26,7 +26,7 @@ def pred(st):
     with col3:
         if show : desable_scale = False 
         else:  desable_scale  = True
-        model_type = st.selectbox(label='models', options=('yolov8', "yolov5", 'yolov8n-seg', 'ocr+yolov8', 'yolov8n-pose', 'my model'), disabled=desable_scale)
+        model_type = st.selectbox(label='models', options=('yolov8', "yolov5", 'yolov8-seg', 'ocr+yolov8', 'yolov8-pose', 'my model'), disabled=desable_scale)
 
     if model_type == 'ocr+yolov8': factor = True 
     else: factor = False 
@@ -233,7 +233,7 @@ def Image(st, yolo_model_path, df, col, shape, model_type, **kwargs):
             image_predicted = resize(image_predicted, output_shape=shape)
             resume(st=st, df=df, **{"image_predicted" : image_predicted})
         
-        if model_type == 'yolov8n-seg':
+        if model_type == 'yolov8-seg':
             from ultralytics import YOLO
 
             yolo_model_v8   = YOLO('./yolov8/yolov8n-seg.pt')
@@ -261,7 +261,7 @@ def Image(st, yolo_model_path, df, col, shape, model_type, **kwargs):
             image_predicted = resize(image_predicted, output_shape=shape)
             resume(st=st, df=df, **{"image_predicted" : image_predicted})
         
-        if model_type == 'yolov8n-pose':
+        if model_type == 'yolov8-pose':
             st.wrilte("YOLOV8 for pose detection is not yet implimented.")
         
         if model_type == 'yolov5':
@@ -341,6 +341,7 @@ def Image(st, yolo_model_path, df, col, shape, model_type, **kwargs):
             
             image_predicted = resize(image_predicted, output_shape=shape)
             resume(st=st, df=df, **{"image_predicted" : image_predicted})
+    
     else: pass
 
 def scaling(image = None, shape = (608, 608), boxes = None, S = None):

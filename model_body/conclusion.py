@@ -31,7 +31,7 @@ def conclusion(st):
     for i in range(10):
         transform(st, '')
     
-    st.markdown(f'<a href="" target="_blank"><img src="{links()}" width="400" height="500"></a>', unsafe_allow_html=True)
+    st.markdown(f'<a href="" target="_blank"><img src="{links()}" width="200" height="200"></a>', unsafe_allow_html=True)
 
     st.write('<h1 class="custom-text">Thanks for taking the time to read</h1>', unsafe_allow_html=True)
 
