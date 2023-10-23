@@ -22,19 +22,21 @@ from model_body.project import project
 from model_body.intro import intro
 from model_body.modeling import modeling
 from model_body.conclusion import conclusion
+import matplotlib.pyplot as plt
 
-def head_img(st):
-    file = Image.open('./images/img_pred.jpg', 'r')
+def head_img(st, path='./images/img_pred.jpg'):
+    file = Image.open(path, 'r')
     file = np.array(file).astype(np.float32) / 255 
     st.image(file, use_column_width=True)
 
 def head(st = st):
-    yolo_model_path = './yolo_model/' 
-    
-    yolo_logo = links('loyo_logo')
+
+   
+    yolo_logo = './images/ocr.png' #links('loyo_logo')
     git_page  = links('git_page')
     
-    st.markdown(f'<a href="{git_page}" target="_blank"><img src="{yolo_logo}" width="450" height="200"></a>', unsafe_allow_html=True)
+    st.image(plt.imread(yolo_logo))
+    #st.markdown(f'<a href="{git_page}" target="_blank"><img src="{yolo_logo}" width="450" height="200"></a>', unsafe_allow_html=True)
     
     # Définir le style CSS personnalisé
     custom_css = styles()
@@ -43,7 +45,7 @@ def head(st = st):
     st.write('<style>{}</style>'.format(custom_css), unsafe_allow_html=True)
 
     # Utiliser le style CSS personnalisé pour afficher du texte en surbrillance
-    st.write('<h1 class="custom-text">REAL time Object Detection with YOLO model</h1>', unsafe_allow_html=True)
+    st.write('<h1 class="custom-text">Optical Character Recognition (OCR) & REAL time Object Detection with YOLO</h1>', unsafe_allow_html=True)
    
 
     [contain_feedback, yolo_feedback_contrain] = sidebar(streamlit=st)
@@ -64,7 +66,13 @@ def head(st = st):
     else :
         if yolo_feedback_contrain :  
             st.code(code(yolo_feedback_contrain), language='python', line_numbers=True)    
-        else: head_img(st=st)
+        else: 
+            st.write('<h2 class="custom-text-under">Object Detection</h2>', unsafe_allow_html=True)
+            head_img(st=st)
+            st.write('<h2 class="custom-text-under">Segmentic Image Segmentation</h2>', unsafe_allow_html=True)
+            head_img(st=st, path='./images/img_seg.png')
+            st.write('<h2 class="custom-text-under"> OCR of Plates & Object Detection</h2>', unsafe_allow_html=True)
+            head_img(st=st, path='./images/tracked.jpg')
 
 if __name__ == '__main__':
     head()

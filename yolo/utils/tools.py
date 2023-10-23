@@ -4,13 +4,13 @@ import numpy as np
 import tempfile
 import imageio
 import shutil
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFont, ImageOps
 from skimage.transform import resize
 from keras import backend as K
 from functools import reduce
 from streamlit_modules.button_style import button_style
 
-def preprocess_image(img_path, model_image_size, done : bool = False):
+def preprocess_image(img_path, model_image_size, done : bool = False, factor = False):
     #image_type = imghdr.what(img_path)
     if done is False : image           = Image.open(img_path)
     else: image = img_path
@@ -22,7 +22,8 @@ def preprocess_image(img_path, model_image_size, done : bool = False):
     # Add batch dimension.
     image_data      = np.expand_dims(image_data, 0) 
 
-    return image.resize(model_image_size), image_data, shape
+    if factor is False : return image.resize(model_image_size), image_data, shape
+    else: return image, image_data, shape
 
 def compose(*funcs):
     """Compose arbitrarily many functions, evaluated left to right.
@@ -189,7 +190,8 @@ def draw_boxes(image, boxes, box_classes, class_names, scores=None, use_classes 
 
     return np.array(image)
 
-def draw_boxes_v8(image, boxes, box_classes, class_names, scores=None, use_classes : list = [], df = {}, with_score : bool = True):
+def draw_boxes_v8(image, boxes, box_classes, class_names, scores=None, use_classes : list = [], 
+                  df = {}, with_score : bool = True, C =None, return_sequence=False, width=2):
     """
     Draw bounding boxes on image.
 
@@ -213,7 +215,7 @@ def draw_boxes_v8(image, boxes, box_classes, class_names, scores=None, use_class
     thickness   = (image.size[0] + image.size[1]) // 300
     colors      = get_colors_for_classes(len(class_names))
 
-    
+
     for i, c in list(enumerate(box_classes)):
         box_class   = class_names[c]
         box         = boxes[i]
@@ -223,7 +225,6 @@ def draw_boxes_v8(image, boxes, box_classes, class_names, scores=None, use_class
             label   = '{} {:.2f}'.format(box_class, score)
         else: label = '{}'.format(box_class)
 
-        
         _label_ = label.split()
         if len(_label_) <= 2 : 
             if with_score : pass 
@@ -256,8 +257,10 @@ def draw_boxes_v8(image, boxes, box_classes, class_names, scores=None, use_class
                 text_origin = np.array([left, top - 20 + idd])
             # My kingdom for a good redistributable image drawing library.
             #for i in range(thickness):
+            if C : colors[c] = C
+        
             draw.rectangle(
-                [left, top, right, bottom], outline=colors[c], width=2
+                [left, top, right, bottom], outline=colors[c], width=width, fill=None
                 )
                       
             draw.rectangle(
@@ -265,10 +268,101 @@ def draw_boxes_v8(image, boxes, box_classes, class_names, scores=None, use_class
                 fill=colors[c]
                 )
             draw.text(text_origin, label, fill=(0, 0, 0), font=font)
+           
             del draw
         else : pass 
 
-    return np.array(image)
+    if return_sequence is False: return  np.array(image)
+    else:  return image 
+    
+def draw_boxes_v8_seg(image, boxes, box_classes, class_names, scores=None, use_classes : list = [], 
+                  df = {}, with_score : bool = True, mask=False):
+
+    font = ImageFont.truetype(
+        font='font/FiraMono-Medium.otf',
+        size=np.floor(3e-2 * image.size[1] + 0.5).astype('int32'))
+    thickness   = (image.size[0] + image.size[1]) // 300
+    colors      = get_colors_for_classes(len(class_names))
+
+    Text_pos = []
+    Labels   = []
+
+    mask = Image.new("RGBA", image.size, (0, 0, 0, 0))
+    for i, c in list(enumerate(box_classes)):
+        box_class   = class_names[c]
+        box         = boxes[i]
+        
+        if isinstance(scores.numpy(), np.ndarray):
+            score   = scores.numpy()[i]
+            label   = '{} {:.2f}'.format(box_class, score)
+        else: label = '{}'.format(box_class)
+
+        _label_ = label.split()
+        if len(_label_) <= 2 : 
+            if with_score : pass 
+            else : label = _label_[0]
+        else:
+            string = ""
+            for i, s in enumerate(_label_[:-1]) : string = string + s + " " if (i != len(_label_)-2) else string  + s
+            _label_ = [string, _label_[-1]]
+
+            if with_score : pass 
+            else: label = string
+  
+        if _label_[0] in use_classes:
+            #mask = Image.new("RGBA", image.size, (0, 0, 0, 0))
+            draw = ImageDraw.Draw(mask) 
+
+            #draw        = ImageDraw.Draw(image)
+            label_size  = draw.textlength(text=label, font=font)
+            left, top, right, bottom = box
+         
+            df['top'].append(np.round(np.float32(top), 2) ) 
+            df['left'].append(np.round( np.float32(left), 2))
+            df['bottom'].append(np.round(np.float32(bottom), 2))
+            df['right'].append(np.round( np.float32(right), 2))
+            df['score'].append(float(_label_[1]))
+            df['label'].append(_label_[0])
+
+            if (top - 20) >= 0 : text_origin = np.array([left, top - 20])
+            else:
+                idd = 0
+                while (top - 20 + idd) < 0:
+                    idd += 1
+                text_origin = np.array([left, top - 20 + idd])
+            # My kingdom for a good redistributable image drawing library.
+            #for i in range(thickness):
+            draw.rectangle(
+                [left, top, right, bottom], outline=colors[c]+(90,), width=2, fill=colors[c]+(90,) 
+                )
+                      
+            draw.rectangle(
+                [tuple(text_origin), tuple(text_origin + (label_size, 20))],
+                fill=colors[c]+(90,) 
+                )
+            draw.text(text_origin, label, fill=(0, 0, 0, 255), font=font)
+            #Text_pos.append(text_origin)
+            #Labels.append(label)
+            del draw
+        else : pass 
+
+ 
+    image_de_fond = ImageOps.grayscale(image.convert("RGBA"))
+    image_superposee = mask
+
+    if image_de_fond.size != image_superposee.size:
+        image_superposee = image_superposee.resize(image_de_fond.size)
+
+    result = Image.alpha_composite(image_de_fond.convert("RGBA"), image_superposee.convert("RGBA"))
+
+    """
+    if Labels:
+        for i in range(len(Labels)):
+            draw        = ImageDraw.Draw(result)
+            draw.text(Text_pos[i], Labels[i], fill=(0, 0, 0, 255), font=font)
+    """
+
+    return np.array(result)
 
 def read_video(image):
     import imageio

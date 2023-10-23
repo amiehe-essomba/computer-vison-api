@@ -14,16 +14,15 @@ def styles():
             border: 2px solid #555; /* Bordure */
             margin: 3px; /* Marge extérieure */
             width: 700px; /* Largeur du conteneur */
-            height: 70px; /* longueur */
+            height: 100px; /* longueur */
             line-height: 1.5; /* Hauteur de ligne */
         }
 
         .custom-text-under {
+            color: black; /* Couleur du texte */
             text-align: left; /* Alignement du texte */
-            border: 2px solid #555; /* Bordure */
-            margin: 1px; /* Marge extérieure */
-            width: 1000px; /* Largeur du conteneur */
-            height: 500px; /* longueur */
+            width: 700px; /* Largeur du conteneur */
+            height: 70px; /* longueur */
             line-height: 1.5; /* Hauteur de ligne */
         }
     """

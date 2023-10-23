@@ -23,14 +23,14 @@ def slider_video(st, *details):
 
     return start, end, step
 
-def slider_model(st):
+def slider_model(st, locked = False):
     col1, col2, col3 = st.columns(3)
-
+ 
     with col1:
-        iou_threshold   = st.slider('iou threshold', max_value=1.0, min_value=0.0, step=0.1, value=0.5)
+        iou_threshold   = st.slider('iou threshold', max_value=1.0, min_value=0.0, step=0.1, value=0.5, disabled=locked)
     with col2:
         score_threshold = st.slider('score threshold', max_value=1.0, min_value=0., step=0.1, value=0.4)
     with col3:
-        max_boxes       = st.slider('max boxes', max_value=50, min_value=1, step=1, value=20) 
+        max_boxes       = st.slider('max boxes', max_value=50, min_value=1, step=1, value=20, disabled=locked) 
 
     return [iou_threshold, score_threshold, max_boxes]

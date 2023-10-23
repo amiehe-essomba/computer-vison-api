@@ -30,7 +30,8 @@ def file_read(st, uploaded_file : any, show: bool = True, factor : float = None)
 
             if file_extension in ["jpg", "jpeg", "png", "gif", "webp"]:
                 try:
-                    image, image_data, shape = preprocess_image(img_path=file, model_image_size = (608, 608))
+                    
+                    image, image_data, shape = preprocess_image(img_path=file, model_image_size = (608, 608), factor=factor)
                     
                     files['image'].append((image, image_data))
                     _files.append('image')
@@ -124,7 +125,7 @@ def online_link(st, url : str = "", show_image : bool = True):
 
     return (image, image_data, shape, error)
 
-def url_img_read( url : str):
+def url_img_read( url : str, factor = False):
     from PIL import Image
     import requests
     from io import BytesIO
@@ -142,7 +143,7 @@ def url_img_read( url : str):
             #Image.open(image_data)
             image = Image.open(image_data)
 
-            image, image_data, shape = preprocess_image(img_path=image, model_image_size = (608, 608), done=True)
+            image, image_data, shape = preprocess_image(img_path=image, model_image_size = (608, 608), done=True, factor=factor)
         else:
             error = f"Failed to retrieve image. Status code: {response.status_code}"
     except Exception as e:

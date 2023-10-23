@@ -1,4 +1,4 @@
-# <!-- TITLE --> __``` REAL TIME OBJECT DETECTION WITH YOLO MODEL ```__
+# <!-- TITLE --> __``` OPTICAL CHARACTER RECOGNITION (OCR) & REAL TIME OBJECT DETECTION WITH YOLO ```__
 #### <!-- AUTHOR --> - Author : __Dr. Amiehe-Essomba__ (c) 2023
 ![Sample Video](/video/yolo_pred_gif.gif)
 
@@ -34,7 +34,14 @@ This project is not only a testament to the power of cutting-edge technology but
 ## PREDICTION
 > Learn about the prediction [here](https://vision-api.streamlit.app/)
 
+### OBJECT DETECTION
 <img width="800px" height="600px" src="images/img_pred.jpg"></img>
+
+### Segmentic Image Segmentation
+<img width="800px" height="600px" src="images/img_seg.png"></img>
+
+### OCR of Plates & Object Detection
+<img width="800px" height="600px" src="images/tracked.jpg"></img>
 
 ## CONTRIBUTING
 pull requests are welcome. Fore major changes, please open an issue first to discuss what you would like to change.

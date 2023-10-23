@@ -8,8 +8,9 @@ from streamlit_modules.button_style import button_style
 import plotly.express as px
 import logging
 from yolo import video_settings as vs 
-from yolo.utils.tools import draw_boxes_v8
+from yolo.utils.tools import draw_boxes_v8, draw_boxes_v8_seg
 from skimage.transform import resize
+import PIL
 
 def pred(st):
     import streamlit as st 
@@ -25,8 +26,10 @@ def pred(st):
     with col3:
         if show : desable_scale = False 
         else:  desable_scale  = True
-        model_type = st.selectbox(label='models', options=('yolov8', "yolov5", 'yolov8n-seg', 'yolov8n-pose' 'my model'), disabled=desable_scale)
+        model_type = st.selectbox(label='models', options=('yolov8', "yolov5", 'yolov8n-seg', 'ocr+yolov8', 'yolov8n-pose', 'my model'), disabled=desable_scale)
 
+    if model_type == 'ocr+yolov8': factor = True 
+    else: factor = False 
 
     if label_select:
         if label_select == 'Local':
@@ -39,8 +42,11 @@ def pred(st):
                     if show : show = True 
                     # get the informations about the video or image s
                     # video, image, image shape, and more ...
-                    all_files = file_read(st, uploaded_file=uploaded_file, show=show, factor=None)
-                    [iou_threshold, score_threshold, max_boxes] = vs.slider_model(st=st)
+                    if model_type == 'my model': locked = False 
+                    else: locked = True 
+
+                    all_files = file_read(st, uploaded_file=uploaded_file, show=show, factor=factor)
+                    [iou_threshold, score_threshold, max_boxes] = vs.slider_model(st=st, locked=locked)
 
                     # classses and anchors 
                     Class_names         = read_classes()
@@ -98,7 +104,8 @@ def pred(st):
                                     if file_type == 'image':
                                         items['image_file'] = [all_files['image'][index]]
                                         shape = all_files['image_shape'][index][:-1]
-                                        Image(st=st, yolo_model_path=yolo_model_path, df=df, col=cp_col5, shape=shape, model_type=model_type, **items)
+                                        Image(st=st, yolo_model_path=yolo_model_path, df=df, col=cp_col5, 
+                                              shape=shape, model_type=model_type, **items)
                                     else:
                                         details = all_files['details'][index]
                                         details = vs.slider_video(st, *details)
@@ -184,6 +191,7 @@ def Image(st, yolo_model_path, df, col, shape, model_type, **kwargs):
         response = st.checkbox('with score')
 
     if button_style(st=st, name='run'):
+
         if model_type == 'my_model':
             tf.get_logger().setLevel(logging.ERROR)
             yolo_model = tf.keras.models.load_model(yolo_model_path, compile=False)
@@ -196,6 +204,7 @@ def Image(st, yolo_model_path, df, col, shape, model_type, **kwargs):
                 shape=shape, file_type='image', with_score=response
             )
             resume(st=st, df=df, **{"image_predicted" : image_predicted})
+        
         if model_type == 'yolov8':
             from ultralytics import YOLO
 
@@ -224,7 +233,7 @@ def Image(st, yolo_model_path, df, col, shape, model_type, **kwargs):
             image_predicted = resize(image_predicted, output_shape=shape)
             resume(st=st, df=df, **{"image_predicted" : image_predicted})
         
-        if model_type == 'yolov8-seg':
+        if model_type == 'yolov8n-seg':
             from ultralytics import YOLO
 
             yolo_model_v8   = YOLO('./yolov8/yolov8n-seg.pt')
@@ -233,7 +242,6 @@ def Image(st, yolo_model_path, df, col, shape, model_type, **kwargs):
             boxes           = []
             box_classes     = []
             scores          = []
-            print(detections, '@@@@@@@@@@@')
             
             for detection in detections.boxes.data.tolist():
                 x1, y1, x2, y2, score, class_id = detection
@@ -247,16 +255,115 @@ def Image(st, yolo_model_path, df, col, shape, model_type, **kwargs):
             class_names     = kwargs['Class_names']
             use_classes     = kwargs['class_names']
 
-            image_predicted = draw_boxes_v8(image=frame, boxes=boxes, box_classes=box_classes, scores=scores, with_score=response,
+            image_predicted = draw_boxes_v8_seg(image=frame, boxes=boxes, box_classes=box_classes, scores=scores, with_score=response,
                                                             class_names=class_names, use_classes=use_classes, df=df)
 
             image_predicted = resize(image_predicted, output_shape=shape)
             resume(st=st, df=df, **{"image_predicted" : image_predicted})
-
+        
+        if model_type == 'yolov8n-pose':
+            st.wrilte("YOLOV8 for pose detection is not yet implimented.")
+        
         if model_type == 'yolov5':
-            st.wrilte("YOLOV5 is not yet implimented.")
+            st.wrilte("YOLOV5 for object detection is not yet implimented.")
+        
+        if model_type == 'ocr+yolov8':
+            from ultralytics import YOLO
+            import cv2
+            from ocr_modules.utils import read_license_plate
+
+            yolo_model_v8   = YOLO('./yolov8/yolov8n.pt')
+            yolo_model_ocr  = YOLO('./yolov8/license_plate_detector.pt')
+            frame           = kwargs['image_file'][0][0].copy()
+
+            detections      = yolo_model_ocr(frame)[0]
+            boxes_plates           = []
+            box_classes_plates     = []
+            scores_plates          = []
+            CLASSES                = []
+         
+            for detection in detections.boxes.data.tolist():
+                x1, y1, x2, y2, score, class_id = detection
+              
+                box_classes_plates.append(int(class_id))
+                boxes_plates.append([x1, y1, x2, y2])
+                scores_plates.append(score)
+
+                license_plate_drop                      = np.array(frame)[int(y1) : int(y2), int(x1) : int(x2), :]
+                license_plate_drop_gray                 = cv2.cvtColor(license_plate_drop, cv2.COLOR_BGR2GRAY)
+                s, license_plate_drop_threshold         = cv2.threshold(license_plate_drop_gray, 64, 255, cv2.THRESH_BINARY_INV)
+                #st.image(license_plate_drop)
+                license_plate_text, license_plate_score = read_license_plate(license_plate_drop_gray)
+                
+                if license_plate_text: 
+                    CLASSES.append(license_plate_text)
             
+            boxes           = []
+            box_classes     = []
+            scores          = []
+            
+            detections      = yolo_model_v8(frame)[0]
+
+            for detection in detections.boxes.data.tolist():
+                x1, y1, x2, y2, score, class_id = detection
+                box_classes.append(int(class_id))
+                boxes.append([x1, y1, x2, y2])
+                scores.append(score)
+            
+            if CLASSES:
+                boxes_plates, frame    = scaling(frame, boxes=boxes_plates, S=frame.size)
+                scores_plates          = tf.constant(scores_plates, dtype=tf.float32)
+                box_classes_plates     = tf.constant(box_classes_plates, dtype=tf.int32)
+                boxes_plates           = tf.constant(boxes_plates, dtype=tf.float32)
+
+                frame = draw_boxes_v8(image=frame, boxes=boxes_plates, box_classes=box_classes_plates, scores=scores_plates, 
+                                    with_score=response, class_names=CLASSES, use_classes=CLASSES, 
+                                    df=df, C=(255, 255, 0), return_sequence=True, width = 6)
+            del boxes_plates
+            del scores_plates 
+            del box_classes_plates
+
+            boxes, frame    = scaling(frame, boxes=boxes,S=(shape[1], shape[0]))
+            scores          = tf.constant(scores, dtype=tf.float32)
+            box_classes     = tf.constant(box_classes, dtype=tf.int32)
+            boxes           = tf.constant(boxes, dtype=tf.float32)
+            class_names     = kwargs['Class_names']
+            use_classes     = kwargs['Class_names']
+
+            image_predicted = draw_boxes_v8(image=frame, boxes=boxes, box_classes=box_classes, scores=scores, with_score=response,
+                        class_names=class_names, use_classes=use_classes, df=df, C = None, return_sequence=False, width=4)
+            
+            del boxes
+            del scores 
+            del box_classes
+            del class_names
+            del use_classes
+            
+            image_predicted = resize(image_predicted, output_shape=shape)
+            resume(st=st, df=df, **{"image_predicted" : image_predicted})
     else: pass
+
+def scaling(image = None, shape = (608, 608), boxes = None, S = None):
+    import cv2
+
+    # Mettez à l'échelle l'image
+    scaled_image    = image.resize(shape)
+    new_width       = shape[0]
+    new_height      = shape[1]
+    # Mettez à l'échelle les boîtes englobantes
+    scaling_factor_x = new_width / S[0]
+    scaling_factor_y = new_height / S[1]
+
+    scaled_boxes = []
+    for box in boxes:
+        x_min, y_min, x_max, y_max = box
+        scaled_x_min = int(x_min * scaling_factor_x)
+        scaled_y_min = int(y_min * scaling_factor_y)
+        scaled_x_max = int(x_max * scaling_factor_x)
+        scaled_y_max = int(y_max * scaling_factor_y)
+        scaled_boxes.append([scaled_x_min, scaled_y_min, scaled_x_max, scaled_y_max])
+
+    return scaled_boxes, scaled_image
 
 def Video(st, prediction, yolo_model, video, df, details, **kwargs):
     video           = video
