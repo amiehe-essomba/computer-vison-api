@@ -16,7 +16,6 @@ ultralytics==8.0.200
 opencv-contrib-python==4.8.1.78
 altair==5.1.1
 attrs==23.1.0
-backports.zoneinfo==0.2.1
 blinker==1.6.2
 cachetools==5.3.1
 certifi==2023.7.22
@@ -52,9 +51,6 @@ nvidia-cudnn-cu11==8.5.0.96
 nvidia-cufft-cu11==10.9.0.58
 nvidia-curand-cu11==10.2.10.91
 nvidia-cusolver-cu11==11.4.0.1
-nvidia-cusparse-cu11==11.7.4.91
-nvidia-nccl-cu11==2.14.3
-nvidia-nvtx-cu11==11.7.91
 opencv-python-headless==4.8.0.76
 packaging==23.1
 Pillow==9.5.0
@@ -88,7 +84,6 @@ torch==2.0.1
 torchvision==0.15.2
 tornado==6.3.3
 tqdm==4.66.1
-triton==2.0.0
 typing-extensions==4.7.1
 tzdata==2023.3
 tzlocal==4.3.1
