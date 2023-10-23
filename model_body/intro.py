@@ -36,7 +36,7 @@ def intro(st):
         This project is not only a testament to the power of cutting-edge technology but also 
         a commitment to the safety and well-being of individuals on the road. By leveraging 
         computer vision, it offers a promising solution to one of 
-        society's most pressing challenges—road safety enhancement in the face of ever-increasing traffic demands.
+        society's most pressing challenges-road safety enhancement in the face of ever-increasing traffic demands.
         """
     
     for p in [p1, p2, p3, p4]:
