@@ -40,7 +40,7 @@ This project is not only a testament to the power of cutting-edge technology but
 ### Segmentic Image Segmentation
 <img width="400px" height="300px" src="images/img_seg.png"></img>
 
-### OCR of Plates & Object Detection
+### OCR of Plates & Object Detection & Tracking Object
 <img width="400px" height="300px" src="images/tracked.jpg"></img>
 
 ## CONTRIBUTING
@@ -80,7 +80,7 @@ Additionally, by helping to ease traffic flow, I have paved the way for more eff
 </p>
 
 
-<img width="400px" height="500px" src="https://i.pinimg.com/originals/18/e1/11/18e1110635dc82318910603571fe4e5a.jpg"></img>
+<img width="300px" height="400px" src="https://i.pinimg.com/originals/18/e1/11/18e1110635dc82318910603571fe4e5a.jpg"></img>
 
 ## 🤵 Author 
 __**Amiehe Essomba**__ 
