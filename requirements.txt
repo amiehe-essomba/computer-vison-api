@@ -3,7 +3,7 @@ openpyxl==3.1.2
 streamlit==1.27.2
 pyodbc==5.0.1
 pandas==2.1.1
-numpy==1.25.2
+numpy==1.26.1
 matplotlib==3.8.0
 tensorflow==2.14.0
 imageio==2.31.5
@@ -14,3 +14,4 @@ moviepy==1.0.3
 easyocr==1.7.1
 ultralytics==8.0.200
 opencv-contrib-python==4.8.1.78
+pyyaml==6.0.0
