@@ -72,6 +72,10 @@ Road safety is a major concern in our societies, and my work has shown how compu
 Additionally, by helping to ease traffic flow, I have paved the way for more effective traffic management systems, including tackling congestion and improving the efficiency of our transportation networks. My work illustrates the power of smart cameras and computer vision to solve complex and challenging problems, contributing to smarter, more livable cities.
 
 
+
+
+
+
 </p>
 
 
