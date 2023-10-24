@@ -69,7 +69,7 @@ def file_read(st, uploaded_file : any, show: bool = True, factor : float = None)
         image_id    = 0
 
         tabs = st.tabs(list_types)
-    
+        
         if show:
             if list_types : 
                 for i, types in enumerate(list_types):

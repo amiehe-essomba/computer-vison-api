@@ -2,7 +2,7 @@ def styles():
      custom_css_title = """
         .custom-text {
             color: deepskyblue; /* Couleur du texte */
-            background-color: white; /* Couleur de l'arrière-plan */
+            background-color: blue; /* Couleur de l'arrière-plan */
             padding: 10px; /* Marge intérieure pour le texte */
             border-radius: 5px; /* Coins arrondis */
             font-size: 30px; /* Taille de police */
@@ -16,6 +16,7 @@ def styles():
             width: 700px; /* Largeur du conteneur */
             height: 100px; /* longueur */
             line-height: 1.5; /* Hauteur de ligne */
+            background-image: linear-gradient(#7D3C98, #663399);
         }
 
         .custom-text-under {

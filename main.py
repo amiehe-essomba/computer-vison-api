@@ -31,7 +31,6 @@ def head_img(st, path='./images/img_pred.jpg'):
 
 def head(st = st):
 
-   
     yolo_logo = './images/ocr.png' #links('loyo_logo')
     git_page  = links('git_page')
     
