@@ -64,29 +64,29 @@ def sidebar(streamlit = st):
     # git hub link page 
     git_page    = links('git_page')
     # create image with associtated link 
-    streamlit.sidebar.markdown(f'<a href="{git_page}" target="_blank"><img src="{cm}" width="250" height="200"></a>', unsafe_allow_html=True)
+    streamlit.sidebar.markdown(f'<a href="{git_page}" target="_blank"><img src="{cm}" width="320" height="270"></a>', unsafe_allow_html=True)
     
     
     # contains section : create the table of constains 
     streamlit.sidebar.write('<h3 class="sidebar-text">Table of contains</h3>', unsafe_allow_html=True)
     # list of contains 
     contains = (
-        "Project description", 
-        "Introduction",
-        "Modelling",
-        "prediction",
-        "Conclusion"
+        ":writing_hand: Project description", 
+        ":recycle: Introduction",
+        ":desktop_computer: Modelling",
+        ":brain: prediction",
+        ":stars: Conclusion"
         )
     
     # get feedback storage in contain_feedback
     index            = None 
-    contain_feedback = streamlit.sidebar.radio('all contains', options=contains, disabled=False, index=index)
+    contain_feedback = streamlit.sidebar.radio('all contains', options=contains, disabled=False, index=None)
     
     if streamlit.sidebar.button('reset'):
         contain_feedback = None 
         index = None   
     # Scripts python section : 
-    streamlit.sidebar.write('<h3 class="sidebar-text">Learn More About Scripts Project</h3>', unsafe_allow_html=True)
+    streamlit.sidebar.write('<h3 class="sidebar-text">Scripts of Project </h3>', unsafe_allow_html=True)
     # liste of python scripts to create yolo model
     yolo_contrains = ("IoU", "yolo filter boxes", "yolo-non-max suppression", 
                 "yolo boxes to corners", "yolo evaluation", "yolo model")

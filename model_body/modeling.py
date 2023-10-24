@@ -3,6 +3,7 @@ def modeling(st):
     import numpy as np
     from yolo.iou import IoU
     from PIL import Image, ImageDraw
+    import pandas as pd 
 
     st.write('<style>{}</style>'.format(styles()), unsafe_allow_html=True)
     st.write(f'<h1 class="header-text">Data modelling and understanding</h1>', unsafe_allow_html=True)
@@ -212,18 +213,21 @@ def modeling(st):
                 st.write("Try again.")
 
     st.write(f'<h1 class="body-text">Models</h1>', unsafe_allow_html=True)
-    st.markdown(
-        '''
-        <ol>
-        <li class="header-text-under">my model -- Object Detection.</li>
-        <li class="header-text-under">yolov8n -- Object Detection.</li>
-        <li class="header-text-under">ocr+yolov8n -- Object Detection & OCR & Object Tracking.</li>
-        <li class="header-text-under">yolov5n -- Object Detection.</li>
-        <li class="header-text-under">yolov8n-seg -- Semantic Image Segmentation.</li>
-        <li class="header-text-under">yolov8n-pose -- Object Detection & Pose.</li>
-        </ol>
-        '''
-        , unsafe_allow_html=True)
+    
+    index = ['Object Detection', 'Optical Character Recognition(OCR)', 'Tracking', 'Object Segmentation', 'Classification']
+
+    data = {
+        "my model" : [True, False, True, False, False], 
+        'yolov8' : [True, False, True, False, False], 
+        'ocr+yolov8' : [True, True, True, False, False], 
+        'yolov5' : [True, False, False, False, False], 
+        'yolov8-seg'  :[True, False, False, True, False], 
+        'yolov8-pose' : [True, False, False, False, False],
+        'yolov8-cls' : [False, False, False, False, True]
+        }
+    
+    df = pd.DataFrame(data=data, index=index)
+    st.dataframe(data=df)
 
 def iuo_solution():
     import numpy as np 
@@ -268,12 +272,18 @@ def styles():
     custom_css_title = """
         .header-text {
             color: black; /* Couleur du texte */
-            background-color: white; /* Couleur de l'arrière-plan */
+            /*background-color: white; Couleur de l'arrière-plan */
             font-size: 25px; /* Taille de police */
             font-weight: bolder; /* Gras */
-            text-decoration: underline; /* Souligné underline overline */
+            text-decoration: none; /* Souligné underline overline */
             font-family: Arial, sans-serif; /* font family*/
             text-align: justify;
+            background-image: darkgray;
+            border-radius: 5px; /* Coins arrondis */
+            margin: 3px; /* Marge extérieure */
+            border: 2px solid #555; /* Bordure */
+            padding: 5px; /* Marge intérieure pour le texte */
+            display: inline-block;
         }
 
         .body-text {

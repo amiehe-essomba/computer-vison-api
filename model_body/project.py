@@ -10,7 +10,7 @@ def project(st):
 
 def title():
     t = """
-        Project Title: Enhancing Road Safety through Computer Vision
+        Project description
         """
     return t 
 
@@ -112,12 +112,18 @@ def styles():
      custom_css_title = """
         .header-text {
             color: black; /* Couleur du texte */
-            background-color: white; /* Couleur de l'arrière-plan */
+            /*background-color: white; Couleur de l'arrière-plan */
             font-size: 25px; /* Taille de police */
             font-weight: bolder; /* Gras */
-            text-decoration: underline; /* Souligné underline overline */
+            text-decoration: none; /* Souligné underline overline */
             font-family: Arial, sans-serif; /* font family*/
             text-align: justify;
+            background-image: darkgray;
+            border-radius: 5px; /* Coins arrondis */
+            margin: 3px; /* Marge extérieure */
+            border: 2px solid #555; /* Bordure */
+            padding: 5px; /* Marge intérieure pour le texte */
+            display: inline-block;
         }
 
         .body-text {

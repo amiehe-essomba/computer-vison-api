@@ -13,7 +13,9 @@ from skimage.transform import resize
 import PIL
 
 def pred(st):
-    import streamlit as st 
+    st.write('<style>{}</style>'.format(styles()), unsafe_allow_html=True)
+    st.write(f'<h1 class="header-text1">Welcome in modelling section</h1>', unsafe_allow_html=True)
+
     yolo_model_path = './yolo_model/' 
 
     # three columns for local file, show file updated, image scale factor 
@@ -24,8 +26,8 @@ def pred(st):
     with col2:
         show = st.toggle('show files uploaded')
     with col3:
-        if show : desable_scale = False 
-        else:  desable_scale  = True
+        #if show : desable_scale = False 
+        desable_scale  = False
         model_type = st.selectbox(label='models', options=('yolov8', "yolov5", 'yolov8-seg', 'ocr+yolov8', 'yolov8-pose', 'my model'), disabled=desable_scale)
 
     if model_type == 'ocr+yolov8': factor = True 
@@ -228,7 +230,7 @@ def Image(st, yolo_model_path, df, col, shape, model_type, **kwargs):
             use_classes     = kwargs['class_names']
 
             image_predicted = draw_boxes_v8(image=frame, boxes=boxes, box_classes=box_classes, scores=scores, with_score=response,
-                                                            class_names=class_names, use_classes=use_classes, df=df)
+                                                            class_names=class_names, use_classes=use_classes, df=df, width=4)
 
             image_predicted = resize(image_predicted, output_shape=shape)
             resume(st=st, df=df, **{"image_predicted" : image_predicted})
@@ -416,3 +418,24 @@ def resume(st, df : dict, file_type: str='image', **kwargs):
             st.plotly_chart(fig, use_container_width=True)
 
         else: pass 
+
+def styles():
+     
+    custom_css_title = """
+        .header-text1 {
+            color: black; /* Couleur du texte */
+            /*background-color: white; Couleur de l'arrière-plan */
+            font-size: 25px; /* Taille de police */
+            font-weight: bolder; /* Gras */
+            text-decoration: none; /* Souligné underline overline */
+            font-family: Arial, sans-serif; /* font family*/
+            text-align: justify;
+            background-image: darkgray;
+            border-radius: 5px; /* Coins arrondis */
+            margin: 3px; /* Marge extérieure */
+            border: 2px solid #555; /* Bordure */
+            padding: 5px; /* Marge intérieure pour le texte */
+            display: inline-block;
+        }
+        """
+    return custom_css_title
