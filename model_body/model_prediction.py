@@ -14,7 +14,7 @@ import PIL
 
 def pred(st):
     st.write('<style>{}</style>'.format(styles()), unsafe_allow_html=True)
-    st.write(f'<h1 class="header-text1">Welcome in modelling section</h1>', unsafe_allow_html=True)
+    st.write(f'<h1 class="header-text">Welcome in prediction section</h1>', unsafe_allow_html=True)
 
     yolo_model_path = './yolo_model/' 
 
@@ -22,13 +22,14 @@ def pred(st):
     col1, col2, col3 = st.columns(3)
     
     with col1:
-        label_select = st.selectbox('local or online file', options=('Local', 'Online'), index=None)
+        label_select = st.selectbox('Local or Online File', options=('Local', 'Online'), index=None)
     with col2:
-        show = st.toggle('show files uploaded')
+        show = st.checkbox('Show files uploaded')
+        st.write('state', show)
     with col3:
         #if show : desable_scale = False 
         desable_scale  = False
-        model_type = st.selectbox(label='models', options=('yolov8', "yolov5", 'yolov8-seg', 'ocr+yolov8', 'yolov8-pose', 'my model'), disabled=desable_scale)
+        model_type = st.selectbox(label='Select models', options=('yolov8', "yolov5", 'yolov8-seg', 'ocr+yolov8', 'yolov8-pose', 'my model'), disabled=desable_scale)
 
     if model_type == 'ocr+yolov8': factor = True 
     else: factor = False 
@@ -47,7 +48,7 @@ def pred(st):
                     if model_type == 'my model': locked = False 
                     else: locked = True 
 
-                    all_files = file_read(st, uploaded_file=uploaded_file, show=show, factor=factor)
+                    all_files = file_read(st, uploaded_file=uploaded_file, show=False, factor=factor)
                     [iou_threshold, score_threshold, max_boxes] = vs.slider_model(st=st, locked=locked)
 
                     # classses and anchors 
@@ -58,7 +59,8 @@ def pred(st):
                     cp_col1, cp_col2, cp_col3, cp_col4, cp_col5 = st.columns(5)
 
                     with cp_col2:
-                        cp_check = st.checkbox("use all classes")
+                        cp_check = st.checkbox("Use all classes")
+                        st.write('state', cp_check)
 
                     with cp_col1:
                         # if use all is true cp_disable become True 
@@ -66,7 +68,7 @@ def pred(st):
                         else: cp_disable  = False 
 
                         # select multi-classs probabilities 
-                        class_names = st.multiselect("class probabilities", options=Class_names, disabled=cp_disable)
+                        class_names = st.multiselect("Classes", options=Class_names, disabled=cp_disable)
 
                         if class_names: pass 
                         else: 
@@ -77,7 +79,7 @@ def pred(st):
                     if class_names:
                         with cp_col3:
                             # select file type (video or image)
-                            file_type = st.radio('file type', options=('image', 'video'))
+                            file_type = st.radio('File Types', options=('image', 'video'))
                         
                         if file_type:
                             # index of one file (video or image)
@@ -87,7 +89,7 @@ def pred(st):
                             if indexes: 
                                 with cp_col4:
                                     # select iindex of file
-                                    index = st.selectbox('select index', options=indexes)
+                                    index = st.selectbox('Select file index', options=indexes)
                                 
                                 if index >= 0:
                                     items  = {
@@ -107,13 +109,13 @@ def pred(st):
                                         items['image_file'] = [all_files['image'][index]]
                                         shape = all_files['image_shape'][index][:-1]
                                         Image(st=st, yolo_model_path=yolo_model_path, df=df, col=cp_col5, 
-                                              shape=shape, model_type=model_type, **items)
+                                              shape=shape, model_type=model_type, show=show, **items)
                                     else:
                                         details = all_files['details'][index]
                                         details = vs.slider_video(st, *details)
                                         video   = all_files['video_reader'][index]
                                         Video(st=st, prediction=prediction, yolo_model=yolo_model, video=video, 
-                                                                df=df, details=details, **items)
+                                                                df=df, details=details, show=show, **items)
                                 else: pass
                             else: pass
                         else: pass 
@@ -186,12 +188,12 @@ def pred(st):
             #st.video()
     else: pass
 
-def Image(st, yolo_model_path, df, col, shape, model_type, **kwargs):
+def Image(st, yolo_model_path, df, col, shape, model_type, show, **kwargs):
     import numpy as np 
 
     with col:
-        response = st.checkbox('with score')
-
+        response = st.checkbox('With scores')
+        st.write('state', response)
     if button_style(st=st, name='run'):
 
         if model_type == 'my model':
@@ -205,13 +207,13 @@ def Image(st, yolo_model_path, df, col, shape, model_type, **kwargs):
                 max_boxes=kwargs['max_boxes'], score_threshold=kwargs['score_threshold'], iou_threshold=kwargs['iou_threshold'], data_dict=df,
                 shape=shape, file_type='image', with_score=response
             )
-            resume(st=st, df=df, **{"image_predicted" : image_predicted})
+            resume(st=st, df=df, show=show, **{"image_predicted" : image_predicted})
         
         if model_type == 'yolov8':
             from ultralytics import YOLO
 
             yolo_model_v8   = YOLO('./yolov8/yolov8n.pt')
-            frame           = kwargs['image_file'][0][0]
+            frame           = kwargs['image_file'][0][0].copy()
             detections      = yolo_model_v8(frame)[0]
             boxes           = []
             box_classes     = []
@@ -233,7 +235,7 @@ def Image(st, yolo_model_path, df, col, shape, model_type, **kwargs):
                                                             class_names=class_names, use_classes=use_classes, df=df, width=4)
 
             image_predicted = resize(image_predicted, output_shape=shape)
-            resume(st=st, df=df, **{"image_predicted" : image_predicted})
+            resume(st=st, df=df, show=show, img = kwargs['image_file'][0][0], **{"image_predicted" : image_predicted})
         
         if model_type == 'yolov8-seg':
             from ultralytics import YOLO
@@ -261,7 +263,7 @@ def Image(st, yolo_model_path, df, col, shape, model_type, **kwargs):
                                                             class_names=class_names, use_classes=use_classes, df=df)
 
             image_predicted = resize(image_predicted, output_shape=shape)
-            resume(st=st, df=df, **{"image_predicted" : image_predicted})
+            resume(st=st, df=df, show=show, **{"image_predicted" : image_predicted})
         
         if model_type == 'yolov8-pose':
             st.wrilte("YOLOV8 for pose detection is not yet implimented.")
@@ -342,7 +344,7 @@ def Image(st, yolo_model_path, df, col, shape, model_type, **kwargs):
             del use_classes
             
             image_predicted = resize(image_predicted, output_shape=shape)
-            resume(st=st, df=df, **{"image_predicted" : image_predicted})
+            resume(st=st, df=df, show=show, **{"image_predicted" : image_predicted})
     
     else: pass
 
@@ -368,7 +370,7 @@ def scaling(image = None, shape = (608, 608), boxes = None, S = None):
 
     return scaled_boxes, scaled_image
 
-def Video(st, prediction, yolo_model, video, df, details, **kwargs):
+def Video(st, prediction, yolo_model, video, df, details, show, **kwargs):
     video           = video
     items           = {
                     'class_names' : kwargs['class_names'],
@@ -386,19 +388,27 @@ def Video(st, prediction, yolo_model, video, df, details, **kwargs):
         resume(st=st, df=df, file_type='video', **{'fps' : fps, 'video_reader' : video_reader})
     else: pass 
 
-def resume(st, df : dict, file_type: str='image', **kwargs):
+def resume(st, df : dict, file_type: str='image', img=None, show=True, **kwargs):
     with st.expander("MODEL PERFORMANCES"):
         st.write("""
             You can observe the chosen predicted classes at the top, and it's 
             important to note that these class predictions are influenced by 
             factors like the IoU threshold, score threshold, and the quantity 
             of boxes. Adjusting these parameters allows you to fine-tune your 
-            predictions for improved accuracy.
+            predictions for improving accuracy.
 
             Great job, you've done excellently!
         """)
 
-        if file_type == 'image': st.image(kwargs['image_predicted'])
+        if file_type == 'image': 
+            if show is False : st.image(kwargs['image_predicted'])
+            else:
+                c1, c2 = st.columns(2)
+                pred = kwargs['image_predicted']
+                with c1:
+                    st.image(img.resize((pred.shape[1], pred.shape[0])))
+                with c2:
+                    st.image(pred)
         else :
             st.write(f"frame rate per second : {kwargs['fps']}") 
             st.video(kwargs['video_reader'])
@@ -422,7 +432,7 @@ def resume(st, df : dict, file_type: str='image', **kwargs):
 def styles():
      
     custom_css_title = """
-        .header-text1 {
+        .header-text {
             color: black; /* Couleur du texte */
             /*background-color: white; Couleur de l'arrière-plan */
             font-size: 25px; /* Taille de police */

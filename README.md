@@ -35,7 +35,7 @@ This project is not only a testament to the power of cutting-edge technology but
 ### Semantic Image Segmentation
 <img width="400px" height="300px" src="images/img_seg.png"></img>
 
-### OCR of Plates & Object Detection & Tracking Object
+### Plates Optical Recognition & Object detection
 <img width="400px" height="300px" src="images/tracked.jpg"></img>
 
 ## CONTRIBUTING
@@ -56,6 +56,7 @@ In the streatmlit platform th code takes:
 You can also use this [notebook](https://github.com/amiehe-essomba/computer-vison-api/blob/vis/main.ipynb) to see how it works.
 Enjoy !!!!
 
+<img width="600px" height="600px" src="images/format.png"></img>
 
 ## CONCLUSION:
 <p color: black;  

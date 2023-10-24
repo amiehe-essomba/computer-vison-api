@@ -38,8 +38,15 @@ def head_img(st, path='./images/img_pred.jpg', factor : int = 50, types : str='i
         video_file.close()
 
 def head(st = st):
-    yolo_logo = './images/ocr.png' #links('loyo_logo')
+    yolo_logo = './images/ocr.png'
     git_page  = links('git_page')
+
+    st.set_page_config(
+            page_title="My Streamlit App",
+            page_icon=":chart_with_upwards_trend:",
+            initial_sidebar_state="expanded",
+            layout="centered",
+        )
     
     st.image(plt.imread(yolo_logo))
     #st.markdown(f'<a href="{git_page}" target="_blank"><img src="{yolo_logo}" width="450" height="200"></a>', unsafe_allow_html=True)
@@ -49,6 +56,66 @@ def head(st = st):
 
     # Appliquer le style CSS personnalisé
     st.write('<style>{}</style>'.format(custom_css), unsafe_allow_html=True)
+
+    # buttom configuration
+    st.write(
+        f'<style>div.stButton > button{{background-color: white; color: black; \
+            padding: 10px 20px, text-align: center;\
+            display: inline-block;\
+            font-size: 16px;\
+            border-radius: 50px;\
+            background-image: linear-gradient(to bottom, red, darkorange, orange);\
+            font-weight: bolder}} </style>',
+        unsafe_allow_html=True
+    )
+
+    # selectbox configuration
+    custom_style = "<style>\
+                    div[data-baseweb='select'] { background-color: #f2f2f2; \
+                    background-image: linear-gradient(to bottom, darkgreen, lime, gray);\
+                    border: 1px solid #ccc;\
+                    border-radius: 5px;\
+                    padding: 5px;\
+                    font-size: 16px;\
+                    font-family: Arial, sans-serif;\
+                    max-height: 50px;\
+                    overflow-y: auto;\
+                    }\
+                    </style>"
+    st.write(custom_style, unsafe_allow_html=True)
+    #st.markdown(custom_style, unsafe_allow_html=True)
+    # Insérer du HTML personnalisé pour personnaliser la case à cocher
+    st.markdown("""
+        <style>
+            /* Personnalisation de la case à cocher */
+            .custom-checkbox-label {
+                display: inline-block;
+                cursor: pointer;
+                position: relative;
+                padding-left: 25px;
+            }
+
+            .custom-checkbox-label::before {
+                content: "";
+                display: inline-block;
+                position: absolute;
+                width: 18px;
+                height: 18px;
+                left: 0;
+                top: 0;
+                border: 1px solid #000;
+                background-color: #fff;
+            }
+
+            input[type="checkbox"] {
+                display: none;
+            }
+
+            input[type="checkbox"]:checked + .custom-checkbox-label::before {
+                background-color: #007BFF;
+            }
+        </style>
+    """, unsafe_allow_html=True)
 
     # Utiliser le style CSS personnalisé pour afficher du texte en surbrillance
     st.write('<h1 class="custom-text">Optical Character Recognition (OCR) & REAL-time Object Detection with YOLO</h1>', unsafe_allow_html=True)

@@ -12,6 +12,8 @@ def button_style(st, name: str = "run", class_ : str = "custom-button"):
             display: inline-block; /* Display as inline block */
             font-size: 16px; /* Font size */
             border-radius: 50px; /* Make it a circle shape */
+            background-image: linear-gradient(to bottom, blue, skyblue, deepskyblue);
+            font-family: Arial, sans-serif; /* font family*/
         }
         """
 
@@ -22,17 +24,8 @@ def button_style(st, name: str = "run", class_ : str = "custom-button"):
     # Create a custom button using HTML
     custom_button = f'<button class={class_}>{name}</button>'
     #st.markdown(custom_button, unsafe_allow_html=True)
+    
     """
-
-    st.write(
-        f'<style>div.stButton > button{{background-color: white; color: darkgreen; \
-            padding: 10px 20px, text-align: center;\
-            display: inline-block;\
-            font-size: 16px;\
-            border-radius: 50px;\
-            font-weight: bolder}} </style>',
-        unsafe_allow_html=True
-    )
 
     col, _, _, _, _ = st.columns(5)
 

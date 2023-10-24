@@ -83,6 +83,19 @@ def styles():
             font-family: Arial, sans-serif; /* font family*/
             font-size: 25px; /* Taille de police */
         }
+
+        .custom-button {
+            background-color: #4CAF50; /* Green background color */
+            border: none; /* Remove border */
+            color: white; /* White text color */
+            padding: 10px 20px; /* Padding */
+            text-align: center; /* Center text */
+            display: inline-block; /* Display as inline block */
+            font-size: 16px; /* Font size */
+            border-radius: 50px; /* Make it a circle shape */
+            background-image: linear-gradient(to bottom, blue, skyblue, deepskyblue);
+            font-family: Arial, sans-serif; /* font family*/
+        }
     """
      
      return custom_css_title
