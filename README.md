@@ -80,7 +80,9 @@ Additionally, by helping to ease traffic flow, I have paved the way for more eff
 </p>
 
 ## Acknowledgements
+
 > [YOLOv8](https://github.com/ultralytics/ultralytics) 
+
 > [Streamlit](https://github.com/streamlit/streamlit)
 
 
