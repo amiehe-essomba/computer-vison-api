@@ -56,7 +56,7 @@ In the streatmlit platform th code takes:
 You can also use this [notebook](https://github.com/amiehe-essomba/computer-vison-api/blob/vis/main.ipynb) to see how it works.
 Enjoy !!!!
 
-<img width="600px" height="600px" src="images/format.png"></img>
+<img width="800px" height="400px" src="images/format.png"></img>
 
 ## CONCLUSION:
 <p color: black;  
