@@ -3,7 +3,7 @@ from skimage.transform import resize
 from ultralytics import YOLO
 import tensorflow as tf
 
-def yolov8_seg(st, df, shape, show, response, resume,  **kwargs):
+def yolov8_seg(st, df, shape, show, response, resume, colors, **kwargs):
     yolo_model_v8   = YOLO('./yolov8/yolov8n-seg.pt')
     frame           = kwargs['image_file'][0][0].copy()
     detections      = yolo_model_v8(frame)[0]
@@ -28,7 +28,7 @@ def yolov8_seg(st, df, shape, show, response, resume,  **kwargs):
         use_classes     = kwargs['class_names']
 
         image_predicted = draw_boxes_v8_seg(image=frame, boxes=boxes, box_classes=box_classes, scores=scores, with_score=response,
-                                                        class_names=class_names, use_classes=use_classes, df=df)
+                                                        class_names=class_names, use_classes=use_classes, df=df, colors=colors)
 
         image_predicted = resize(image_predicted, output_shape=shape)
     else:  image_predicted = kwargs['image_file'][0][0]

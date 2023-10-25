@@ -118,7 +118,7 @@ def head(st = st):
     """, unsafe_allow_html=True)
 
     # Utiliser le style CSS personnalisé pour afficher du texte en surbrillance
-    st.write('<h1 class="custom-text">Optical Character Recognition (OCR) & REAL-time Object Detection with YOLO</h1>', unsafe_allow_html=True)
+    st.write('<h1 class="custom-text">Optical Character Recognition (OCR) & REAL-time Object Detection</h1>', unsafe_allow_html=True)
    
     [contain_feedback, yolo_feedback_contrain] = sidebar(streamlit=st)
     #st.write('<h1 class="custom-text-under"></h1>', unsafe_allow_html=True)
@@ -170,9 +170,9 @@ def head(st = st):
 
             st.write('<h2 class="custom-text-under4">Object Tracking</h2>', unsafe_allow_html=True)
             with st.expander("HAVE A LOOK"):
-                tab_track = st.tabs(['Tracking objects'])
-                image_location = ['./video/yolo_pred.mp4']
-                types = ['video']
+                tab_track = st.tabs(['video 1', 'video 2', 'video 3'])
+                image_location = ['./video/yolo_pred.mp4', './video/yolo_video2.mp4', './video/yolo_video2_pred.mp4']
+                types = ['video', 'video', 'video']
 
                 for i in range(len(tab_track)):
                     with tab_track[i]:

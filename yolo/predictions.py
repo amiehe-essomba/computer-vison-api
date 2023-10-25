@@ -22,7 +22,8 @@ def prediction(
         action          : bool  = False,
         shape           : tuple = (),
         file_type       : str   = 'image',
-        with_score      : bool  = True
+        with_score      : bool  = True,
+        colors          : dict  = {}
         ):
 
     out_scores, out_boxes, out_classes  = [[], [], []]
@@ -47,7 +48,7 @@ def prediction(
 
                 # Draw bounding boxes on the image file
                 draw_image = draw_boxes(image=image, boxes=out_boxe, box_classes=out_classe, with_score=with_score, 
-                                        class_names=class_names, scores=out_score, use_classes=use_classes, df=data_dict)
+                                        class_names=class_names, scores=out_score, use_classes=use_classes, df=data_dict, colors=colors)
                 
                 r = shape[0] / shape[1] 
 
@@ -66,11 +67,7 @@ def prediction(
                     
                     shape = (int( shape[1] * r), shape[1])
                     draw_image = resize(draw_image, output_shape=shape).astype("float32")
-                                
-                # Draw bounding boxes on the image file
-                #draw_image = draw_boxes(image=image, boxes=out_boxe, box_classes=out_classe, 
-                #                        class_names=class_names, scores=out_score, use_classes=use_classes, df=data_dict)
-                
+                                      
                 draw_image = resize(draw_image, output_shape=shape)
 
                 # saving section

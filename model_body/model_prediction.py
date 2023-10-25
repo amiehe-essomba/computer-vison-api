@@ -112,7 +112,7 @@ def pred(st):
                                         Image(st=st, yolo_model_path=yolo_model_path, df=df, col=cp_col5, 
                                               shape=shape, model_type=model_type, show=show, **items)
                                     else:
-                                        details = all_files['details'][index]
+                                        details = tuple( all_files['details'][index])
                                         details = vs.slider_video(st, *details)
                                         video   = all_files['video_reader'][index]
                                         Video(st=st, prediction=prediction, yolo_model=yolo_model, video=video, model_type=model_type,
@@ -193,6 +193,16 @@ def pred(st):
 
 def Image(st, yolo_model_path, df, col, shape, model_type, show, **kwargs):
     import numpy as np 
+    from yolo.utils.tools import get_colors_for_classes
+    import random
+
+    def f():
+        s = random.sample(range(50), 1)
+        return s[0] 
+    
+    class_names = kwargs['Class_names']
+    colors_     = get_colors_for_classes(len(class_names) + 100)
+    colors      = {class_names[i] : colors_[i] if colors_[i] != (255, 255, 0) else colors_[len(class_names) : ][f()] for i in range(len(class_names))}
 
     with col:
         response = st.checkbox('With scores')
@@ -208,12 +218,12 @@ def Image(st, yolo_model_path, df, col, shape, model_type, show, **kwargs):
                 yolo_model=yolo_model, use_classes=kwargs['class_names'],
                 image_file=kwargs['image_file'], anchors=kwargs['anchors'], class_names=kwargs['Class_names'], img_size=(608, 608),
                 max_boxes=kwargs['max_boxes'], score_threshold=kwargs['score_threshold'], iou_threshold=kwargs['iou_threshold'], data_dict=df,
-                shape=shape, file_type='image', with_score=response
+                shape=shape, file_type='image', with_score=response, colors=colors
             )
             resume(st=st, df=df, show=show, **{"image_predicted" : image_predicted})
         
         if model_type == 'yolov8':
-            yolov8.yolov8(st, df, shape, show, response, resume, False, **kwargs)
+            yolov8.yolov8(st, df, shape, show, response, resume, False, colors, **kwargs)
         
         if model_type == 'yolov8-seg':
             yolov8_seg.yolov8_seg(st, df, shape, show, response, resume, **kwargs)
@@ -225,7 +235,7 @@ def Image(st, yolo_model_path, df, col, shape, model_type, show, **kwargs):
             st.wrilte("YOLOV5 for object detection is not yet implimented.")
         
         if model_type == 'ocr+yolov8':
-            ocr_yolov8.ocr_yolov8(st, df, shape, show, response, resume, scaling, **kwargs)
+            ocr_yolov8.ocr_yolov8(st, df, shape, show, response, resume, scaling, colors, **kwargs)
 
         if model_type == 'ocr':
             ocr.ocr(st, df, shape, show, response, resume, scaling, **kwargs)
@@ -255,6 +265,18 @@ def scaling(image = None, shape = (608, 608), boxes = None, S = None):
     return scaled_boxes, scaled_image
 
 def Video(st, prediction, yolo_model, video, df, details, show, model_type, **kwargs):
+
+    from yolo.utils.tools import get_colors_for_classes
+    import random
+
+    def f():
+        s = random.sample(range(50), 1)
+        return s[0] 
+
+    class_names = kwargs['Class_names']
+    colors_     = get_colors_for_classes(len(class_names) + 100)
+    colors      = {class_names[i] : colors_[i] if colors_[i] != (255, 255, 0) else colors_[len(class_names) : ][f()] for i in range(len(class_names))}
+
     items  = {
             'class_names' : kwargs['class_names'],
             'anchors' : kwargs['anchors'],
@@ -266,7 +288,7 @@ def Video(st, prediction, yolo_model, video, df, details, show, model_type, **kw
     
     if model_type == 'my model':
         video_reader, fps = total_precess(st=st, prediction=prediction, 
-                            estimator=yolo_model, video=video, df=df, details=details, **items)
+                            estimator=yolo_model, video=video, df=df, details=details, colors=colors, **items)
 
         if video_reader:
             resume(st=st, df=df, file_type='video', show=show, **{'fps' : fps, 'video_reader' : video_reader})
@@ -274,7 +296,6 @@ def Video(st, prediction, yolo_model, video, df, details, show, model_type, **kw
     
     if model_type == 'yolov8':
         ct1, ct2, ct3 = st.columns(3)
-
         with ct1:
             typ_of_op = st.selectbox('type of operation', ('detection', 'tracking'), disabled=False)
         with ct2:
@@ -285,7 +306,7 @@ def Video(st, prediction, yolo_model, video, df, details, show, model_type, **kw
 
         if typ_of_op:
             if typ_of_op == 'detection':
-                yolov8.yolovo_video(st, video, df, details, show, resume, response, run, **items)
+                yolov8.yolovo_video(st, video, df, details, show, resume, response, run, colors, **items)
             else:
                 st.write("tracking is not yet implemented")
                 #yolov8.yolo_tracking(st, video, df, details, show, resume, response, run, **items)

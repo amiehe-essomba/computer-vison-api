@@ -64,6 +64,5 @@ def ocr(st, df, shape, show, response, resume, scaling, **kwargs):
                             df=df, C=(255, 255, 0), return_sequence=False, width = 6)
     
         image_predicted = resize(image_predicted, output_shape=shape)
-    else:
-        image_predicted = kwargs['image_file'][0][0]
+    else:  image_predicted = kwargs['image_file'][0][0]
     resume(st=st, df=df, show=show, img = kwargs['image_file'][0][0], **{"image_predicted" : image_predicted})

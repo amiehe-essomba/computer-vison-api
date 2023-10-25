@@ -79,7 +79,7 @@ def get_colors_for_classes(num_classes):
 
     return colors
 
-def draw_boxes(image, boxes, box_classes, class_names, scores=None, use_classes : list = [], df = {}, with_score : bool = True):
+def draw_boxes(image, boxes, box_classes, class_names, scores=None, use_classes : list = [], df = {}, with_score : bool = True, colors=None):
     """
     Draw bounding boxes on image.
 
@@ -101,7 +101,7 @@ def draw_boxes(image, boxes, box_classes, class_names, scores=None, use_classes 
         font='font/FiraMono-Medium.otf',
         size=np.floor(3e-2 * image.size[1] + 0.5).astype('int32'))
     thickness   = (image.size[0] + image.size[1]) // 300
-    colors      = get_colors_for_classes(len(class_names))
+    #colors      = get_colors_for_classes(len(class_names))
 
     
     for i, c in list(enumerate(box_classes)):
@@ -125,8 +125,9 @@ def draw_boxes(image, boxes, box_classes, class_names, scores=None, use_classes 
 
             if with_score : pass 
             else: label = string
-  
-        if _label_[0] in use_classes:
+
+        LABEL = _label_[0]
+        if LABEL in use_classes:
             draw        = ImageDraw.Draw(image)
             label_size  = draw.textlength(text=label, font=font)
             top, left, bottom, right = box
@@ -159,30 +160,30 @@ def draw_boxes(image, boxes, box_classes, class_names, scores=None, use_classes 
             for i in range(thickness):
                 try:
                     draw.rectangle(
-                        [left + i, top + i, right - i, bottom - i], outline=colors[c]
+                        [left + i, top + i, right - i, bottom - i], outline=colors[LABEL]
                         )
                 except ValueError:
                     done = None 
                     if left + i >= right - i:
                         draw.rectangle(
-                            [left + i, top + i, left + i + abs(left-right), bottom - i], outline=colors[c]
+                            [left + i, top + i, left + i + abs(left-right), bottom - i], outline=colors[LABEL]
                             )
                         done = True 
 
                     if top + i >= bottom - i :
                         if done is True : 
                             draw.rectangle(
-                                [left + i, top - i, left + i + abs(left-right), top + i + abs(top-bottom)], outline=colors[c]
+                                [left + i, top - i, left + i + abs(left-right), top + i + abs(top-bottom)], outline=colors[LABEL]
                                 )
                         else:
                             draw.rectangle(
-                                [left + i, top - i, right - i, top + i + abs(top-bottom)], outline=colors[c]
+                                [left + i, top - i, right - i, top + i + abs(top-bottom)], outline=colors[LABEL]
                                 )
 
                         
             draw.rectangle(
                 [tuple(text_origin), tuple(text_origin + (label_size, 20))],
-                fill=colors[c]
+                fill=colors[LABEL]
                 )
             draw.text(text_origin, label, fill=(0, 0, 0), font=font)
             del draw
@@ -190,7 +191,7 @@ def draw_boxes(image, boxes, box_classes, class_names, scores=None, use_classes 
 
     return np.array(image)
 
-def draw_boxes_v8(image, boxes, box_classes, class_names, scores=None, use_classes : list = [], 
+def draw_boxes_v8(image, boxes, box_classes, class_names, scores=None, use_classes : list = [], colors = None,
                   df = {}, with_score : bool = True, C =None, return_sequence=False, width=2):
     """
     Draw bounding boxes on image.
@@ -213,8 +214,8 @@ def draw_boxes_v8(image, boxes, box_classes, class_names, scores=None, use_class
         font='font/FiraMono-Medium.otf',
         size=np.floor(3e-2 * image.size[1] + 0.5).astype('int32'))
     thickness   = (image.size[0] + image.size[1]) // 300
-    colors      = get_colors_for_classes(len(class_names))
-
+    #colors_     = get_colors_for_classes(len(class_names) + 30)
+    #colors      = {class_names[i] : colors_[i] for i in range(len(class_names))} 
 
     for i, c in list(enumerate(box_classes)):
         box_class   = class_names[c]
@@ -236,8 +237,9 @@ def draw_boxes_v8(image, boxes, box_classes, class_names, scores=None, use_class
 
             if with_score : pass 
             else: label = string
-  
-        if _label_[0] in use_classes:
+        LABEL = _label_[0]
+
+        if LABEL in use_classes:
             draw        = ImageDraw.Draw(image)
             label_size  = draw.textlength(text=label, font=font)
             left, top, right, bottom = box
@@ -257,15 +259,15 @@ def draw_boxes_v8(image, boxes, box_classes, class_names, scores=None, use_class
                 text_origin = np.array([left, top - 20 + idd])
             # My kingdom for a good redistributable image drawing library.
             #for i in range(thickness):
-            if C : colors[c] = C
+            if C : colors[LABEL] = C
         
             draw.rectangle(
-                [left, top, right, bottom], outline=colors[c], width=width, fill=None
+                [left, top, right, bottom], outline=colors[LABEL], width=width, fill=None
                 )
                       
             draw.rectangle(
                 [tuple(text_origin), tuple(text_origin + (label_size, 20))],
-                fill=colors[c]
+                fill=colors[LABEL]
                 )
             draw.text(text_origin, label, fill=(0, 0, 0), font=font)
            
@@ -275,14 +277,14 @@ def draw_boxes_v8(image, boxes, box_classes, class_names, scores=None, use_class
     if return_sequence is False: return  np.array(image)
     else:  return image 
     
-def draw_boxes_v8_seg(image, boxes, box_classes, class_names, scores=None, use_classes : list = [], 
+def draw_boxes_v8_seg(image, boxes, box_classes, class_names, scores=None, use_classes : list = [], colors=None,
                   df = {}, with_score : bool = True, mask=False):
 
     font = ImageFont.truetype(
         font='font/FiraMono-Medium.otf',
         size=np.floor(3e-2 * image.size[1] + 0.5).astype('int32'))
     thickness   = (image.size[0] + image.size[1]) // 300
-    colors      = get_colors_for_classes(len(class_names))
+    #colors      = get_colors_for_classes(len(class_names))
 
     Text_pos = []
     Labels   = []
@@ -308,8 +310,8 @@ def draw_boxes_v8_seg(image, boxes, box_classes, class_names, scores=None, use_c
 
             if with_score : pass 
             else: label = string
-  
-        if _label_[0] in use_classes:
+        LABEL = _label_[0]
+        if LABEL in use_classes:
             #mask = Image.new("RGBA", image.size, (0, 0, 0, 0))
             draw = ImageDraw.Draw(mask) 
 
@@ -333,12 +335,12 @@ def draw_boxes_v8_seg(image, boxes, box_classes, class_names, scores=None, use_c
             # My kingdom for a good redistributable image drawing library.
             #for i in range(thickness):
             draw.rectangle(
-                [left, top, right, bottom], outline=colors[c]+(90,), width=2, fill=colors[c]+(90,) 
+                [left, top, right, bottom], outline=colors[LABEL]+(90,), width=2, fill=colors[LABEL]+(90,) 
                 )
                       
             draw.rectangle(
                 [tuple(text_origin), tuple(text_origin + (label_size, 20))],
-                fill=colors[c]+(90,) 
+                fill=colors[LABEL]+(90,) 
                 )
             draw.text(text_origin, label, fill=(0, 0, 0, 255), font=font)
             #Text_pos.append(text_origin)
@@ -373,7 +375,7 @@ def read_video(image):
 
     return video_reader, [fps, video_frame, duration]
 
-def total_precess(st, prediction, estimator, video, df, details, **kwargs):
+def total_precess(st, prediction, estimator, video, df, details, colors, **kwargs):
     import time 
 
     storage             = []
@@ -410,7 +412,7 @@ def total_precess(st, prediction, estimator, video, df, details, **kwargs):
                                         class_names=kwargs['Class_names'], img_size=(608, 608),
                                         max_boxes=kwargs['max_boxes'], score_threshold=kwargs['score_threshold'], 
                                         iou_threshold=kwargs['iou_threshold'], data_dict=df,shape=shape[:-1], 
-                                        file_type='video', with_score = response
+                                        file_type='video', with_score = response, colors=colors
                                         )
                     
                     image_predicted = image_predicted.astype('float32')

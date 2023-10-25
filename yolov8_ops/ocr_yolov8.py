@@ -6,7 +6,7 @@ import cv2
 from ocr_modules.utils import read_license_plate
 import numpy as np
 
-def ocr_yolov8(st, df, shape, show, response, resume, scaling, **kwargs):
+def ocr_yolov8(st, df, shape, show, response, resume, scaling, colors, **kwargs):
     yolo_model_v8   = YOLO('./yolov8/yolov8n.pt')
     yolo_model_ocr  = YOLO('./yolov8/license_plate_detector.pt')
     frame           = kwargs['image_file'][0][0].copy()
@@ -52,7 +52,7 @@ def ocr_yolov8(st, df, shape, show, response, resume, scaling, **kwargs):
         boxes_plates           = tf.constant(boxes_plates, dtype=tf.float32)
 
         frame = draw_boxes_v8(image=frame, boxes=boxes_plates, box_classes=box_classes_plates, scores=scores_plates, 
-                            with_score=response, class_names=CLASSES, use_classes=CLASSES, 
+                            with_score=response, class_names=CLASSES, use_classes=CLASSES, colors=colors,
                             df=df, C=(255, 255, 0), return_sequence=True, width = 6)
     
     del boxes_plates
@@ -68,7 +68,7 @@ def ocr_yolov8(st, df, shape, show, response, resume, scaling, **kwargs):
         use_classes     = kwargs['Class_names']
 
         image_predicted = draw_boxes_v8(image=frame, boxes=boxes, box_classes=box_classes, scores=scores, with_score=response,
-                    class_names=class_names, use_classes=use_classes, df=df, C = None, return_sequence=False, width=4)
+                    class_names=class_names, use_classes=use_classes, df=df, C = None, return_sequence=False, width=4, colors=colors)
     else:
         image_predicted = kwargs['image_file'][0][0]
     

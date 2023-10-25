@@ -10,7 +10,7 @@ import shutil
 import pandas as pd 
 import cv2
 
-def yolov8(st, df, shape, show, response, resume, return_sequence, **kwargs):
+def yolov8(st, df, shape, show, response, resume, return_sequence, colors, **kwargs):
     yolo_model_v8   = YOLO('./yolov8/yolov8n.pt')
     frame           = kwargs['image_file'][0][0].copy()
     detections      = yolo_model_v8(frame)[0]
@@ -18,7 +18,7 @@ def yolov8(st, df, shape, show, response, resume, return_sequence, **kwargs):
     box_classes     = []
     scores          = []
     score_threshold = kwargs['score_threshold']
-
+    
     for detection in detections.boxes.data.tolist():
         x1, y1, x2, y2, score, class_id = detection
         if score >=  score_threshold:
@@ -33,8 +33,9 @@ def yolov8(st, df, shape, show, response, resume, return_sequence, **kwargs):
         class_names     = kwargs['Class_names']
         use_classes     = kwargs['class_names']
 
-        image_predicted = draw_boxes_v8(image=frame, boxes=boxes, box_classes=box_classes, scores=scores, with_score=response,
-                                                        class_names=class_names, use_classes=use_classes, df=df, width=4)
+        image_predicted = draw_boxes_v8(image=frame, boxes=boxes, box_classes=box_classes, scores=scores, 
+                                        with_score=response, colors=colors,
+                                        class_names=class_names, use_classes=use_classes, df=df, width=4)
 
         image_predicted = resize(image_predicted, output_shape=shape)
     else:
@@ -44,8 +45,7 @@ def yolov8(st, df, shape, show, response, resume, return_sequence, **kwargs):
         resume(st=st, df=df, show=show, img = kwargs['image_file'][0][0], **{"image_predicted" : image_predicted})
     else: return image_predicted
 
-
-def yolovo_video(st, video, df, details, show, resume, response,  run, **items):
+def yolovo_video(st, video, df, details, show, resume, response,  run, colors, **items):
 
     #storage             = []
     frame_count         = 0
@@ -67,7 +67,7 @@ def yolovo_video(st, video, df, details, show, resume, response,  run, **items):
                     items['image_file']         = [(frame,frame_data)]
                     
                     image_predicted = yolov8(st=st, df=df, shape=shape, show=show, response=response,
-                                            resume=None, return_sequence=True, **items)
+                                            resume=None, return_sequence=True, colors=colors, **items)
                     
                     #image_predicted = np.uint8(255 * image_predicted )
                     # Écrire le tableau NumPy dans une vidéo avec imageio
@@ -97,7 +97,7 @@ def yolovo_video(st, video, df, details, show, resume, response,  run, **items):
         else: pass    
     else: pass
         
-def yolo_tracking(st, video, df, details, show, resume, response, run, **items):
+def yolo_tracking(st, video, df, details, show, resume, response, run, colors, **items):
 
     storage             = []
     frame_count         = 0
@@ -120,7 +120,7 @@ def yolo_tracking(st, video, df, details, show, resume, response, run, **items):
                 items['image_file']         = [(frame,frame_data)]
                 
                 image_predicted = yolov8(st=st, df=df, shape=shape, show=show, response=response,
-                                         resume=None, return_sequence=True, **items)
+                                         resume=None, return_sequence=True, colors=colors, **items)
                 
                 storage.append(image_predicted)
 
