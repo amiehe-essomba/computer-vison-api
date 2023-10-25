@@ -2,18 +2,18 @@ def slider_video(st, *details):
     # [fps, video_frame, duration]
     [fps, video_frame, duration] = details 
 
-    if duration <= 6.0 :
+    if duration <= 18.0 :
         col1 = st.columns(1)
         with col1:
             step = st.slider('step', min_value=1, max_value=10, value=1, step=1)
         start, end = 0, video_frame
     else:
-        st.warning("Video too long > 6.0s, set video range to avoid streamlit cloud memory Error", icon="⚠️")
+        st.warning("Video too long > 18.0s, set video range to avoid streamlit cloud memory Error", icon="⚠️")
 
         col0, col1, col3 = st.columns(3)
 
         with col0:
-            second  = st.slider('time(s)', min_value=1, max_value=6, step=1, value=1)
+            second  = st.slider('time(s)', min_value=1, max_value=20, step=1, value=1)
         with col1:
             start   = st.slider('start frame', min_value=0, max_value=int(video_frame-fps * second), value=0, step=int(fps))
         with col3:

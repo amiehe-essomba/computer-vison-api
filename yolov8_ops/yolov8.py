@@ -47,43 +47,42 @@ def yolov8(st, df, shape, show, response, resume, return_sequence, **kwargs):
 
 def yolovo_video(st, video, df, details, show, resume, response,  run, **items):
 
-    storage             = []
+    #storage             = []
     frame_count         = 0
     fps                 = video.get_meta_data()['fps']
     (start, end, step)  = details
-
+    temp_video_file     = tempfile.NamedTemporaryFile(delete=False, suffix=".mp4")
+    
     if run: 
         # progress bar 
         progress_text   = "Operation in progress. Please wait."
         my_bar          = st.progress(0, text=progress_text)
-   
-        for i, frame in enumerate(video):
-            if i in range(start, end, step):
-                frame  = Image.fromarray(frame, mode='RGB')
-                frame, frame_data, shape    = preprocess_image(img_path=frame, model_image_size = (608, 608), done=True) 
-                frame_count                += 1
-                items['image_file']         = [(frame,frame_data)]
-                
-                image_predicted = yolov8(st=st, df=df, shape=shape, show=show, response=response,
-                                         resume=None, return_sequence=True, **items)
-                
-                storage.append(image_predicted)
 
-                if i <= 100:
-                    my_bar.progress(i, text=progress_text)
-                else: pass
-            else: pass
-        
-        storage = np.array(storage).astype('float32')
-
-        # Définir le chemin de sortie pour la vidéo
-        #output_video_path = 'video_output2.mp4'
-        temp_video_file = tempfile.NamedTemporaryFile(delete=False, suffix=".mp4")
-
-        # Écrire le tableau NumPy dans une vidéo avec imageio
         with imageio.get_writer(temp_video_file.name, mode='?', fps=fps) as writer:
-            for image in storage:
-                writer.append_data(image)
+            for i, frame in enumerate(video):
+                if i in range(start, end, step):
+                    frame  = Image.fromarray(frame, mode='RGB')
+                    frame, frame_data, shape    = preprocess_image(img_path=frame, model_image_size = (608, 608), done=True) 
+                    frame_count                += 1
+                    items['image_file']         = [(frame,frame_data)]
+                    
+                    image_predicted = yolov8(st=st, df=df, shape=shape, show=show, response=response,
+                                            resume=None, return_sequence=True, **items)
+                    
+                    #image_predicted = np.uint8(255 * image_predicted )
+                    # Écrire le tableau NumPy dans une vidéo avec imageio
+                    #with imageio.get_writer(temp_video_file.name, mode='?', fps=fps) as writer:
+                    image_predicted = image_predicted.astype('float32')
+                    writer.append_data(image_predicted)
+
+                    #storage.append(image_predicted)
+
+                    if i <= 100:
+                        my_bar.progress(i, text=progress_text)
+                    else: pass
+                else: pass
+        
+        #storage = np.array(storage).astype('float32')
 
         # Ouvrir le fichier temporaire en mode lecture binaire (rb)
         with open(temp_video_file.name, 'rb') as temp_file:

@@ -380,7 +380,7 @@ def total_precess(st, prediction, estimator, video, df, details, **kwargs):
     frame_count         = 0
     fps                 = video.get_meta_data()['fps']
     (start, end, step)  = details
-    import streamlit as st
+    temp_video_file     = tempfile.NamedTemporaryFile(delete=False, suffix=".mp4")
 
     ct1, ct2, ct3 = st.columns(3)
 
@@ -396,36 +396,31 @@ def total_precess(st, prediction, estimator, video, df, details, **kwargs):
         # progress bar 
         progress_text   = "Operation in progress. Please wait."
         my_bar          = st.progress(0, text=progress_text)
-   
-        for i, frame in enumerate(video):
-            if i in range(start, end, step):
-                frame                       = Image.fromarray(frame, mode='RGB')
-                frame, frame_data, shape    = preprocess_image(img_path=frame, model_image_size = (608, 608), done=True)        
-                frame_count                += 1
-                
-                image_predicted = prediction(yolo_model=estimator, use_classes=kwargs['class_names'],
-                                    image_file=[(frame, frame_data)], anchors=kwargs['anchors'], 
-                                    class_names=kwargs['Class_names'], img_size=(608, 608),
-                                    max_boxes=kwargs['max_boxes'], score_threshold=kwargs['score_threshold'], 
-                                    iou_threshold=kwargs['iou_threshold'], data_dict=df,shape=shape[:-1], 
-                                    file_type='video', with_score = response
-                                    )
-                
-                storage.append(image_predicted)
-
-                if i <= 100:
-                    time.sleep(0.01)
-                    my_bar.progress(i, text=progress_text)
-            else: pass
-        else: pass
-
-        storage = np.array(storage).astype('float32')
-
-        # Définir le chemin de sortie pour la vidéo
-        #output_video_path = 'video_output2.mp4'
-        temp_video_file = tempfile.NamedTemporaryFile(delete=False, suffix=".mp4")
 
         # Écrire le tableau NumPy dans une vidéo avec imageio
+        with imageio.get_writer(temp_video_file.name, mode='?', fps=fps) as writer:
+            for i, frame in enumerate(video):
+                if i in range(start, end, step):
+                    frame                       = Image.fromarray(frame, mode='RGB')
+                    frame, frame_data, shape    = preprocess_image(img_path=frame, model_image_size = (608, 608), done=True)        
+                    frame_count                += 1
+                    
+                    image_predicted = prediction(yolo_model=estimator, use_classes=kwargs['class_names'],
+                                        image_file=[(frame, frame_data)], anchors=kwargs['anchors'], 
+                                        class_names=kwargs['Class_names'], img_size=(608, 608),
+                                        max_boxes=kwargs['max_boxes'], score_threshold=kwargs['score_threshold'], 
+                                        iou_threshold=kwargs['iou_threshold'], data_dict=df,shape=shape[:-1], 
+                                        file_type='video', with_score = response
+                                        )
+                    
+                    image_predicted = image_predicted.astype('float32')
+                    writer.append_data(image_predicted)
+
+                    if i <= 100:
+                        time.sleep(0.01)
+                        my_bar.progress(i, text=progress_text)
+                else: pass
+              
         with imageio.get_writer(temp_video_file.name, mode='?', fps=fps) as writer:
             for image in storage:
                 writer.append_data(image)
