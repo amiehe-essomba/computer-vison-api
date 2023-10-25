@@ -27,7 +27,10 @@ def pred(st):
     with col3:
         #if show : desable_scale = False 
         desable_scale  = False
-        model_type = st.selectbox(label='Select models', options=('yolov8', "yolov5", 'yolov8-seg', 'ocr', 'ocr+yolov8', 'yolov8-pose', 'my model'), disabled=desable_scale)
+        model_type = st.selectbox(label='Select models', 
+                                options=('yolov8', "yolov5", 'yolov8-seg', 'ocr', 
+                                        'ocr+yolov8', 'yolov8-pose', 'my model'), 
+                                disabled=desable_scale)
 
     if model_type == 'ocr+yolov8': factor = True 
     else: factor = False 
@@ -252,16 +255,16 @@ def scaling(image = None, shape = (608, 608), boxes = None, S = None):
     return scaled_boxes, scaled_image
 
 def Video(st, prediction, yolo_model, video, df, details, show, model_type, **kwargs):
+    items  = {
+            'class_names' : kwargs['class_names'],
+            'anchors' : kwargs['anchors'],
+            'Class_names' : kwargs['Class_names'],
+            'max_boxes' : kwargs['max_boxes'],
+            'score_threshold' : kwargs['score_threshold'],
+            'iou_threshold' : kwargs['iou_threshold'] 
+            }
+    
     if model_type == 'my model':
-        items           = {
-                        'class_names' : kwargs['class_names'],
-                        'anchors' : kwargs['anchors'],
-                        'Class_names' : kwargs['Class_names'],
-                        'max_boxes' : kwargs['max_boxes'],
-                        'score_threshold' : kwargs['score_threshold'],
-                        'iou_threshold' : kwargs['iou_threshold'] 
-
-                    }
         video_reader, fps = total_precess(st=st, prediction=prediction, 
                             estimator=yolo_model, video=video, df=df, details=details, **items)
 
@@ -270,7 +273,22 @@ def Video(st, prediction, yolo_model, video, df, details, show, model_type, **kw
         else: pass 
     
     if model_type == 'yolov8':
-        yolov8.yolovo_video(st, video, df, details, show, resume, **items)
+        ct1, ct2, ct3 = st.columns(3)
+
+        with ct1:
+            typ_of_op = st.selectbox('type of operation', ('detection', 'tracking'), disabled=False)
+        with ct2:
+            response = st.checkbox("With score")
+            st.write(response)
+        with ct3:
+            run = st.button('run')
+
+        if typ_of_op:
+            if typ_of_op == 'detection':
+                yolov8.yolovo_video(st, video, df, details, show, resume, response, run, **items)
+            else:
+                st.write("tracking is not yet implemented")
+                #yolov8.yolo_tracking(st, video, df, details, show, resume, response, run, **items)
 
 def resume(st, df : dict, file_type: str='image', img=None, show=True, **kwargs):
     with st.expander("MODEL PERFORMANCES"):

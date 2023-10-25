@@ -382,8 +382,15 @@ def total_precess(st, prediction, estimator, video, df, details, **kwargs):
     (start, end, step)  = details
     import streamlit as st
 
-    response = st.checkbox("with score")
-    run = button_style(st=st, name='run')
+    ct1, ct2, ct3 = st.columns(3)
+
+    with ct1:
+        typ_of_op = st.selectbox('type of operation', ('detection', 'tracking'), disabled=True)
+    with ct2:
+        response = st.checkbox("With score")
+        st.write(response)
+    with ct3:
+        run = button_style(st=st, name='run')
 
     if run:   
         # progress bar 
