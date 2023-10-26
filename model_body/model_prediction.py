@@ -207,6 +207,11 @@ def Image(st, yolo_model_path, df, col, shape, model_type, show, **kwargs):
     with col:
         response = st.checkbox('With scores')
         st.write('state', response)
+    import streamlit as st 
+
+    if model_type == 'yolov8-seg':
+        alpha = st.slider('alpha', min_value=1, max_value=255, value=30, step=1)
+
     if button_style(st=st, name='run'):
 
         if model_type == 'my model':
@@ -226,7 +231,7 @@ def Image(st, yolo_model_path, df, col, shape, model_type, show, **kwargs):
             yolov8.yolov8(st, df, shape, show, response, resume, False, colors, **kwargs)
         
         if model_type == 'yolov8-seg':
-            yolov8_seg.yolov8_seg(st, df, shape, show, response, resume, **kwargs)
+            yolov8_seg.yolov8_seg(st, df, shape, show, response, resume, colors, alpha, **kwargs)
         
         if model_type == 'yolov8-pose':
             st.wrilte("YOLOV8 for pose detection is not yet implimented.")
@@ -235,10 +240,10 @@ def Image(st, yolo_model_path, df, col, shape, model_type, show, **kwargs):
             st.wrilte("YOLOV5 for object detection is not yet implimented.")
         
         if model_type == 'ocr+yolov8':
-            ocr_yolov8.ocr_yolov8(st, df, shape, show, response, resume, scaling, colors, **kwargs)
+            ocr_yolov8.ocr_yolov8(st, df, shape, show, response, resume, scaling, False, colors, **kwargs)
 
         if model_type == 'ocr':
-            ocr.ocr(st, df, shape, show, response, resume, scaling, **kwargs)
+            ocr.ocr(st, df, shape, show, response, resume, scaling, colors, **kwargs)
 
     else: pass
 
@@ -294,10 +299,10 @@ def Video(st, prediction, yolo_model, video, df, details, show, model_type, **kw
             resume(st=st, df=df, file_type='video', show=show, **{'fps' : fps, 'video_reader' : video_reader})
         else: pass 
     
-    if model_type == 'yolov8':
+    if model_type in ['yolov8', 'ocr+yolov8']:
         ct1, ct2, ct3 = st.columns(3)
         with ct1:
-            typ_of_op = st.selectbox('type of operation', ('detection', 'tracking'), disabled=False)
+            typ_of_op = st.selectbox('type of operation', ('tracking', ''), disabled=False)
         with ct2:
             response = st.checkbox("With score")
             st.write(response)
@@ -305,12 +310,11 @@ def Video(st, prediction, yolo_model, video, df, details, show, model_type, **kw
             run = st.button('run')
 
         if typ_of_op:
-            if typ_of_op == 'detection':
+            if model_type == 'yolov8':
                 yolov8.yolovo_video(st, video, df, details, show, resume, response, run, colors, **items)
             else:
-                st.write("tracking is not yet implemented")
-                #yolov8.yolo_tracking(st, video, df, details, show, resume, response, run, **items)
-
+                ocr_yolov8.ocr_yolovo_video(st, video, df, details, show, resume, scaling, response, run, colors, **items)
+                
 def resume(st, df : dict, file_type: str='image', img=None, show=True, **kwargs):
     with st.expander("MODEL PERFORMANCES"):
         st.write("""

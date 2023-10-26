@@ -278,7 +278,7 @@ def draw_boxes_v8(image, boxes, box_classes, class_names, scores=None, use_class
     else:  return image 
     
 def draw_boxes_v8_seg(image, boxes, box_classes, class_names, scores=None, use_classes : list = [], colors=None,
-                  df = {}, with_score : bool = True, mask=False):
+                  df = {}, with_score : bool = True, mask=False, alpha = 30):
 
     font = ImageFont.truetype(
         font='font/FiraMono-Medium.otf',
@@ -286,10 +286,8 @@ def draw_boxes_v8_seg(image, boxes, box_classes, class_names, scores=None, use_c
     thickness   = (image.size[0] + image.size[1]) // 300
     #colors      = get_colors_for_classes(len(class_names))
 
-    Text_pos = []
-    Labels   = []
+    temp_images = []
 
-    mask = Image.new("RGBA", image.size, (0, 0, 0, 0))
     for i, c in list(enumerate(box_classes)):
         box_class   = class_names[c]
         box         = boxes[i]
@@ -312,11 +310,9 @@ def draw_boxes_v8_seg(image, boxes, box_classes, class_names, scores=None, use_c
             else: label = string
         LABEL = _label_[0]
         if LABEL in use_classes:
-            #mask = Image.new("RGBA", image.size, (0, 0, 0, 0))
-            draw = ImageDraw.Draw(mask) 
-
-            #draw        = ImageDraw.Draw(image)
-            label_size  = draw.textlength(text=label, font=font)
+            temp_image  = Image.new("RGBA", image.size, (0, 0, 0, 0))
+            temp_draw   = ImageDraw.Draw(temp_image) 
+            label_size  = temp_draw.textlength(text=label, font=font)
             left, top, right, bottom = box
          
             df['top'].append(np.round(np.float32(top), 2) ) 
@@ -332,37 +328,23 @@ def draw_boxes_v8_seg(image, boxes, box_classes, class_names, scores=None, use_c
                 while (top - 20 + idd) < 0:
                     idd += 1
                 text_origin = np.array([left, top - 20 + idd])
-            # My kingdom for a good redistributable image drawing library.
-            #for i in range(thickness):
-            draw.rectangle(
-                [left, top, right, bottom], outline=colors[LABEL]+(90,), width=2, fill=colors[LABEL]+(90,) 
+          
+            temp_draw.rectangle(
+                [left, top, right, bottom], outline=colors[LABEL]+(150,), width=2, fill=colors[LABEL]+(alpha,) 
                 )
                       
-            draw.rectangle(
+            temp_draw.rectangle(
                 [tuple(text_origin), tuple(text_origin + (label_size, 20))],
-                fill=colors[LABEL]+(90,) 
+                fill=colors[LABEL]+(255,) 
                 )
-            draw.text(text_origin, label, fill=(0, 0, 0, 255), font=font)
-            #Text_pos.append(text_origin)
-            #Labels.append(label)
-            del draw
+            temp_draw.text(text_origin, label, fill=(0, 0, 0, 255), font=font)
+            temp_images.append(temp_image)
         else : pass 
 
- 
-    image_de_fond = ImageOps.grayscale(image.convert("RGBA"))
-    image_superposee = mask
+    result = ImageOps.grayscale(image).convert('RGBA') #image.convert("RGBA")
 
-    if image_de_fond.size != image_superposee.size:
-        image_superposee = image_superposee.resize(image_de_fond.size)
-
-    result = Image.alpha_composite(image_de_fond.convert("RGBA"), image_superposee.convert("RGBA"))
-
-    """
-    if Labels:
-        for i in range(len(Labels)):
-            draw        = ImageDraw.Draw(result)
-            draw.text(Text_pos[i], Labels[i], fill=(0, 0, 0, 255), font=font)
-    """
+    for temp_image in temp_images:
+        result = Image.alpha_composite(result, temp_image)
 
     return np.array(result)
 
