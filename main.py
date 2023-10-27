@@ -168,11 +168,11 @@ def head(st = st):
             with st.expander("HAVE A LOOK"):
                 head_img(st=st, path='./images/tracked.jpg', factor=factor)
 
-            st.write('<h2 class="custom-text-under4">Objects Tracking</h2>', unsafe_allow_html=True)
+            st.write('<h2 class="custom-text-under4">Objects Tracking & Segmentation</h2>', unsafe_allow_html=True)
             with st.expander("HAVE A LOOK"):
-                tab_track = st.tabs(['video 2', 'video 3'])
-                image_location = ['./video/yolo_video2.mp4', './video/yolo_video2_pred.mp4']
-                types = ['video', 'video']
+                tab_track = st.tabs(['original', 'tracking', 'segmentation'])
+                image_location = ['./video/yolo_video2.mp4', './video/yolo_video2_pred.mp4', './video/yolo_video3_pred.mp4']
+                types = ['video', 'video', 'video']
 
                 for i in range(len(tab_track)):
                     with tab_track[i]:

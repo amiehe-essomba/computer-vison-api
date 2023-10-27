@@ -23,10 +23,10 @@ def yolov8_seg(st, df, shape, show, response, resume, return_sequence, colors, a
     scores          = []
    
     masks           = detections.masks.data.numpy()
-    if seg is True:
-        class_id        = detections.boxes.data.numpy()[:, -1].astype("int32")
-        frame = draw_mask(frame, masks=masks, Colors=colors, class_names=kwargs['Class_names'], alpha=100, class_id = class_id)
-    else: pass 
+    #if seg is True:
+    class_id        = detections.boxes.data.numpy()[:, -1].astype("int32")
+    frame = draw_mask(frame, masks=masks, Colors=colors, class_names=kwargs['Class_names'], alpha=100, class_id = class_id)
+    #else: pass 
 
     for detection in detections.boxes.data.tolist():
         x1, y1, x2, y2, score, class_id = detection

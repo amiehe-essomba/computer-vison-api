@@ -217,7 +217,11 @@ def Image(st, yolo_model_path, df, col, shape, model_type, show, **kwargs):
         st.write('state', response) 
 
     if model_type == 'yolov8-seg':
-        alpha = st.slider('alpha', min_value=1, max_value=255, value=30, step=1)
+        ctt1, ctt2 = st.columns(2)
+        with ctt1:
+            alpha = st.slider('alpha', min_value=1, max_value=255, value=30, step=1)
+        with ctt2:
+            mode = st.selectbox('mode', options=('gray', 'rbg'), index=0)
 
     if button_style(st=st, name='run'):
 
@@ -238,7 +242,7 @@ def Image(st, yolo_model_path, df, col, shape, model_type, show, **kwargs):
             yolov8.yolov8(st, df, shape, show, response, resume, False, colors, **kwargs)
         
         if model_type == 'yolov8-seg':
-            yolov8_seg.yolov8_seg(st, df, shape, show, response, resume, False, colors, alpha, **kwargs)
+            yolov8_seg.yolov8_seg(st, df, shape, show, response, resume, False, colors, alpha, mode, **kwargs)
         
         if model_type == 'yolov8-pose':
             st.wrilte("YOLOV8 for pose detection is not yet implimented.")
