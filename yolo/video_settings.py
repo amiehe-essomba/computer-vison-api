@@ -9,7 +9,8 @@ def slider_video(st, *details):
     if duration <= 18.0 :
         col0, col1, col3 = st.columns(3)
         with col0:
-            second  = st.slider('time(s)', min_value=1, max_value=int(duration), step=1, value=1)
+            d = int(duration) - 1
+            second  = st.slider('time(s)', min_value=1, max_value=d, step=1, value=1)
             if second > duration:  second = duration
             else: pass 
         with col1:
@@ -24,7 +25,7 @@ def slider_video(st, *details):
         col0, col1, col3 = st.columns(3)
 
         with col0:
-            second  = st.slider('time(s)', min_value=1, max_value=20, step=1, value=1)
+            second  = st.slider('time(s)', min_value=1, max_value=18, step=1, value=1)
         with col1:
             start   = st.slider('start frame', min_value=0, max_value=int(video_frame-fps * second), value=0, step=int(fps))
         with col3:

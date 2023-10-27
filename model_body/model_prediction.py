@@ -17,7 +17,7 @@ def pred(st):
     yolo_model_path = './yolo_model/' 
 
     # three columns for local file, show file updated, image scale factor 
-    col1, col2, col3 = st.columns(3)
+    col1, col2, col3, col4 = st.columns(4)
     
     with col1:
         label_select = st.selectbox('Local or Online File', options=('Local', 'Online'), index=None)
@@ -25,12 +25,20 @@ def pred(st):
         show = st.checkbox('Show files uploaded')
         st.write('state', show)
     with col3:
+        tracking = st.checkbox('Tracking')
+        st.write('state', tracking)
+        if tracking : tracking = True 
+        else: tracking = False
+    with col4:
         #if show : desable_scale = False 
         desable_scale  = False
-        model_type = st.selectbox(label='Select models', 
+        if tracking is False:
+            model_type = st.selectbox(label='Select models', 
                                 options=('yolov8', "yolov5", 'yolov8-seg', 'ocr', 
                                         'ocr+yolov8', 'yolov8-pose', 'my model'), 
                                 disabled=desable_scale)
+        else:
+            model_type = st.selectbox(label='Select models', options=('yolov8', ''),  disabled=True)
 
     if model_type == 'ocr+yolov8': factor = True 
     else: factor = False 
@@ -116,7 +124,7 @@ def pred(st):
                                         details = vs.slider_video(st, *details)
                                         video   = all_files['video_reader'][index]
                                         Video(st=st, prediction=prediction, yolo_model=yolo_model, video=video, model_type=model_type,
-                                                                             df=df, details=details, show=show, **items)
+                                                                             df=df, details=details, show=show, tracking=tracking, **items)
                                 else: pass
                             else: pass
                         else: pass 
@@ -206,8 +214,7 @@ def Image(st, yolo_model_path, df, col, shape, model_type, show, **kwargs):
 
     with col:
         response = st.checkbox('With scores')
-        st.write('state', response)
-    import streamlit as st 
+        st.write('state', response) 
 
     if model_type == 'yolov8-seg':
         alpha = st.slider('alpha', min_value=1, max_value=255, value=30, step=1)
@@ -231,7 +238,7 @@ def Image(st, yolo_model_path, df, col, shape, model_type, show, **kwargs):
             yolov8.yolov8(st, df, shape, show, response, resume, False, colors, **kwargs)
         
         if model_type == 'yolov8-seg':
-            yolov8_seg.yolov8_seg(st, df, shape, show, response, resume, colors, alpha, **kwargs)
+            yolov8_seg.yolov8_seg(st, df, shape, show, response, resume, False, colors, alpha, **kwargs)
         
         if model_type == 'yolov8-pose':
             st.wrilte("YOLOV8 for pose detection is not yet implimented.")
@@ -269,7 +276,7 @@ def scaling(image = None, shape = (608, 608), boxes = None, S = None):
 
     return scaled_boxes, scaled_image
 
-def Video(st, prediction, yolo_model, video, df, details, show, model_type, **kwargs):
+def Video(st, prediction, yolo_model, video, df, details, show, model_type, tracking, **kwargs):
 
     from yolo.utils.tools import get_colors_for_classes
     import random
@@ -299,21 +306,50 @@ def Video(st, prediction, yolo_model, video, df, details, show, model_type, **kw
             resume(st=st, df=df, file_type='video', show=show, **{'fps' : fps, 'video_reader' : video_reader})
         else: pass 
     
-    if model_type in ['yolov8', 'ocr+yolov8']:
-        ct1, ct2, ct3 = st.columns(3)
+    if model_type in ['yolov8', 'yolov8-seg']:
+        ct1, ct2, ct3, ct4 = st.columns(4)
+        dis = False if tracking else True
+        
         with ct1:
-            typ_of_op = st.selectbox('type of operation', ('tracking', ''), disabled=False)
+            tracker = st.selectbox('Tracking models', ("bytetrack.yaml", 
+                                                "botsort.yaml",), disabled=dis, index=0)
         with ct2:
             response = st.checkbox("With score")
             st.write(response)
         with ct3:
-            run = st.button('run')
+            import streamlit as st 
+            track_all = st.checkbox("Track all", disabled=dis)
+            st.write(response)
+        with ct4:
+            if dis is False: dis = track_all
+            else: pass
 
-        if typ_of_op:
+            track_num = st.multiselect('Object id', options=[str(x) for x in range(len(class_names))], disabled=dis, default='0')
+            
+            if track_all: track_num = [x for x in range(len(class_names))]
+            else:  track_num = [int(float(x)) for x in track_num]
+
+
+        if model_type != 'yolov8-seg' : run = st.button('run')
+
+        if tracking is False:
             if model_type == 'yolov8':
                 yolov8.yolovo_video(st, video, df, details, show, resume, response, run, colors, **items)
+            if model_type == 'yolov8-seg':
+                ctt1, ctt2 = st.columns(2)
+
+                with ctt1:
+                    alpha = st.slider('alpha', min_value=1, max_value=255, value=30, step=1)
+                with ctt2:
+                    mode = st.selectbox('mode', options=('gray', 'rbg'), index=0)
+                run = st.button('run')
+                yolov8_seg.yolovo_video_seg(st, video, df, details, show, resume, response, run, colors, alpha, mode, **items)
             else:
                 ocr_yolov8.ocr_yolovo_video(st, video, df, details, show, resume, scaling, response, run, colors, **items)
+        else:
+            if track_num:
+                yolov8.yolov8_video_track(st, video, df, details, show, resume, response, run, colors, tracker, track_num, **items)
+            else: pass
                 
 def resume(st, df : dict, file_type: str='image', img=None, show=True, **kwargs):
     with st.expander("MODEL PERFORMANCES"):

@@ -192,7 +192,7 @@ def draw_boxes(image, boxes, box_classes, class_names, scores=None, use_classes 
     return np.array(image)
 
 def draw_boxes_v8(image, boxes, box_classes, class_names, scores=None, use_classes : list = [], colors = None,
-                  df = {}, with_score : bool = True, C =None, return_sequence=False, width=2):
+                  df = {}, with_score : bool = True, C =None, return_sequence=False, width=2, ids = None):
     """
     Draw bounding boxes on image.
 
@@ -214,8 +214,6 @@ def draw_boxes_v8(image, boxes, box_classes, class_names, scores=None, use_class
         font='font/FiraMono-Medium.otf',
         size=np.floor(3e-2 * image.size[1] + 0.5).astype('int32'))
     thickness   = (image.size[0] + image.size[1]) // 300
-    #colors_     = get_colors_for_classes(len(class_names) + 30)
-    #colors      = {class_names[i] : colors_[i] for i in range(len(class_names))} 
 
     for i, c in list(enumerate(box_classes)):
         box_class   = class_names[c]
@@ -227,6 +225,7 @@ def draw_boxes_v8(image, boxes, box_classes, class_names, scores=None, use_class
         else: label = '{}'.format(box_class)
 
         _label_ = label.split()
+
         if len(_label_) <= 2 : 
             if with_score : pass 
             else : label = _label_[0]
@@ -234,12 +233,13 @@ def draw_boxes_v8(image, boxes, box_classes, class_names, scores=None, use_class
             string = ""
             for i, s in enumerate(_label_[:-1]) : string = string + s + " " if (i != len(_label_)-2) else string  + s
             _label_ = [string, _label_[-1]]
-
             if with_score : pass 
             else: label = string
+
         LABEL = _label_[0]
 
         if LABEL in use_classes:
+            if type(ids) is not None:  label += f' id:{int(ids[i])}'
             draw        = ImageDraw.Draw(image)
             label_size  = draw.textlength(text=label, font=font)
             left, top, right, bottom = box
@@ -257,10 +257,8 @@ def draw_boxes_v8(image, boxes, box_classes, class_names, scores=None, use_class
                 while (top - 20 + idd) < 0:
                     idd += 1
                 text_origin = np.array([left, top - 20 + idd])
-            # My kingdom for a good redistributable image drawing library.
-            #for i in range(thickness):
+      
             if C : colors[LABEL] = C
-        
             draw.rectangle(
                 [left, top, right, bottom], outline=colors[LABEL], width=width, fill=None
                 )
@@ -278,7 +276,7 @@ def draw_boxes_v8(image, boxes, box_classes, class_names, scores=None, use_class
     else:  return image 
     
 def draw_boxes_v8_seg(image, boxes, box_classes, class_names, scores=None, use_classes : list = [], colors=None,
-                  df = {}, with_score : bool = True, mask=False, alpha = 30):
+                  df = {}, with_score : bool = True, mask=False, alpha = 30, mode="gray"):
 
     font = ImageFont.truetype(
         font='font/FiraMono-Medium.otf',
@@ -337,15 +335,18 @@ def draw_boxes_v8_seg(image, boxes, box_classes, class_names, scores=None, use_c
                 [tuple(text_origin), tuple(text_origin + (label_size, 20))],
                 fill=colors[LABEL]+(255,) 
                 )
-            temp_draw.text(text_origin, label, fill=(0, 0, 0, 255), font=font)
+            temp_draw.text(text_origin, label, fill=(0, 0, 0, 255), font=font,  embedded_color=True)
             temp_images.append(temp_image)
         else : pass 
 
-    result = ImageOps.grayscale(image).convert('RGBA') #image.convert("RGBA")
+    if mode == "gray":
+        result = ImageOps.grayscale(image.copy()).convert('RGBA') #image.convert("RGBA")
+    else:
+        result = image.convert("RGBA")
 
     for temp_image in temp_images:
         result = Image.alpha_composite(result, temp_image)
-
+  
     return np.array(result)
 
 def read_video(image):

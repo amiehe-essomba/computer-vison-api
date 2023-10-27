@@ -164,7 +164,7 @@ def head(st = st):
                     with tab_seg[i]:
                         head_img(st=st, factor=factor, types=types[i], path=image_location[i])
                 
-            st.write('<h2 class="custom-text-under3"> OCR of Plates and Object Detection</h2>', unsafe_allow_html=True)
+            st.write('<h2 class="custom-text-under3"> OCR and Object Detection</h2>', unsafe_allow_html=True)
             with st.expander("HAVE A LOOK"):
                 head_img(st=st, path='./images/tracked.jpg', factor=factor)
 

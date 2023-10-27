@@ -48,7 +48,7 @@ def ocr(st, df, shape, show, response, resume, scaling, colors, **kwargs):
             license_plate_drop                      = np.array(frame)[int(y1) : int(y2), int(x1) : int(x2), :]
             license_plate_drop_gray                 = cv2.cvtColor(license_plate_drop, cv2.COLOR_BGR2GRAY)
             s, license_plate_drop_threshold         = cv2.threshold(license_plate_drop_gray, 64, 255, cv2.THRESH_BINARY_INV)
-            license_plate_text, license_plate_score = read_license_plate(license_plate_drop_gray)
+            license_plate_text, license_plate_score = read_license_plate(license_plate_drop_threshold)
             
             if license_plate_text: 
                 CLASSES.append(license_plate_text)
