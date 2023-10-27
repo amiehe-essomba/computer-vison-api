@@ -134,11 +134,7 @@ def head(st = st):
             modeling(st=st)
         if contain_feedback == ":stars: Conclusion":
             conclusion(st=st)
-        else: pass 
-    else :
-        if yolo_feedback_contrain :  
-            st.code(code(yolo_feedback_contrain), language='python', line_numbers=True)    
-        else: 
+        if contain_feedback == ":sparkler: Examples":
             factor = None
 
             st.write('<h2 class="custom-text-under">Object Detection</h2>', unsafe_allow_html=True)
@@ -177,6 +173,11 @@ def head(st = st):
                 for i in range(len(tab_track)):
                     with tab_track[i]:
                         head_img(st=st, types=types[i], path=image_location[i])
+    else :
+        if yolo_feedback_contrain :  
+            st.code(code(yolo_feedback_contrain), language='python', line_numbers=True)    
+        else: pass
+            
 
 if __name__ == '__main__':
     head()

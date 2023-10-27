@@ -1,7 +1,7 @@
 import tensorflow as tf  
 import pandas as pd 
 from yolo.utils.tools import total_precess
-from streamlit_modules.file_read import file_read, online_link
+from streamlit_modules.file_read import file_read, online_link, camera
 from yolo.utils.tools import read_classes, read_anchors
 from yolo.predictions import prediction
 from streamlit_modules.button_style import button_style
@@ -19,13 +19,15 @@ def pred(st):
     # three columns for local file, show file updated, image scale factor 
     col1, col2, col3, col4 = st.columns(4)
     
+    locked_mod = True
     with col1:
-        label_select = st.selectbox('Local or Online File', options=('Local', 'Online'), index=None)
+        label_select = st.selectbox('Local or Online File', options=('Local', 'Online', 'Camera'), index=None)
+        locked_mod = False if locked_mod else True
     with col2:
         show = st.checkbox('Show files uploaded')
         st.write('state', show)
     with col3:
-        tracking = st.checkbox('Tracking')
+        tracking = st.checkbox('Tracking', disabled=locked_mod)
         st.write('state', tracking)
         if tracking : tracking = True 
         else: tracking = False
@@ -42,9 +44,9 @@ def pred(st):
 
     if model_type == 'ocr+yolov8': factor = True 
     else: factor = False 
-
+    
     if label_select:
-        if label_select == 'Local':
+        if   label_select == 'Local':
             if label_select: 
                 uploaded_file = st.file_uploader("upload local image or video", 
                                                 type=["jpg", "jpeg", "png", "gif", "webp", "mp4", "mov", "avi", "mkv"],
@@ -156,6 +158,7 @@ def pred(st):
 
                         with cp_col2:
                             cp_check = st.checkbox("use all classes")
+                            st.write('state', cp_check)
 
                         with cp_col1  :
                             # if use all is true cp_disable become True 
@@ -197,6 +200,55 @@ def pred(st):
                 else: pass
             else: pass
             #st.video()
+        elif label_select == 'Camera':
+            image, image_data, shape = camera()
+
+            if image:
+                [iou_threshold, score_threshold, max_boxes] = vs.slider_model(st=st)
+
+                # classses and anchors 
+                Class_names         = read_classes()
+                anchors             = read_anchors()
+
+                # five columns for use all classes, class probabilitiess etc....
+                cp_col1, cp_col2, cp_col3 = st.columns(3)
+
+                with cp_col2:
+                    cp_check = st.checkbox("use all classes")
+                    st.write('state', cp_check)
+                
+                with cp_col1  :
+                    # if use all is true cp_disable become True 
+                    if cp_check :  cp_disable = True  
+                    else: cp_disable  = False 
+
+                    # select multi-classs probabilities 
+                    class_names = st.multiselect("class probabilities", options=Class_names, disabled=cp_disable)
+
+                    if class_names: pass 
+                    else: 
+                        # Class_names can be different ro class_name 
+                        if cp_check : class_names = Class_names
+                        else: pass 
+
+                if class_names: 
+                    items  = {
+                        'class_names' : class_names,
+                        'anchors' : anchors,
+                        'Class_names' : Class_names,
+                        'max_boxes' : max_boxes,
+                        'score_threshold' : score_threshold,
+                        'iou_threshold' : iou_threshold,
+                        'image_file'   : [(image, image_data)]
+                        }
+              
+                    tf.get_logger().setLevel(logging.ERROR)
+                    yolo_model = tf.keras.models.load_model(yolo_model_path, compile=False)
+                    df = {'label' : [], 'score':[], 'top':[], "left":[], "bottom":[], 'right':[]}
+                    Image(st=st, yolo_model_path=yolo_model_path, df=df, col=cp_col3, shape=shape, model_type=model_type,
+                        show=show, **items) 
+               
+                else: pass
     else: pass
 
 def Image(st, yolo_model_path, df, col, shape, model_type, show, **kwargs):

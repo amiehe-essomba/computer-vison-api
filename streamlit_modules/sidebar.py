@@ -75,7 +75,8 @@ def sidebar(streamlit = st):
         ":recycle: Introduction",
         ":desktop_computer: Modelling",
         ":brain: prediction",
-        ":stars: Conclusion"
+        ":stars: Conclusion",
+        ":sparkler: Examples"
         )
     
     # get feedback storage in contain_feedback
