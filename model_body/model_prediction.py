@@ -265,13 +265,18 @@ def Image(st:streamlit, yolo_model_path, df, col, shape, model_type, show, **kwa
     from yolo.utils.tools import get_colors_for_classes
     import random
 
+    class_names = kwargs['Class_names']
+    colors_     = get_colors_for_classes(len(class_names) + 100)
+  
     def f():
         s = random.sample(range(50), 1)
         return s[0] 
     
-    class_names = kwargs['Class_names']
-    colors_     = get_colors_for_classes(len(class_names) + 100)
-    colors      = {class_names[i] : colors_[i] if colors_[i] != (255, 255, 0) else colors_[len(class_names) : ][f()] for i in range(len(class_names))}
+    def g():
+        num = random.sample(range(len(colors_)), len(class_names))
+        return num 
+    
+    colors      = {class_names[j] : colors_[i] if colors_[i] != (255, 255, 0) else colors_[j-1] for j, i in enumerate(g())}
 
     with col:
         response = st.checkbox('With scores')
@@ -303,7 +308,7 @@ def Image(st:streamlit, yolo_model_path, df, col, shape, model_type, show, **kwa
                 max_boxes=kwargs['max_boxes'], score_threshold=kwargs['score_threshold'], iou_threshold=kwargs['iou_threshold'], data_dict=df,
                 shape=shape, file_type='image', with_score=response, colors=colors
             )
-            resume(st=st, df=df, show=show, **{"image_predicted" : image_predicted})
+            resume(st=st, df=df, show=show, img = kwargs['image_file'][0][0], **{"image_predicted" : image_predicted})
         
         if model_type == 'yolov8':
             yolov8.yolov8(st, df, shape, show, response, resume, False, colors, **kwargs)
@@ -352,13 +357,18 @@ def Video(st, prediction, yolo_model, video, df, details, show, model_type, trac
     from yolo.utils.tools import get_colors_for_classes
     import random
 
+    class_names = kwargs['Class_names']
+    colors_     = get_colors_for_classes(len(class_names) + 100)
+
     def f():
         s = random.sample(range(50), 1)
         return s[0] 
-
-    class_names = kwargs['Class_names']
-    colors_     = get_colors_for_classes(len(class_names) + 100)
-    colors      = {class_names[i] : colors_[i] if colors_[i] != (255, 255, 0) else colors_[len(class_names) : ][f()] for i in range(len(class_names))}
+    
+    def g():
+        num = random.sample(range(len(colors_)), len(class_names))
+        return num 
+    
+    colors      = {class_names[j] : colors_[i] if colors_[i] != (255, 255, 0) else colors_[j-1] for j, i in enumerate(g())}
 
     items  = {
             'class_names' : kwargs['class_names'],
