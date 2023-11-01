@@ -9,8 +9,9 @@ import plotly.express as px
 import logging
 from yolo import video_settings as vs 
 from yolov8_ops import ocr_yolov8, ocr, yolov8, yolov8_seg
+import streamlit 
 
-def pred(st):
+def pred(st : streamlit):
     st.write('<style>{}</style>'.format(styles()), unsafe_allow_html=True)
     st.write(f'<h1 class="header-text">Welcome in prediction section</h1>', unsafe_allow_html=True)
 
@@ -22,25 +23,33 @@ def pred(st):
     locked_mod = True
     with col1:
         label_select = st.selectbox('Local or Online File', options=('Local', 'Online', 'Camera'), index=None)
-        locked_mod = False if locked_mod else True
+        if label_select: locked_mod = False
+        else: locked_mod = True
+    
     with col2:
-        show = st.checkbox('Show files uploaded')
+        show = st.checkbox('Show files uploaded', disabled=locked_mod)
         st.write('state', show)
     with col3:
-        tracking = st.checkbox('Tracking', disabled=locked_mod)
+        if label_select == "Camera":
+            tracking = st.checkbox('Tracking', disabled=True)
+        else: tracking = st.checkbox('Tracking', disabled=locked_mod)
         st.write('state', tracking)
         if tracking : tracking = True 
         else: tracking = False
     with col4:
         #if show : desable_scale = False 
-        desable_scale  = False
+        desable_scale  = locked_mod
         if tracking is False:
-            model_type = st.selectbox(label='Select models', 
-                                options=('yolov8', "yolov5", 'yolov8-seg', 'ocr', 
+            if label_select != "Camera":
+                model_type = st.selectbox(label='Select models', 
+                                options=('yolov8', "yolov8-cls", 'yolov8-seg', 'ocr', 
                                         'ocr+yolov8', 'yolov8-pose', 'my model'), 
                                 disabled=desable_scale)
-        else:
-            model_type = st.selectbox(label='Select models', options=('yolov8', ''),  disabled=True)
+            else:
+                model_type = st.selectbox(label='Select models', 
+                                options=('yolov8', "yolov8-cls", 'yolov8-seg', 'yolov8-pose', 'my model'), 
+                                disabled=desable_scale)
+        else: model_type = st.selectbox(label='Select models', options=('yolov8', ''),  disabled=True)
 
     if model_type == 'ocr+yolov8': factor = True 
     else: factor = False 
@@ -251,7 +260,7 @@ def pred(st):
                 else: pass
     else: pass
 
-def Image(st, yolo_model_path, df, col, shape, model_type, show, **kwargs):
+def Image(st:streamlit, yolo_model_path, df, col, shape, model_type, show, **kwargs):
     import numpy as np 
     from yolo.utils.tools import get_colors_for_classes
     import random
@@ -269,14 +278,20 @@ def Image(st, yolo_model_path, df, col, shape, model_type, show, **kwargs):
         st.write('state', response) 
 
     if model_type == 'yolov8-seg':
-        ctt1, ctt2 = st.columns(2)
+        ctt1, ctt2, ctt3, ctt4 = st.columns(4)
         with ctt1:
             alpha = st.slider('alpha', min_value=1, max_value=255, value=30, step=1)
         with ctt2:
-            mode = st.selectbox('mode', options=('gray', 'rbg'), index=0)
+            mode = st.selectbox('Background Mode', options=('gray', 'rbg'), index=0)
+        with ctt3:
+            only_mask = st.checkbox('Only Mask')
+            st.write('status', only_mask)
+        with ctt4:
+            with_names = st.checkbox('With Names')
+            st.write('status', with_names)
+        
 
     if button_style(st=st, name='run'):
-
         if model_type == 'my model':
             tf.get_logger().setLevel(logging.ERROR)
             yolo_model = tf.keras.models.load_model(yolo_model_path, compile=False)
@@ -294,7 +309,7 @@ def Image(st, yolo_model_path, df, col, shape, model_type, show, **kwargs):
             yolov8.yolov8(st, df, shape, show, response, resume, False, colors, **kwargs)
         
         if model_type == 'yolov8-seg':
-            yolov8_seg.yolov8_seg(st, df, shape, show, response, resume, False, colors, alpha, mode, **kwargs)
+            yolov8_seg.yolov8_seg(st, df, shape, show, response, resume, False, colors, alpha, mode, only_mask, with_names, **kwargs)
         
         if model_type == 'yolov8-pose':
             st.wrilte("YOLOV8 for pose detection is not yet implimented.")
@@ -386,7 +401,16 @@ def Video(st, prediction, yolo_model, video, df, details, show, model_type, trac
             else:  track_num = [int(float(x)) for x in track_num]
 
 
-        if model_type != 'yolov8-seg' : run = st.button('run')
+        if model_type != 'yolov8-seg' : 
+            ctt1_, ctt2_, ctt3_ = st.columns(3)
+            with ctt1_:
+                only_mask = st.checkbox('Only Mask')
+                st.write('status', only_mask)
+            with ctt2_:
+                with_names = st.checkbox('With Names')
+                st.write('status', with_names)
+            with ctt3_:
+                run = st.button('run')
 
         if tracking is False:
             if model_type == 'yolov8':
@@ -397,9 +421,10 @@ def Video(st, prediction, yolo_model, video, df, details, show, model_type, trac
                 with ctt1:
                     alpha = st.slider('alpha', min_value=1, max_value=255, value=30, step=1)
                 with ctt2:
-                    mode = st.selectbox('mode', options=('gray', 'rbg'), index=0)
+                    mode = st.selectbox('Background Mode', options=('gray', 'rbg'), index=0)
                 run = st.button('run')
-                yolov8_seg.yolovo_video_seg(st, video, df, details, show, resume, response, run, colors, alpha, mode, **items)
+                yolov8_seg.yolovo_video_seg(st, video, df, details, show, resume, response, run, 
+                                                                    colors, alpha, mode, only_mask, with_names, **items)
             else:
                 ocr_yolov8.ocr_yolovo_video(st, video, df, details, show, resume, scaling, response, run, colors, **items)
         else:
@@ -462,9 +487,10 @@ def styles():
             background-image: darkgray;
             border-radius: 5px; /* Coins arrondis */
             margin: 3px; /* Marge extérieure */
-            border: 2px solid #555; /* Bordure */
+            border: 5px solid deepskyblue; /* Bordure */
             padding: 5px; /* Marge intérieure pour le texte */
             display: inline-block;
+            box-shadow: 2px 4px 3px 0 rgba(20, 0, 0.5, 5); /* Ombre */
         }
         """
     return custom_css_title

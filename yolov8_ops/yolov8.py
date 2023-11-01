@@ -91,6 +91,7 @@ def yolov8_track(st, df, shape, show, response, resume, return_sequence, colors,
 
     if return_sequence is False:
         resume(st=st, df=df, show=show, img = kwargs['image_file'][0][0], **{"image_predicted" : image_predicted})
+        
     else: return image_predicted
 
 def yolovo_video(st, video, df, details, show, resume, response,  run, colors, **items):

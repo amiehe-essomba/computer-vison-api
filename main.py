@@ -27,6 +27,7 @@ import cv2
 from skimage import io, transform
 
 
+
 def head_img(st, path='./images/img_pred.jpg', factor : int = 50, types : str='image'):
     if types == 'image':
         file = Image.open(path, 'r')
@@ -38,6 +39,13 @@ def head_img(st, path='./images/img_pred.jpg', factor : int = 50, types : str='i
         video_file.close()
 
 def head(st = st):
+
+    """
+    st.set_page_config(
+    page_title="FloraFlow",
+    page_icon="🌱"
+    )
+    """
     yolo_logo = './images/ocr.png'
     git_page  = links('git_page')
 
@@ -124,17 +132,17 @@ def head(st = st):
     #st.write('<h1 class="custom-text-under"></h1>', unsafe_allow_html=True)
     
     if contain_feedback :
-        if contain_feedback == ":brain: prediction":
+        if contain_feedback == "Prediction":
             pred(st=st)
-        if contain_feedback == ":writing_hand: Project description":
+        if contain_feedback == "Project description":
             project(st=st)
-        if contain_feedback == ":recycle: Introduction":
+        if contain_feedback == "Introduction":
             intro(st=st)
-        if contain_feedback == ":desktop_computer: Modelling":
+        if contain_feedback == "Modelling":
             modeling(st=st)
-        if contain_feedback == ":stars: Conclusion":
+        if contain_feedback == "Conclusion":
             conclusion(st=st)
-        if contain_feedback == ":sparkler: Examples":
+        if contain_feedback == "Examples":
             factor = None
 
             st.write('<h2 class="custom-text-under">Object Detection</h2>', unsafe_allow_html=True)

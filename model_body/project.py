@@ -121,9 +121,10 @@ def styles():
             background-image: darkgray;
             border-radius: 5px; /* Coins arrondis */
             margin: 3px; /* Marge extérieure */
-            border: 2px solid #555; /* Bordure */
+            border: 5px solid deepskyblue; /* Bordure */
             padding: 5px; /* Marge intérieure pour le texte */
             display: inline-block;
+            box-shadow: 2px 4px 3px 0 rgba(20, 0, 0.5, 5); /* Ombre */
         }
 
         .body-text {

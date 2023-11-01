@@ -25,4 +25,16 @@ def links(name : str = ''):
     if name == 'email':
         string = 'https://th.bing.com/th/id/OIP.ugDgTkIwn4zkgnWbA2MMKQHaHI?pid=ImgDet&rs=1'
     
+    if name == 'black_m':
+        string = 'https://github.com/amiehe-essomba/BlackMamba'
+    
+    if name =="vision":
+        string = "https://github.com/amiehe-essomba/vision"
+
+    if name == "seedling":
+        string = 'https://github.com/DataScientest-Studio/AU23_Plantes/tree/main'
+
+    if name == 'streamlit':
+        string = 'https://image.pngaaa.com/798/5084798-middle.png'
+    
     return string

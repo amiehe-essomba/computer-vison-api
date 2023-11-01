@@ -9,9 +9,10 @@ import imageio, tempfile
 import shutil
 import pandas as pd 
 import cv2
+import streamlit as st
 
-def yolov8_seg(st, df, shape, show, response, resume, return_sequence, colors, alpha, mode, seg=False, **kwargs):
-    import streamlit as st
+def yolov8_seg(st:st, df, shape, show, response, resume, return_sequence, colors, alpha, mode, only_mask, with_names, **kwargs):
+    
     yolo_model_v8   = YOLO('./yolov8/yolov8n-seg.pt')
     frame           = kwargs['image_file'][0][0].copy()
     detections      = yolo_model_v8.predict(frame)[0]
@@ -25,7 +26,7 @@ def yolov8_seg(st, df, shape, show, response, resume, return_sequence, colors, a
     masks           = detections.masks.data.numpy()
     #if seg is True:
     class_id        = detections.boxes.data.numpy()[:, -1].astype("int32")
-    frame = draw_mask(frame, masks=masks, Colors=colors, class_names=kwargs['Class_names'], alpha=100, class_id = class_id)
+    frame = draw_mask(frame, masks=masks, Colors=colors, class_names=kwargs['Class_names'], alpha=100, class_id = class_id, mode=mode)
     #else: pass 
 
     for detection in detections.boxes.data.tolist():
@@ -42,9 +43,11 @@ def yolov8_seg(st, df, shape, show, response, resume, return_sequence, colors, a
         class_names     = kwargs['Class_names']
         use_classes     = kwargs['class_names']
 
-        image_predicted = draw_boxes_v8_seg(image=frame, boxes=boxes, box_classes=box_classes, scores=scores, with_score=response,
-                                        class_names=class_names, use_classes=use_classes, df=df, colors=colors, alpha=alpha, mode=mode)
-        
+        if with_names is True or only_mask is False:
+            image_predicted = draw_boxes_v8_seg(image=frame, boxes=boxes, box_classes=box_classes, scores=scores, with_score=response,
+                class_names=class_names, use_classes=use_classes, df=df, colors=colors, alpha=alpha, only_mask=only_mask, with_names=with_names)
+        else:
+            image_predicted = np.array(frame)
         if len(shape) > 2 : shape = shape[:2]
         else: pass 
 
@@ -56,7 +59,7 @@ def yolov8_seg(st, df, shape, show, response, resume, return_sequence, colors, a
         resume(st=st, df=df, show=show, img = kwargs['image_file'][0][0], **{"image_predicted" : image_predicted})
     else: return image_predicted
 
-def yolovo_video_seg(st, video, df, details, show, resume, response,  run, colors, alpha, mode, **items):
+def yolovo_video_seg(st:st, video, df, details, show, resume, response,  run, colors, alpha, mode, only_mask, with_names, **items):
     frame_count         = 0
     fps                 = video.get_meta_data()['fps']
     (start, end, step)  = details
@@ -76,7 +79,8 @@ def yolovo_video_seg(st, video, df, details, show, resume, response,  run, color
                     items['image_file']         = [(frame,frame_data)]
                     
                     image_predicted= yolov8_seg(st=st, df=df, shape=shape, show=show, response=response,
-                                            resume=None, return_sequence=True, colors=colors, alpha=alpha,mode=mode, seg=True, **items)
+                        resume=None, return_sequence=True, colors=colors, alpha=alpha,mode=mode, 
+                                    only_mask=only_mask, with_names=with_names, **items)
                     #s.image(image_predicted)
                     #image_predicted = image_predicted.astype('float32')
                     writer.append_data(image_predicted)
@@ -90,14 +94,12 @@ def yolovo_video_seg(st, video, df, details, show, resume, response,  run, color
         shutil.rmtree(temp_video_file.name, ignore_errors=True)
         my_bar.empty()
 
-        if video_data:
-            resume(st=st, df=df, file_type='video', show=show, **{'fps' : fps, 'video_reader' : video_data})
+        if video_data:  resume(st=st, df=df, file_type='video', show=show, **{'fps' : fps, 'video_reader' : video_data})
         else: pass  
-        
     else: pass
 
-def draw_mask(image, masks, Colors, class_names, alpha=80, class_id=None):
-    from PIL import ImageDraw
+def draw_mask(image, masks, Colors, class_names, alpha=80, class_id=None, mode: str="gray"):
+    from PIL import Image, ImageDraw, ImageFont, ImageOps
     import streamlit as st 
     # Assurez-vous que les masques ont les mêmes dimensions que l'image de fond
     masks = [Image.fromarray((resize(masks[i, :, :], output_shape=image.size) > 0.5).astype(np.uint8)) for i in range(masks.shape[0])]
@@ -121,11 +123,12 @@ def draw_mask(image, masks, Colors, class_names, alpha=80, class_id=None):
                     # Créez une nouvelle couleur avec la valeur alpha spécifiée
                     color_with_alpha = (r, g, b, alpha)
                     temp_draw.point((x, y), fill=color_with_alpha)
-
         temp_images.append(temp_image)
     
     result = image.convert("RGBA")
 
+    if mode == "gray": result = ImageOps.grayscale(image.copy()).convert('RGBA') 
+   
     for temp_image in temp_images:
         result = Image.alpha_composite(result, temp_image)
     

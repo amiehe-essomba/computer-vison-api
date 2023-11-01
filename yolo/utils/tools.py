@@ -276,7 +276,7 @@ def draw_boxes_v8(image, boxes, box_classes, class_names, scores=None, use_class
     else:  return image 
     
 def draw_boxes_v8_seg(image, boxes, box_classes, class_names, scores=None, use_classes : list = [], colors=None,
-                  df = {}, with_score : bool = True, mask=False, alpha = 30, mode="gray"):
+                  df = {}, with_score : bool = True, with_names=True, alpha = 30, only_mask:bool=False):
 
     font = ImageFont.truetype(
         font='font/FiraMono-Medium.otf',
@@ -307,12 +307,13 @@ def draw_boxes_v8_seg(image, boxes, box_classes, class_names, scores=None, use_c
             if with_score : pass 
             else: label = string
         LABEL = _label_[0]
+
         if LABEL in use_classes:
             temp_image  = Image.new("RGBA", image.size, (0, 0, 0, 0))
             temp_draw   = ImageDraw.Draw(temp_image) 
             label_size  = temp_draw.textlength(text=label, font=font)
             left, top, right, bottom = box
-         
+        
             df['top'].append(np.round(np.float32(top), 2) ) 
             df['left'].append(np.round( np.float32(left), 2))
             df['bottom'].append(np.round(np.float32(bottom), 2))
@@ -326,23 +327,26 @@ def draw_boxes_v8_seg(image, boxes, box_classes, class_names, scores=None, use_c
                 while (top - 20 + idd) < 0:
                     idd += 1
                 text_origin = np.array([left, top - 20 + idd])
-          
-            temp_draw.rectangle(
-                [left, top, right, bottom], outline=colors[LABEL]+(150,), width=2, fill=colors[LABEL]+(alpha,) 
-                )
-                      
-            temp_draw.rectangle(
-                [tuple(text_origin), tuple(text_origin + (label_size, 20))],
-                fill=colors[LABEL]+(255,) 
-                )
-            temp_draw.text(text_origin, label, fill=(0, 0, 0, 255), font=font,  embedded_color=True)
+            
+            if only_mask is False:
+                temp_draw.rectangle(
+                    [left, top, right, bottom], outline=colors[LABEL]+(150,), width=2, fill=colors[LABEL]+(alpha,) 
+                    )
+            else:
+                temp_draw.rectangle(
+                    [left, top, right, bottom], outline=colors[LABEL]+(150,), width=2, fill=None 
+                    )
+            
+            if with_names is True:        
+                temp_draw.rectangle(
+                    [tuple(text_origin), tuple(text_origin + (label_size, 20))],
+                    fill=colors[LABEL]+(255,) 
+                    )
+                temp_draw.text(text_origin, label, fill=(0, 0, 0, 255), font=font,  embedded_color=True)
             temp_images.append(temp_image)
-        else : pass 
+        else : pass  
 
-    if mode == "gray":
-        result = ImageOps.grayscale(image.copy()).convert('RGBA') #image.convert("RGBA")
-    else:
-        result = image.convert("RGBA")
+    result = image.convert("RGBA")
 
     for temp_image in temp_images:
         result = Image.alpha_composite(result, temp_image)

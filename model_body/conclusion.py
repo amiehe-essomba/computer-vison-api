@@ -31,7 +31,7 @@ def conclusion(st):
     for i in range(10):
         transform(st, '')
     
-    st.markdown(f'<a href="" target="_blank"><img src="{links()}" width="180" height="200"></a>', unsafe_allow_html=True)
+    st.markdown(f'<a href="" target="_blank"><img src="{links()}" width="160" height="200"></a>', unsafe_allow_html=True)
 
     st.write('<h1 class="header-text">Thanks for taking the time to read this project.</h1>', unsafe_allow_html=True)
 
@@ -49,9 +49,10 @@ def styles():
             background-image: darkgray;
             border-radius: 5px; /* Coins arrondis */
             margin: 3px; /* Marge extérieure */
-            border: 2px solid #555; /* Bordure */
+            border: 5px solid deepskyblue; /* Bordure */
             padding: 5px; /* Marge intérieure pour le texte */
             display: inline-block;
+            box-shadow: 2px 4px 3px 0 rgba(20, 0, 0.5, 5); /* Ombre */
         }
 
         .body-text {

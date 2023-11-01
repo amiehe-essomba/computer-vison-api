@@ -2,6 +2,7 @@ from streamlit_modules.links import links
 from streamlit_modules.sidebar_styles import sidebar_styles as ss
 import streamlit as st
 from streamlit_modules.info import info
+from streamlit_option_menu import option_menu
 
 def example(st, file : str = "./video/yolo_pred.mp4"):
     """
@@ -66,10 +67,12 @@ def sidebar(streamlit = st):
     # create image with associtated link 
     streamlit.sidebar.markdown(f'<a href="{git_page}" target="_blank"><img src="{cm}" width="320" height="270"></a>', unsafe_allow_html=True)
     
-    
     # contains section : create the table of constains 
     streamlit.sidebar.write('<h3 class="sidebar-text">Table of contains</h3>', unsafe_allow_html=True)
+    for i in range(2):
+        streamlit.sidebar.write('', unsafe_allow_html=True)
     # list of contains 
+    '''
     contains = (
         ":writing_hand: Project description", 
         ":recycle: Introduction",
@@ -78,11 +81,42 @@ def sidebar(streamlit = st):
         ":stars: Conclusion",
         ":sparkler: Examples"
         )
+    '''
+    contains = (
+        "Project description", 
+        "Introduction",
+        "Modelling",
+        "Prediction",
+        "Conclusion",
+        "Examples"
+        )
     
+    styles = {
+        "container": {"padding": "0!important", "background-color": "#fafafa", "font-family": "Arial, sans-serif"},
+        "icon": {"color": "orange", "font-size": "25px"}, 
+        "nav-link": {"font-size": "15px", "text-align": "left", "margin":"0px", "--hover-color": "#eee"},
+        "nav-link-selected": {
+                            "background-color": "skyblue",
+                            "border-radius" : "5px",
+                            "margin": "3px",
+                            "border": "5px solid orange",
+                            "padding": "5px",
+                            "width": "250px",
+                            "color" : "black",
+                            "font-family": "Arial, sans-serif",
+                            "font-weight": "lighter",
+                            "box-shadow": "2px 2px 5px 0 rgba(0, 0, 0.5, 5)"
+                            },
+    }
+    
+    icons = ("box-fill", 'recycle', 'database-fill', 'pc-display-horizontal', 'stars', 'explicit-fill')
     # get feedback storage in contain_feedback
     index            = None 
-    contain_feedback = streamlit.sidebar.radio('all contains', options=contains, disabled=False, index=None)
-    
+    #contain_feedback = streamlit.sidebar.radio('all contains', options=contains, disabled=False, index=None)
+    with streamlit.sidebar:
+        contain_feedback = option_menu('Main Menu', options=contains, menu_icon="microsoft", default_index=3,
+                                       icons=icons, styles=styles)
+
     if streamlit.sidebar.button('reset'):
         contain_feedback = None 
         index = None   
@@ -98,11 +132,12 @@ def sidebar(streamlit = st):
     yolo_feedback_contrain = streamlit.sidebar.selectbox('Computer Vision modules', options=yolo_contrains, 
                                                          disabled=disable, index=None, placeholder='Make your choice')
     
+    streamlit.sidebar.write('<h5 class="author"> </h5>', unsafe_allow_html=True)
     example(st=streamlit)
 
     streamlit.write('<style>{}</style>'.format(custom_sidebar_style), unsafe_allow_html=True)
     # create 10 line of space 
-    for i in range(5):
+    for i in range(4):
         streamlit.sidebar.write('<h5 class="author"> </h5>', unsafe_allow_html=True)
     
     # section about author
@@ -116,7 +151,8 @@ def sidebar(streamlit = st):
     col1_, col2_      = streamlit.sidebar.columns(2)
 
     with col1_:
-        streamlit.sidebar.markdown(f'<a href="{linkidin_page}" target="_blank"><img src="{my_photo}" width="125" height="125"></a>', unsafe_allow_html=True)
+        streamlit.sidebar.markdown(f'<a class="photo" href="{linkidin_page}" target="_blank"><img src="{my_photo}"\
+        width="125" height="125" border="5px"></a>', unsafe_allow_html=True)
     
     streamlit.sidebar.write('<h5 class="author">Dr. Iréné Amiehe Essomba, Ph.D </h5>', unsafe_allow_html=True)
 
@@ -140,5 +176,26 @@ def sidebar(streamlit = st):
         f'</div>', 
         unsafe_allow_html=True
         )
-      
+    
+    for i in range(2):
+        streamlit.sidebar.write('<h5 class="author"> </h5>', unsafe_allow_html=True)
+
+    # section about author
+    streamlit.sidebar.write('<h3 class="sidebar-text">Other projects</h3>', unsafe_allow_html=True)
+    bm_href  = links('black_m')
+    vis_href = links('vision') 
+    seed_href = links('seedling')
+    logo_streamlit = links('streamlit')
+    streamlit.sidebar.markdown(
+        f'<lo>'
+        f'<li>Seelding plants Classification \
+            <a href="{seed_href}" target="_blank"><img src="{logo_git}" width="25"></a>\
+            <a href="{seed_href}" target="_blank"><img src="{logo_streamlit}" width="25"></a>\
+         </li>'
+        f'<li>BLACK MAMBA Programming Language <a href="{bm_href}" target="_blank"><img src="{logo_git}" width="25"></a></li>'
+        f'<li>VISON Code Edidor <a href="{vis_href}" target="_blank"><img src="{logo_git}" width="25"></li>'
+        f'</lo>', 
+        unsafe_allow_html=True
+        )
+
     return [contain_feedback, yolo_feedback_contrain]

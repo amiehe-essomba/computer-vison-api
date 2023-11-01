@@ -141,7 +141,7 @@ def modeling(st):
     transform(st, p2)
     t = r'''
     \begin{equation}
-     IoU = \dfrac{Area of Intersection}{Area of Union} 
+     IoU = \dfrac{Intersection}{Union} 
      \end{equation}
     '''
     st.latex(t)
@@ -281,9 +281,10 @@ def styles():
             background-image: darkgray;
             border-radius: 5px; /* Coins arrondis */
             margin: 3px; /* Marge extérieure */
-            border: 2px solid #555; /* Bordure */
+            border: 5px solid deepskyblue; /* Bordure */
             padding: 5px; /* Marge intérieure pour le texte */
             display: inline-block;
+            box-shadow: 2px 4px 3px 0 rgba(20, 0, 0.5, 5); /* Ombre */
         }
 
         .body-text {
@@ -460,7 +461,7 @@ def iou_schema():
     |                                     |
     |      (box2 x1, (box2 y1)(min)       |
     |        +----------------------------+-------+
-    |        |//////////   IoU Here  //////////// | 
+    |        |/////////  IoU AREA  ////// |       | 
     +--------+----------------------------+-------+ (box1 x2, box1 y2) (max) 
              |                                    |
              |        box 2                       |
