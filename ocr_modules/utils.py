@@ -6,8 +6,6 @@ from skimage.transform import resize
 from keras import backend as K
 from functools import reduce
 
-
-
 def read_license_plate(license_plate_crop):
     # Initialize the OCR reader
     reader = easyocr.Reader(['en'], gpu=False)

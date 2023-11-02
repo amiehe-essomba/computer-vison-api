@@ -44,7 +44,7 @@ def ocr_yolov8(st, df, shape, show, response, resume, scaling, return_sequence, 
     boxes           = []
     box_classes     = []
     scores          = []
-    detections      = yolo_model_v8(frame)[0]
+    detections      = yolo_model_v8.predict(frame)[0]
 
     for detection in detections.boxes.data.tolist():
         x1, y1, x2, y2, score, class_id = detection
@@ -59,10 +59,10 @@ def ocr_yolov8(st, df, shape, show, response, resume, scaling, return_sequence, 
         box_classes_plates     = tf.constant(box_classes_plates, dtype=tf.int32)
         boxes_plates           = tf.constant(boxes_plates, dtype=tf.float32)
 
-        frame = draw_boxes_v8(image=frame, boxes=boxes_plates, box_classes=box_classes_plates, scores=scores_plates, 
+    
+        _ = draw_boxes_v8(image=frame, boxes=boxes_plates, box_classes=box_classes_plates, scores=scores_plates, 
                             with_score=response, class_names=CLASSES, use_classes=CLASSES, colors=colors,
                             df=df, C=(255, 255, 0), return_sequence=True, width = 4)
-    
     del boxes_plates
     del scores_plates 
     del box_classes_plates
@@ -84,8 +84,7 @@ def ocr_yolov8(st, df, shape, show, response, resume, scaling, return_sequence, 
 
     if return_sequence is False:
         resume(st=st, df=df, show=show, img=kwargs['image_file'][0][0], **{"image_predicted" : image_predicted})
-    else:
-        return image_predicted 
+    else:  return image_predicted 
     
     del boxes
     del scores 
@@ -99,6 +98,8 @@ def ocr_yolovo_video(st, video, df, details, show, resume, scaling, response,  r
     (start, end, step)  = details
     temp_video_file     = tempfile.NamedTemporaryFile(delete=False, suffix=".mp4")
     
+    #s= st.empty()
+
     if run: 
         # progress bar 
         progress_text   = "Operation in progress. Please wait."
@@ -108,20 +109,23 @@ def ocr_yolovo_video(st, video, df, details, show, resume, scaling, response,  r
             for i, frame in enumerate(video):
                 if i in range(start, end, step):
                     frame  = Image.fromarray(frame, mode='RGB')
-                    frame, frame_data, shape    = preprocess_image(img_path=frame, model_image_size = (608, 608), done=True) 
+                    frame, frame_data, shape    = preprocess_image(img_path=frame, model_image_size = (608, 608), done=True, factor=True) 
                     frame_count                += 1
-                    items['image_file']         = [(frame,frame_data)]
+                    items['image_file']         = [(frame, frame_data)]
                     
                     image_predicted = ocr_yolov8(st=st, df=df, shape=shape, show=show, response=response, scaling=scaling,
                                             resume=None, return_sequence=True, colors=colors, **items)
                     
                     image_predicted = image_predicted.astype('float32')
                     writer.append_data(image_predicted)
-
+                    #s.image(image_predicted)
+                    '''
                     if i <= 100:
                         my_bar.progress(i, text=progress_text)
                     else: pass
+                    '''
                 else: pass
+        
         
         with open(temp_video_file.name, 'rb') as temp_file:
             # Lire le contenu du fichier temporaire
@@ -132,5 +136,6 @@ def ocr_yolovo_video(st, video, df, details, show, resume, scaling, response,  r
 
         if video_data:
             resume(st=st, df=df, file_type='video', show=show, **{'fps' : fps, 'video_reader' : video_data})
-        else: pass    
+        else: pass   
+        
     else: pass

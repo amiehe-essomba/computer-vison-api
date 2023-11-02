@@ -51,7 +51,7 @@ def sidebar_styles():
         border: 5px solid orange; /* Bordure */
         margin: 0px; /* Marge extérieure */
         /*width:  320px; Largeur du conteneur */
-        height: 150px; /* longueur */
+        height: 200px; /* longueur */
         line-height: 1.5; /* Hauteur de ligne */
         font-family: Arial, sans-serif; /* font family*/
         text-align: justify;

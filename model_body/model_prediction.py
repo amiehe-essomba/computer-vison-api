@@ -11,9 +11,13 @@ from yolo import video_settings as vs
 from yolov8_ops import ocr_yolov8, ocr, yolov8, yolov8_seg
 import streamlit 
 
+
 def pred(st : streamlit):
     st.write('<style>{}</style>'.format(styles()), unsafe_allow_html=True)
     st.write(f'<h1 class="header-text">Welcome in prediction section</h1>', unsafe_allow_html=True)
+
+    for i in range(2):
+        st.write('', unsafe_allow_html=True)
 
     yolo_model_path = './yolo_model/' 
 
@@ -27,7 +31,7 @@ def pred(st : streamlit):
         else: locked_mod = True
     
     with col2:
-        show = st.checkbox('Show files uploaded', disabled=locked_mod)
+        show = st.checkbox('Show files uploaded', disabled=locked_mod, value=True)
         st.write('state', show)
     with col3:
         if label_select == "Camera":
@@ -51,7 +55,7 @@ def pred(st : streamlit):
                                 disabled=desable_scale)
         else: model_type = st.selectbox(label='Select models', options=('yolov8', ''),  disabled=True)
 
-    if model_type == 'ocr+yolov8': factor = True 
+    if model_type in ['ocr', 'ocr+yolov8']: factor = True 
     else: factor = False 
     
     if label_select:
@@ -266,7 +270,7 @@ def Image(st:streamlit, yolo_model_path, df, col, shape, model_type, show, **kwa
     import random
 
     class_names = kwargs['Class_names']
-    colors_     = get_colors_for_classes(len(class_names) + 100)
+    colors_     = get_colors_for_classes(len(class_names) + 10)
   
     def f():
         s = random.sample(range(50), 1)
@@ -294,9 +298,20 @@ def Image(st:streamlit, yolo_model_path, df, col, shape, model_type, show, **kwa
         with ctt4:
             with_names = st.checkbox('With Names')
             st.write('status', with_names)
-        
+    
+    if model_type == 'my model': grad_cam_dis = False 
+    else: grad_cam_dis = True 
 
-    if button_style(st=st, name='run'):
+    grad_cam_col, run_data_col = st.columns(2)
+
+    with grad_cam_col:
+        grad_cam = st.checkbox("show grad cam", disabled=grad_cam_dis)
+        st.write('state', grad_cam)
+
+    with run_data_col:
+        run_data = button_style(st=st, name='run')
+
+    if run_data:
         if model_type == 'my model':
             tf.get_logger().setLevel(logging.ERROR)
             yolo_model = tf.keras.models.load_model(yolo_model_path, compile=False)
@@ -306,9 +321,25 @@ def Image(st:streamlit, yolo_model_path, df, col, shape, model_type, show, **kwa
                 yolo_model=yolo_model, use_classes=kwargs['class_names'],
                 image_file=kwargs['image_file'], anchors=kwargs['anchors'], class_names=kwargs['Class_names'], img_size=(608, 608),
                 max_boxes=kwargs['max_boxes'], score_threshold=kwargs['score_threshold'], iou_threshold=kwargs['iou_threshold'], data_dict=df,
-                shape=shape, file_type='image', with_score=response, colors=colors
+                shape=shape, file_type='image', with_score=response, colors=colors, grad_cam=grad_cam
             )
+            if grad_cam is False: pass 
+            else:
+                grad, guided_grad = image_predicted[1:]
+                image_predicted   = image_predicted[0]
+
             resume(st=st, df=df, show=show, img = kwargs['image_file'][0][0], **{"image_predicted" : image_predicted})
+
+            if grad_cam:
+                with st.expander('see the grad cam here'):
+                    g1, g2 = st.columns(2)
+
+                    with g1:
+                        st.header('Grad cam')
+                        st.image(grad)
+                    with g2:
+                        st.header('Guided grad cam')
+                        st.image(guided_grad)
         
         if model_type == 'yolov8':
             yolov8.yolov8(st, df, shape, show, response, resume, False, colors, **kwargs)
@@ -387,7 +418,7 @@ def Video(st, prediction, yolo_model, video, df, details, show, model_type, trac
             resume(st=st, df=df, file_type='video', show=show, **{'fps' : fps, 'video_reader' : video_reader})
         else: pass 
     
-    if model_type in ['yolov8', 'yolov8-seg']:
+    if model_type in ['yolov8', 'yolov8-seg', 'ocr+yolov8']:
         ct1, ct2, ct3, ct4 = st.columns(4)
         dis = False if tracking else True
         
@@ -411,7 +442,7 @@ def Video(st, prediction, yolo_model, video, df, details, show, model_type, trac
             else:  track_num = [int(float(x)) for x in track_num]
 
 
-        if model_type != 'yolov8-seg' : 
+        if model_type not in ['yolov8-seg', 'ocr', 'ocr+yolov8'] : 
             ctt1_, ctt2_, ctt3_ = st.columns(3)
             with ctt1_:
                 only_mask = st.checkbox('Only Mask')
@@ -436,6 +467,7 @@ def Video(st, prediction, yolo_model, video, df, details, show, model_type, trac
                 yolov8_seg.yolovo_video_seg(st, video, df, details, show, resume, response, run, 
                                                                     colors, alpha, mode, only_mask, with_names, **items)
             else:
+                run = st.button('run')
                 ocr_yolov8.ocr_yolovo_video(st, video, df, details, show, resume, scaling, response, run, colors, **items)
         else:
             if track_num:
@@ -455,13 +487,17 @@ def resume(st, df : dict, file_type: str='image', img=None, show=True, **kwargs)
         """)
 
         if file_type == 'image': 
-            if show is False : st.image(kwargs['image_predicted'])
+            if show is False : 
+                st.header("Prediction")
+                st.image(kwargs['image_predicted'])
             else:
                 c1, c2 = st.columns(2)
                 pred = kwargs['image_predicted']
                 with c1:
+                    st.header("True image")
                     st.image(img.resize((pred.shape[1], pred.shape[0])))
                 with c2:
+                    st.header("Prediction")
                     st.image(pred)
         else :
             st.write(f"frame rate per second : {kwargs['fps']}") 

@@ -273,7 +273,7 @@ def draw_boxes_v8(image, boxes, box_classes, class_names, scores=None, use_class
         else : pass 
 
     if return_sequence is False: return  np.array(image)
-    else:  return image 
+    else:  image
     
 def draw_boxes_v8_seg(image, boxes, box_classes, class_names, scores=None, use_classes : list = [], colors=None,
                   df = {}, with_score : bool = True, with_names=True, alpha = 30, only_mask:bool=False):
@@ -282,8 +282,7 @@ def draw_boxes_v8_seg(image, boxes, box_classes, class_names, scores=None, use_c
         font='font/FiraMono-Medium.otf',
         size=np.floor(3e-2 * image.size[1] + 0.5).astype('int32'))
     thickness   = (image.size[0] + image.size[1]) // 300
-    #colors      = get_colors_for_classes(len(class_names))
-
+   
     temp_images = []
 
     for i, c in list(enumerate(box_classes)):
