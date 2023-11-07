@@ -49,8 +49,8 @@ def loss_function(y_true, y_pred):
     here we just have few classes to predict
 
     """
-    return  K.square(y_true[ :, 0]-y_pred[ :, 0]) +\
-            K.square(y_true[ :, 1]-y_pred[ :, 1]) +\
+    return  K.abs(y_true[ :, 0]-y_pred[ :, 0]) +\
+            K.abs(y_true[ :, 1]-y_pred[ :, 1]) +\
             K.square( 
                     K.sqrt(K.abs(y_true[ :, 2])) -\
                     K.sqrt(K.abs(y_pred[ :, 2]))
