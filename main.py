@@ -142,7 +142,7 @@ def head(st = st):
             modeling(st=st)
         if contain_feedback == "Conclusion":
             conclusion(st=st)
-        if contain_feedback == "Examples":
+        if contain_feedback == "Gallery":
             factor = None
 
             st.write('<h2 class="custom-text-under">Object Detection</h2>', unsafe_allow_html=True)

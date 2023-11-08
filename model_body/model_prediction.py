@@ -8,7 +8,7 @@ from streamlit_modules.button_style import button_style
 import plotly.express as px
 import logging
 from yolo import video_settings as vs 
-from yolov8_ops import ocr_yolov8, ocr, yolov8, yolov8_seg
+from yolov8_ops import ocr_yolov8, ocr, yolov8, yolov8_seg, yolov8_pose
 import streamlit 
 
 
@@ -283,7 +283,10 @@ def Image(st:streamlit, yolo_model_path, df, col, shape, model_type, show, **kwa
     colors      = {class_names[j] : colors_[i] if colors_[i] != (255, 255, 0) else colors_[j-1] for j, i in enumerate(g())}
 
     with col:
-        response = st.checkbox('With scores')
+        if model_type == 'yolov8-pose':
+            response = st.checkbox('With scores', disabled=True)
+        else: 
+            response = st.checkbox('With scores', disabled=False)
         st.write('state', response) 
 
     if model_type == 'yolov8-seg':
@@ -299,6 +302,16 @@ def Image(st:streamlit, yolo_model_path, df, col, shape, model_type, show, **kwa
             with_names = st.checkbox('With Names')
             st.write('status', with_names)
     
+    if model_type == 'yolov8-pose':
+        ctt1, ctt2, ctt3 = st.columns(3)
+        with ctt1:
+            radius = st.slider('radius', min_value=1, max_value=10, value=1, step=1)
+        with ctt2:
+            line_width = st.slider('line width', min_value=1, max_value=5, step=1)
+        with ctt3:
+            with_cls = st.checkbox('with OD')
+            st.write('state', with_cls)
+
     if model_type == 'my model': grad_cam_dis = False 
     else: grad_cam_dis = True 
 
@@ -348,10 +361,10 @@ def Image(st:streamlit, yolo_model_path, df, col, shape, model_type, show, **kwa
             yolov8_seg.yolov8_seg(st, df, shape, show, response, resume, False, colors, alpha, mode, only_mask, with_names, **kwargs)
         
         if model_type == 'yolov8-pose':
-            st.wrilte("YOLOV8 for pose detection is not yet implimented.")
-        
+            #st.warning("YOLOV8 for pose detection is not yet implimented.")
+            yolov8_pose.yolov8_pose(st=st, colors=colors, **kwargs)
         if model_type == 'yolov5':
-            st.wrilte("YOLOV5 for object detection is not yet implimented.")
+            st.warning("YOLOV5 for object detection is not yet implimented.")
         
         if model_type == 'ocr+yolov8':
             ocr_yolov8.ocr_yolov8(st, df, shape, show, response, resume, scaling, False, colors, **kwargs)

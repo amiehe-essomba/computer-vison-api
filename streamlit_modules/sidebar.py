@@ -88,7 +88,7 @@ def sidebar(streamlit = st):
         "Modelling",
         "Prediction",
         "Conclusion",
-        "Examples"
+        "Gallery"
         )
     
     styles = {
