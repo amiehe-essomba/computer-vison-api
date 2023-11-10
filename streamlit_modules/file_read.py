@@ -5,7 +5,8 @@ import tempfile
 import shutil
 from skimage.transform import resize
 from yolo.utils.tools import preprocess_image, read_video
-
+from streamlit_cropper import st_cropper
+import streamlit as st
 
 def img_resize(image, factor: float = None):
     if factor : image   = image.reduce(int(factor))
@@ -151,22 +152,28 @@ def url_img_read( url : str, factor = False):
 
     return image, image_data, shape,  error
 
-def camera():
-    import streamlit as st
+def camera(st : st):
     import cv2
     import numpy as np
 
-    img_file_buffer = st.camera_input("Take a picture")
+
+    col1, col2 = st.columns(2)
+    aspect_ratio = (1, 1)
+    with col1:
+        img_file_buffer = st.camera_input("Take a picture")
 
     if img_file_buffer is not None:
-        # To read image file buffer with OpenCV:
-        image = Image.open(img_file_buffer)
-
+        with col2:
+            # To read image file buffer with OpenCV:
+            img = Image.open(img_file_buffer)
+            img_array = np.array(img)
+            img = st_cropper(img_file=img, box_color='green', aspect_ratio=aspect_ratio, realtime_update=True)
+        
         # Check the shape of cv2_img:
         # Should output shape: (height, width, channels)
-        st.write(image.size)
+        st.write("image shape:",img.size)
 
-        image, image_data, shape = preprocess_image(img_path=image, model_image_size = (608, 608), done=True, factor=False)
+        image, image_data, shape = preprocess_image(img_path=img, model_image_size = (608, 608), done=True, factor=False)
 
         
         return image, image_data, shape

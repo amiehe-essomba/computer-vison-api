@@ -188,12 +188,12 @@ def sidebar(streamlit = st):
     logo_streamlit = links('streamlit')
     streamlit.sidebar.markdown(
         f'<lo>'
-        f'<li>Seelding plants Classification \
+        f'<li>FloraFlow (DEEP LEARNING) \
             <a href="{seed_href}" target="_blank"><img src="{logo_git}" width="25"></a>\
             <a href="{seed_href}" target="_blank"><img src="{logo_streamlit}" width="25"></a>\
          </li>'
-        f'<li>BLACK MAMBA Programming Language <a href="{bm_href}" target="_blank"><img src="{logo_git}" width="25"></a></li>'
-        f'<li>VISON Code Edidor <a href="{vis_href}" target="_blank"><img src="{logo_git}" width="25"></li>'
+        f'<li>BLACK MAMBA (OOP) <a href="{bm_href}" target="_blank"><img src="{logo_git}" width="25"></a></li>'
+        f'<li>VISION (CODE EDITOR) <a href="{vis_href}" target="_blank"><img src="{logo_git}" width="25"></li>'
         f'</lo>', 
         unsafe_allow_html=True
         )

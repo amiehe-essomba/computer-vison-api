@@ -9,6 +9,10 @@ import imageio, tempfile
 import shutil
 import pandas as pd 
 import cv2
+from collections import defaultdict
+import streamlit as st 
+from stqdm import stqdm 
+
 
 def yolov8(st, df, shape, show, response, resume, return_sequence, colors, **kwargs):
     score_threshold = kwargs['score_threshold']
@@ -48,7 +52,7 @@ def yolov8(st, df, shape, show, response, resume, return_sequence, colors, **kwa
         resume(st=st, df=df, show=show, img = kwargs['image_file'][0][0], **{"image_predicted" : image_predicted})
     else: return image_predicted
 
-def yolov8_track(st, df, shape, show, response, resume, return_sequence, colors, tracker = None, track_num = [], **kwargs):
+def yolov8_track(st, df, shape, show, response, resume, return_sequence, colors, tracker = None, track_history = None, **kwargs):
     score_threshold = kwargs['score_threshold']
 
     yolo_model_v8   = YOLO('./yolov8/yolov8n.pt')
@@ -58,20 +62,26 @@ def yolov8_track(st, df, shape, show, response, resume, return_sequence, colors,
     box_classes     = []
     scores          = []
     ids             = []
-    
+    points          = None 
+
     for detection in detections.boxes.data.tolist():
         try:
             x1, y1, x2, y2, id_tracker, score, class_id = detection
+            track = track_history[id_tracker]
+            track.append((float(x1), float(y1)))   
+            if len(track) > 30:   
+                track.pop(0)
+            points = np.hstack(track).astype(np.int32).reshape((-1, 1, 2))
         except ValueError: 
             x1, y1, x2, y2, score, class_id = detection
             id_tracker = -1
 
         if score >=  score_threshold:
-            if int(id_tracker) in track_num:
-                box_classes.append(int(class_id))
-                boxes.append([x1, y1, x2, y2])
-                scores.append(score)
-                ids.append(int(id_tracker))
+            #if int(id_tracker) in track_num:
+            box_classes.append(int(class_id))
+            boxes.append([x1, y1, x2, y2])
+            scores.append(score)
+            ids.append(int(id_tracker))
 
     if scores:
         scores          = tf.constant(scores, dtype=tf.float32)
@@ -91,8 +101,7 @@ def yolov8_track(st, df, shape, show, response, resume, return_sequence, colors,
 
     if return_sequence is False:
         resume(st=st, df=df, show=show, img = kwargs['image_file'][0][0], **{"image_predicted" : image_predicted})
-
-    else: return image_predicted
+    else: return image_predicted, points
 
 def yolovo_video(st, video, df, details, show, resume, response,  run, colors, **items):
 
@@ -141,53 +150,65 @@ def yolovo_video(st, video, df, details, show, resume, response,  run, colors, *
         else: pass    
     else: pass
         
-def yolov8_video_track(st, video, df, details, show, resume, response,  run, colors, tracker, track_num, **items):
+def yolov8_video_track(st:st, video, df, details, show, resume, response,  run, colors, tracker, track_num, **items):
     #storage             = []
     frame_count         = 0
     fps                 = video.get_meta_data()['fps']
     (start, end, step)  = details
     temp_video_file     = tempfile.NamedTemporaryFile(delete=False, suffix=".mp4")
-    #s = st.empty()
+   
+    s = st.empty()
+
     if run: 
-        # progress bar 
-        progress_text   = "Operation in progress. Please wait."
-        my_bar          = st.progress(0, text=progress_text)
-        idd = -1
+        idd             = -1
+        track_history   = defaultdict(lambda: []) 
+        color_track     = list(colors.values())[-1]
+
         with imageio.get_writer(temp_video_file.name, mode='?', fps=fps) as writer:
-            for i, frame in enumerate(video):
+            for i, frame in stqdm(enumerate(video), backend=False, frontend=True):
+                #sleep(0.5)
+
+                #for i, frame in enumerate(video):
                 if i in range(start, end, step):
                     idd += 1
                     frame  = Image.fromarray(frame, mode='RGB')
                     frame, frame_data, shape    = preprocess_image(img_path=frame, model_image_size = (608, 608), done=True) 
                     frame_count                += 1
                     items['image_file']         = [(frame,frame_data)]
-                    
-                    image_predicted = yolov8_track(st=st, df=df, shape=shape, show=show, response=response,
-                                            resume=None, return_sequence=True, colors=colors, tracker=tracker, track_num=track_num, **items)
+    
+                    image_predicted, points = yolov8_track(st=st, df=df, shape=shape, show=show, response=response,
+                                                            resume=None, return_sequence=True, colors=colors, tracker=tracker, 
+                                                            track_history=track_history, **items)
                     #import streamlit as st 
-                    
-                    #s.image(image_predicted)
-                    #image_predicted = image_predicted.astype('float32')
-                    #if idd > 50 : break
-                    image_predicted = image_predicted.astype('float32')
+                    image_predicted = (np.array(image_predicted) * 255).astype(np.int32)
+
+                    if points.all():
+                        cv2.polylines(image_predicted, [points], isClosed=False, color=color_track, thickness=10)
+
+                    #image_predicted /= 255.
+                    image_predicted = np.uint8(image_predicted)
                     writer.append_data(image_predicted)
+                    s.write('banary writing in progress ...')
+                
+                    #if i <= 100:
+                    #    my_bar.progress(i, text=progress_text)
+                    #else: pass
 
-                    #storage.append(image_predicted)
-
-                    if i <= 100:
-                        my_bar.progress(i, text=progress_text)
-                    else: pass
                 else: pass
 
         # Ouvrir le fichier temporaire en mode lecture binaire (rb)
         with open(temp_video_file.name, 'rb') as temp_file:
             # Lire le contenu du fichier temporaire
             video_data = temp_file.read()
+            s.write('banary lecture in progress ...')
 
         shutil.rmtree(temp_video_file.name, ignore_errors=True)
-        my_bar.empty()
+        #my_bar.empty()
 
+        s.write('complete')
+        s.empty()
         if video_data:
             resume(st=st, df=df, file_type='video', show=show, **{'fps' : fps, 'video_reader' : video_data})
-        else: pass    
+        else: pass  
+        
     else: pass

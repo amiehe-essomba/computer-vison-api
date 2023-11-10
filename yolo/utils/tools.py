@@ -273,7 +273,7 @@ def draw_boxes_v8(image, boxes, box_classes, class_names, scores=None, use_class
         else : pass 
 
     if return_sequence is False: return  np.array(image)
-    else:  image
+    else:  return image
     
 def draw_boxes_v8_seg(image, boxes, box_classes, class_names, scores=None, use_classes : list = [], colors=None,
                   df = {}, with_score : bool = True, with_names=True, alpha = 30, only_mask:bool=False):

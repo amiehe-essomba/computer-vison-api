@@ -214,7 +214,7 @@ def pred(st : streamlit):
             else: pass
             #st.video()
         elif label_select == 'Camera':
-            image, image_data, shape = camera()
+            image, image_data, shape = camera(st=st)
 
             if image:
                 [iou_threshold, score_threshold, max_boxes] = vs.slider_model(st=st)
@@ -284,7 +284,7 @@ def Image(st:streamlit, yolo_model_path, df, col, shape, model_type, show, **kwa
 
     with col:
         if model_type == 'yolov8-pose':
-            response = st.checkbox('With scores', disabled=True)
+            response = st.checkbox('With scores', disabled=False)
         else: 
             response = st.checkbox('With scores', disabled=False)
         st.write('state', response) 
@@ -362,7 +362,8 @@ def Image(st:streamlit, yolo_model_path, df, col, shape, model_type, show, **kwa
         
         if model_type == 'yolov8-pose':
             #st.warning("YOLOV8 for pose detection is not yet implimented.")
-            yolov8_pose.yolov8_pose(st=st, colors=colors, **kwargs)
+            yolov8_pose.yolov8_pose(st=st, df=df, colors=colors, radus=radius, line_width = line_width, 
+                                shape=shape, resume=resume, shwo=show, response=response, od=with_cls, **kwargs)
         if model_type == 'yolov5':
             st.warning("YOLOV5 for object detection is not yet implimented.")
         
@@ -449,7 +450,7 @@ def Video(st, prediction, yolo_model, video, df, details, show, model_type, trac
             if dis is False: dis = track_all
             else: pass
 
-            track_num = st.multiselect('Object id', options=[str(x) for x in range(len(class_names))], disabled=dis, default='0')
+            track_num = st.multiselect('Object id', options=[str(x) for x in range(len(class_names))], disabled=True, default='0')
             
             if track_all: track_num = [x for x in range(len(class_names))]
             else:  track_num = [int(float(x)) for x in track_num]
@@ -458,7 +459,10 @@ def Video(st, prediction, yolo_model, video, df, details, show, model_type, trac
         if model_type not in ['yolov8-seg', 'ocr', 'ocr+yolov8'] : 
             ctt1_, ctt2_, ctt3_ = st.columns(3)
             with ctt1_:
-                only_mask = st.checkbox('Only Mask')
+                if model_type == 'yolov8-seg':
+                    only_mask = st.checkbox('Only Mask')
+                else:
+                    only_mask = st.checkbox('Only Mask', disabled=True)
                 st.write('status', only_mask)
             with ctt2_:
                 with_names = st.checkbox('With Names')
@@ -483,17 +487,15 @@ def Video(st, prediction, yolo_model, video, df, details, show, model_type, trac
                 run = st.button('run')
                 ocr_yolov8.ocr_yolovo_video(st, video, df, details, show, resume, scaling, response, run, colors, **items)
         else:
-            if track_num:
-                yolov8.yolov8_video_track(st, video, df, details, show, resume, response, run, colors, tracker, track_num, **items)
-            else: pass
+            #if track_num:
+            track_num = [0]
+            yolov8.yolov8_video_track(st, video, df, details, show, resume, response, run, colors, tracker, track_num, **items)
+            #else: pass
                 
 def resume(st, df : dict, file_type: str='image', img=None, show=True, **kwargs):
     with st.expander("MODEL PERFORMANCES"):
         st.write("""
-            You can observe the chosen predicted classes at the top, and it's 
-            important to note that these class predictions are influenced by 
-            factors like the IoU threshold, score threshold, and the quantity 
-            of boxes. Adjusting these parameters allows you to fine-tune your 
+            Adjusting the parameters above allows you to fine-tune your 
             predictions for improving accuracy.
 
             Great job, you've done excellently!

@@ -1,4 +1,4 @@
-from yolo.utils.tools import  draw_boxes_v8_seg
+from yolo.utils.tools import  draw_boxes_v8
 from skimage.transform import resize
 from ultralytics import YOLO
 import tensorflow as tf
@@ -11,66 +11,72 @@ import pandas as pd
 import cv2
 import streamlit as st
 
-def yolov8_pose(st:st,  colors, **kwargs):
+def yolov8_pose(
+        st              :st,  
+        df              :pd.DataFrame, 
+        colors          :dict,  
+        radus           :int, 
+        line_width      :int, 
+        shape           :tuple, 
+        resume          :pd.DataFrame, 
+        return_sequence :bool = False, 
+        show            :bool = True, 
+        od              :bool = False,
+        response        :bool = False,
+        **kwargs
+        ) -> None | np.ndarray:
+    
     yolo_model_v8   = YOLO('./yolov8/yolov8n-pose.pt')
     frame           = kwargs['image_file'][0][0].copy()
     detections      = yolo_model_v8.predict(frame)[0]
-    score_threshold = kwargs['score_threshold']
     
-    boxes           = []
-    box_classes     = []
-    scores          = []
-
-    #res_plotted = detections.plot()
     
-    keypoints = detections.keypoints.data.numpy()
-    ndim = keypoints.shape[0]
-    
-    for i in range(ndim):
-        frame = kpts(image=frame, kpts=keypoints[i].reshape((17, 3)), colors=colors)
-    st.image(frame)
-
-def connect(image, keypoints : np.ndarray, width : int = 4, colors : list  = []):
-    from PIL import Image, ImageDraw
-    import math
-
-
-    keypoints_shape = keypoints.shape 
-    #keypoints   = [(x[0], x[1])  for j in range(keypoints_shape[0]) for x in keypoints[j]]
-    temp_images = []
-
-    # Calcul de la distance minimale pour connecter les keypoints
-    min_distance = 20
-    connections = []
-
-    colors = list(colors.values())
-    point_radius = 2
-    for k in range(keypoints_shape[0]):
-        keypoint   = [(x[0], x[1])  for x in keypoints[k]]
-        # Dessiner des points
-        for i, point in enumerate(keypoint):
-            temp_image  = Image.new("RGBA", image.size, (0, 0, 0, 0))
-            temp_draw   = ImageDraw.Draw(temp_image) 
-            x, y = point
-            temp_draw.ellipse((x - point_radius, y - point_radius, x + point_radius, y + point_radius), fill=colors[k])
-
-            try:
-                start_point = (x, y)
-                end_point = keypoint[i+1]
-                distance = math.sqrt((x - end_point[0]) ** 2 + (y - end_point[1]) ** 2)
-                if distance < 100:
-                    temp_draw.line([start_point, end_point], fill=colors[k], width=2)
-            except Exception: pass 
-            temp_images.append(temp_image)
+    if od:
+        obj = object_detection(frame=frame, detections=detections, 
+                            df=df, colors=colors, response=response, width=line_width, **kwargs)
+    try:
+        keypoints = detections.keypoints.data.numpy()
+        ndim = keypoints.shape[0]
         
-        result = image.convert("RGBA")
+        for i in range(ndim):
+            frame = connections(image=frame, kpts=keypoints[i].reshape((17, 3)), colors=colors, point_radius=radus, width=line_width)
 
-    for temp_image in temp_images:
-        result = Image.alpha_composite(result, temp_image)
+        image_predicted = resize(np.array(frame), output_shape=shape)
+    except Exception: 
+        image_predicted = kwargs['image_file'][0][0]
+
+    if return_sequence is False:
+        resume(st=st, df=df, show=show, img = kwargs['image_file'][0][0], **{"image_predicted" : image_predicted})
+    else: return image_predicted
+
+def object_detection(frame, detections, df, colors, response, width, **kwargs):
+    box_classes, boxes, scores = [[], [], []]
+    score_threshold = kwargs['score_threshold']
+    for detection in detections.boxes.data.tolist():
+        x1, y1, x2, y2, score, class_id = detection
+        if score >= score_threshold :
+            box_classes.append(int(class_id))
+            boxes.append([x1, y1, x2, y2])
+            scores.append(score)
     
-    return result
-  
-def kpts(image, kpts, shape=(640, 640), point_radius=5, kpt_line=True, colors = None):
+    if scores:
+        scores          = tf.constant(scores, dtype=tf.float32)
+        box_classes     = tf.constant(box_classes, dtype=tf.int32)
+        boxes           = tf.constant(boxes, dtype=tf.float32)
+        class_names     = kwargs['Class_names']
+        use_classes     = kwargs['class_names']
+        image_predicted = draw_boxes_v8(image=frame, boxes=boxes, box_classes=box_classes, scores=scores, with_score=response,
+                class_names=class_names, use_classes=use_classes, df=df, colors=colors, width=width, return_sequence=True)
+    else:
+        image_predicted = frame
+    
+    del scores
+    del boxes
+    del box_classes
+
+    return image_predicted
+
+def connections(image, kpts, shape=(640, 640), point_radius=5, kpt_line=True, colors = None, width=2):
     from PIL import Image, ImageDraw
     import math
     """
@@ -141,7 +147,7 @@ def kpts(image, kpts, shape=(640, 640), point_radius=5, kpt_line=True, colors = 
                 continue
 
             temp_images.append(temp_image)
-            temp_draw.line([pos1, pos2], fill=colors[palette[i]], width=2)
+            temp_draw.line([pos1, pos2], fill=colors[palette[i]], width=width)
 
     result = image.convert("RGBA")
 
