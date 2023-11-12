@@ -92,3 +92,4 @@ validators==0.22.0
 watchdog==3.0.0
 zipp==3.16.2
 streamlit-option-menu==0.3.6
+streamlit-cropper==0.2.2
