@@ -56,7 +56,7 @@ In the streatmlit platform th code takes:
 You can also use this [notebook](https://github.com/amiehe-essomba/computer-vison-api/blob/vis/main.ipynb) to see how it works.
 Enjoy !!!!
 
-<a href="https://vision-api.streamlit.app/" target="_blank"><img src="images/format.png" width="800px" height="400px"></a>
+
 
 ## CONCLUSION:
 <p color: black;  
