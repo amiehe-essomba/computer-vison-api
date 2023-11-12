@@ -53,11 +53,12 @@ In the streatmlit platform th code takes:
 > videos 
 > links 
 
-You can also use these [notebooks] to see how it works.
-* [object detection](https://github.com/amiehe-essomba/computer-vison-api/blob/vis/segmentation.ipynb)
-* [segmentation](https://github.com/amiehe-essomba/computer-vison-api/blob/vis/segmentation.ipynb)
-* [optical character recognition]()
-* [optical character recognition & object detection]()
+You can also use these [notebooks]() to see how it works.
+* [object_detection.ipynb](https://github.com/amiehe-essomba/computer-vison-api/blob/vis/segmentation.ipynb)
+* [segmentation.ipynb](https://github.com/amiehe-essomba/computer-vison-api/blob/vis/segmentation.ipynb)
+* [optical_character_recognition.ipynb]()
+* [optical_character_recognition_and_object_detection.ipynb]()
+
 Enjoy !!!!
 
 <a href="https://vision-api.streamlit.app/" target="_blank"><img src="images/format.png" width="800px" height="400px"></a>
