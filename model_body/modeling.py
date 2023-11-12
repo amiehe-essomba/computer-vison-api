@@ -214,13 +214,13 @@ def modeling(st):
 
     st.write(f'<h1 class="body-text">Models</h1>', unsafe_allow_html=True)
     
-    index = ['Object Detection', 'Optical Character Recognition(OCR)', 'Tracking', 'Object Segmentation', 'Classification']
+    index = ['Object Detection', 'Optical Character Recognition(OCR)', 'Tracking', 
+                    'Object Segmentation', 'Classification']
 
     data = {
         "my model" : [True, False, True, False, False], 
         'yolov8' : [True, False, True, False, False], 
-        'ocr+yolov8' : [True, True, True, False, False], 
-        'yolov5' : [True, False, False, False, False], 
+        'ocr+yolov8' : [True, True, True, False, False],  
         'yolov8-seg'  :[True, False, False, True, False], 
         'yolov8-pose' : [True, False, False, False, False],
         'yolov8-cls' : [False, False, False, False, True]

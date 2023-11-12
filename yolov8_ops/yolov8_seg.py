@@ -59,6 +59,53 @@ def yolov8_seg(st:st, df, shape, show, response, resume, return_sequence, colors
         resume(st=st, df=df, show=show, img = kwargs['image_file'][0][0], **{"image_predicted" : image_predicted})
     else: return image_predicted
 
+def demo_seg(df, shape,  response,  colors, alpha, mode, only_mask, with_names, **kwargs):
+    
+    yolo_model_v8   = YOLO('./yolov8/yolov8n-seg.pt')
+    frame           = kwargs['image_file'][0][0].copy()
+    detections      = yolo_model_v8.predict(frame)[0]
+    score_threshold = kwargs['score_threshold']
+    
+   
+    boxes           = []
+    box_classes     = []
+    scores          = []
+   
+    masks           = detections.masks.data.numpy()
+    #if seg is True:
+    class_id        = detections.boxes.data.numpy()[:, -1].astype("int32")
+    frame = draw_mask(frame, masks=masks, Colors=colors, class_names=kwargs['Class_names'], 
+                        alpha=100, class_id = class_id, mode=mode)
+    #else: pass 
+
+    for detection in detections.boxes.data.tolist():
+        x1, y1, x2, y2, score, class_id = detection
+        if score >= score_threshold:
+            box_classes.append(int(class_id))
+            boxes.append([x1, y1, x2, y2])
+            scores.append(score)
+    
+    if scores:
+        scores          = tf.constant(scores, dtype=tf.float32)
+        box_classes     = tf.constant(box_classes, dtype=tf.int32)
+        boxes           = tf.constant(boxes, dtype=tf.float32)
+        class_names     = kwargs['Class_names']
+        use_classes     = kwargs['class_names']
+
+        if with_names is True or only_mask is False:
+            image_predicted = draw_boxes_v8_seg(image=frame, boxes=boxes, box_classes=box_classes, scores=scores, with_score=response,
+                class_names=class_names, use_classes=use_classes, df=df, colors=colors, alpha=alpha, only_mask=only_mask, with_names=with_names)
+        else:
+            image_predicted = np.array(frame)
+        if len(shape) > 2 : shape = shape[:2]
+        else: pass 
+
+        image_predicted = resize(image_predicted, output_shape=shape)
+    else:  
+        image_predicted = kwargs['image_file'][0][0]
+
+    return image_predicted
+
 def yolovo_video_seg(st:st, video, df, details, show, resume, response,  run, colors, alpha, mode, only_mask, with_names, **items):
     frame_count         = 0
     fps                 = video.get_meta_data()['fps']

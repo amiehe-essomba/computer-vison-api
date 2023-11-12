@@ -189,11 +189,6 @@ def yolov8_video_track(st:st, video, df, details, show, resume, response,  run, 
                     image_predicted = np.uint8(image_predicted)
                     writer.append_data(image_predicted)
                     s.write('banary writing in progress ...')
-                
-                    #if i <= 100:
-                    #    my_bar.progress(i, text=progress_text)
-                    #else: pass
-
                 else: pass
 
         # Ouvrir le fichier temporaire en mode lecture binaire (rb)
