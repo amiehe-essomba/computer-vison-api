@@ -223,7 +223,7 @@ def modeling(st):
         'ocr+yolov8' : [True, True, True, False, False],  
         'yolov8-seg'  :[True, False, False, True, False], 
         'yolov8-pose' : [True, False, False, False, False],
-        'yolov8-cls' : [False, False, False, False, True]
+        'yolov8-cls' : [True, False, False, False, True]
         }
     
     df = pd.DataFrame(data=data, index=index)
