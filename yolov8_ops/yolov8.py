@@ -98,6 +98,7 @@ def yolov8_track(st, df, shape, show, response, resume, return_sequence, colors,
 
     if return_sequence is False:
         resume(st=st, df=df, show=show, img = kwargs['image_file'][0][0], **{"image_predicted" : image_predicted})
+
     else: return image_predicted, points
 
 def yolovo_video(st, video, df, details, show, resume, response,  run, colors, model, **items):
@@ -275,8 +276,9 @@ def yolovo_video_youtube_track(st:st, video, df, details, show, resume, response
                         #import streamlit as st 
                         image_predicted = (np.array(image_predicted) * 255).astype(np.int32)
 
-                        if points.all():
-                            cv2.polylines(image_predicted, [points], isClosed=False, color=color_track, thickness=10)
+                        if isinstance(points, np.ndarray):
+                            if points.all():
+                                cv2.polylines(image_predicted, [points], isClosed=False, color=color_track, thickness=10)
 
                         #image_predicted /= 255.
                         image_predicted = np.uint8(image_predicted)
