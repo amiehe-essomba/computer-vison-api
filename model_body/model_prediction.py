@@ -573,6 +573,7 @@ def Video(st, prediction, all_models:dict, video, df, details, show, model_type,
                 #if track_num:
                 track_num = [0]
                 model = all_models['yolov8n.pt']
+                run = st.button('run')
                 if run:
                     if youtube is False:
                         yolov8.yolov8_video_track(st, video, df, details, show, resume, 
