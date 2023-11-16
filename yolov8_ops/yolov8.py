@@ -278,7 +278,7 @@ def yolovo_video_youtube_track(st:st, video, df, details, show, resume, response
 
                         if isinstance(points, np.ndarray):
                             if points.all():
-                                cv2.polylines(image_predicted, [points], isClosed=False, color=color_track, thickness=10)
+                                cv2.polylines(image_predicted, [points], isClosed=False, color=color_track, thickness=4)
 
                         #image_predicted /= 255.
                         image_predicted = np.uint8(image_predicted)

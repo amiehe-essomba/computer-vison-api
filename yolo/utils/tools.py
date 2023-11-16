@@ -240,7 +240,7 @@ def draw_boxes_v8(image, boxes, box_classes, class_names, scores=None, use_class
         LABEL = _label_[0]
 
         if LABEL in use_classes:
-            if type(ids) != type(None):  label += f' id:{int(ids[i])}'
+            if type(ids) != type(None):  label += f' id:{int(ids.numpy()[i])}'
             draw        = ImageDraw.Draw(image)
             label_size  = draw.textlength(text=label, font=font)
             left, top, right, bottom = box
