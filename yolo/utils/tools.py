@@ -215,7 +215,7 @@ def draw_boxes_v8(image, boxes, box_classes, class_names, scores=None, use_class
         font='font/FiraMono-Medium.otf',
         size=np.floor(3e-2 * image.size[1] + 0.5).astype('int32'))
     thickness   = (image.size[0] + image.size[1]) // 300
-
+    j = 0
     for i, c in list(enumerate(box_classes)):
         box_class   = class_names[c]
         box         = boxes[i]
@@ -240,11 +240,11 @@ def draw_boxes_v8(image, boxes, box_classes, class_names, scores=None, use_class
         LABEL = _label_[0]
 
         if LABEL in use_classes:
-            if type(ids) != type(None):  label += f' id:{int(ids.numpy()[i])}'
+            if type(ids) != type(None):  label += f' id:{int(ids.numpy()[j])}'
             draw        = ImageDraw.Draw(image)
             label_size  = draw.textlength(text=label, font=font)
             left, top, right, bottom = box
-         
+            j += 1
             df['top'].append(np.round(np.float32(top), 2) ) 
             df['left'].append(np.round( np.float32(left), 2))
             df['bottom'].append(np.round(np.float32(bottom), 2))
