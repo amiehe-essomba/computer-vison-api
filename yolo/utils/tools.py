@@ -9,6 +9,7 @@ from skimage.transform import resize
 from keras import backend as K
 from functools import reduce
 from streamlit_modules.button_style import button_style
+from stqdm import stqdm 
 
 def preprocess_image(img_path, model_image_size, done : bool = False, factor = False):
     #image_type = imghdr.what(img_path)
@@ -366,7 +367,9 @@ def total_precess(st, prediction, estimator, video, df, details, colors, **kwarg
 
     storage             = []
     frame_count         = 0
-    fps                 = video.get_meta_data()['fps']
+    try: fps                 = video.get_meta_data()['fps']
+    except AttributeError: fps = kwargs['fps']
+
     (start, end, step)  = details
     temp_video_file     = tempfile.NamedTemporaryFile(delete=False, suffix=".mp4")
 
@@ -378,16 +381,16 @@ def total_precess(st, prediction, estimator, video, df, details, colors, **kwarg
         response = st.checkbox("With score")
         st.write(response)
     with ct3:
-        run = button_style(st=st, name='run')
+        run = st.button('run')# button_style(st=st, name='run')
 
     if run:   
         # progress bar 
-        progress_text   = "Operation in progress. Please wait."
-        my_bar          = st.progress(0, text=progress_text)
+        s = st.empty()
 
         # Écrire le tableau NumPy dans une vidéo avec imageio
         with imageio.get_writer(temp_video_file.name, mode='?', fps=fps) as writer:
-            for i, frame in enumerate(video):
+            #for i, frame in enumerate(video):
+            for i, frame in stqdm(enumerate(video), backend=False, frontend=True):
                 if i in range(start, end, step):
                     frame                       = Image.fromarray(frame, mode='RGB')
                     frame, frame_data, shape    = preprocess_image(img_path=frame, model_image_size = (608, 608), done=True)        
@@ -403,11 +406,10 @@ def total_precess(st, prediction, estimator, video, df, details, colors, **kwarg
                     
                     image_predicted = image_predicted.astype('float32')
                     writer.append_data(image_predicted)
-
-                    if i <= 100:
-                        time.sleep(0.01)
-                        my_bar.progress(i, text=progress_text)
+                    s.write('banary writing in progress ...')
                 else: pass
+
+                if i == end:  break
               
         with imageio.get_writer(temp_video_file.name, mode='?', fps=fps) as writer:
             for image in storage:
@@ -417,10 +419,77 @@ def total_precess(st, prediction, estimator, video, df, details, colors, **kwarg
         with open(temp_video_file.name, 'rb') as temp_file:
             # Lire le contenu du fichier temporaire
             video_data = temp_file.read()
+            s.write('banary lecture in progress ...')
 
         shutil.rmtree(temp_video_file.name, ignore_errors=True)
-        my_bar.empty()
+        return video_data, fps
+    
+    else: return None, None
 
+
+def total_precess_youtuble(st, prediction, estimator, video, df, details, colors, **kwargs):
+    storage             = []
+    frame_count         = 0
+    try: fps                 = video.get_meta_data()['fps']
+    except AttributeError: fps = kwargs['fps']
+
+    (start, end, step)  = details
+    temp_video_file     = tempfile.NamedTemporaryFile(delete=False, suffix=".mp4")
+
+    ct1, ct2, ct3 = st.columns(3)
+
+    with ct1:
+        typ_of_op = st.selectbox('type of operation', ('detection', 'tracking'), disabled=True)
+    with ct2:
+        response = st.checkbox("With score")
+        st.write(response)
+    with ct3:
+        run = st.button('run')# button_style(st=st, name='run')
+
+    if run:   
+        # progress bar 
+        s = st.empty()
+        i = -1
+        
+        # Écrire le tableau NumPy dans une vidéo avec imageio
+        with imageio.get_writer(temp_video_file.name, mode='?', fps=fps) as writer:
+            #for i, frame in enumerate(video):
+            while (video.isOpened()):
+                re, frame = video.read()
+                
+                if re:
+                    i += 1
+                    if i in range(start, end, step):
+                        frame                       = Image.fromarray(frame, mode='RGB')
+                        frame, frame_data, shape    = preprocess_image(img_path=frame, model_image_size = (608, 608), done=True)        
+                        frame_count                += 1
+                        
+                        image_predicted = prediction(yolo_model=estimator, use_classes=kwargs['class_names'],
+                                            image_file=[(frame, frame_data)], anchors=kwargs['anchors'], 
+                                            class_names=kwargs['Class_names'], img_size=(608, 608),
+                                            max_boxes=kwargs['max_boxes'], score_threshold=kwargs['score_threshold'], 
+                                            iou_threshold=kwargs['iou_threshold'], data_dict=df,shape=shape[:-1], 
+                                            file_type='video', with_score = response, colors=colors
+                                            )
+                        
+                        image_predicted = image_predicted.astype('float32')
+                        writer.append_data(image_predicted)
+                        s.write('banary writing in progress ...')
+                    else: pass
+
+                    if i == end:  break
+              
+        with imageio.get_writer(temp_video_file.name, mode='?', fps=fps) as writer:
+            for image in storage:
+                writer.append_data(image)
+
+        # Ouvrir le fichier temporaire en mode lecture binaire (rb)
+        with open(temp_video_file.name, 'rb') as temp_file:
+            # Lire le contenu du fichier temporaire
+            video_data = temp_file.read()
+            s.write('banary lecture in progress ...')
+        video.release()
+        shutil.rmtree(temp_video_file.name, ignore_errors=True)
         return video_data, fps
     
     else: return None, None

@@ -6,12 +6,10 @@ import cv2
 from ocr_modules.utils import read_license_plate
 import numpy as np
 
-def ocr(st, df, shape, show, response, resume, scaling, colors, **kwargs):
-    yolo_model_ocr  = YOLO('./yolov8/license_plate_detector.pt')
+def ocr(st, df, shape, show, response, resume, scaling, colors, model, **kwargs):
     frame           = kwargs['image_file'][0][0].copy()
-    print(frame.size, '@@@@@@@@@@@@@@@@@')
     score_threshold = kwargs['score_threshold']
-    detections      = yolo_model_ocr(frame)[0]
+    detections      = model(frame)[0]
 
     boxes_plates           = []
     box_classes_plates     = []

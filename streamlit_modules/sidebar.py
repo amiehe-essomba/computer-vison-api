@@ -181,6 +181,7 @@ def sidebar(streamlit = st):
         streamlit.sidebar.write('<h5 class="author"> </h5>', unsafe_allow_html=True)
 
     # section about author
+    """
     streamlit.sidebar.write('<h3 class="sidebar-text">Other projects</h3>', unsafe_allow_html=True)
     bm_href  = links('black_m')
     vis_href = links('vision') 
@@ -197,5 +198,5 @@ def sidebar(streamlit = st):
         f'</lo>', 
         unsafe_allow_html=True
         )
-
+    """
     return [contain_feedback, yolo_feedback_contrain]

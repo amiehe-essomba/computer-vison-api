@@ -23,12 +23,12 @@ def yolov8_pose(
         show            :bool = True, 
         od              :bool = False,
         response        :bool = False,
+        model           :any  = None,
         **kwargs
         ) -> None | np.ndarray:
     
-    yolo_model_v8   = YOLO('./yolov8/yolov8n-pose.pt')
     frame           = kwargs['image_file'][0][0].copy()
-    detections      = yolo_model_v8.predict(frame)[0]
+    detections      = model.predict(frame)[0]
     
     
     if od:

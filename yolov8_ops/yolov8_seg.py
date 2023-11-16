@@ -11,11 +11,9 @@ import pandas as pd
 import cv2
 import streamlit as st
 
-def yolov8_seg(st:st, df, shape, show, response, resume, return_sequence, colors, alpha, mode, only_mask, with_names, **kwargs):
-    
-    yolo_model_v8   = YOLO('./yolov8/yolov8n-seg.pt')
+def yolov8_seg(st:st, df, shape, show, response, resume, return_sequence, colors, alpha, mode, only_mask, with_names, model, **kwargs):
     frame           = kwargs['image_file'][0][0].copy()
-    detections      = yolo_model_v8.predict(frame)[0]
+    detections      = model.predict(frame)[0]
     score_threshold = kwargs['score_threshold']
     
    
@@ -106,17 +104,15 @@ def demo_seg(df, shape,  response,  colors, alpha, mode, only_mask, with_names, 
 
     return image_predicted
 
-def yolovo_video_seg(st:st, video, df, details, show, resume, response,  run, colors, alpha, mode, only_mask, with_names, **items):
+def yolovo_video_seg(st:st, video, df, details, show, resume, response,  
+                     run, colors, alpha, mode, only_mask, with_names, model, **items):
     frame_count         = 0
     fps                 = video.get_meta_data()['fps']
     (start, end, step)  = details
     temp_video_file     = tempfile.NamedTemporaryFile(delete=False, suffix=".mp4")
     
     if run: 
-        # progress bar 
-        progress_text   = "Operation in progress. Please wait."
-        my_bar          = st.progress(0, text=progress_text)
-        #s = st.empty()
+        s = st.empty()
         with imageio.get_writer(temp_video_file.name, mode='?', fps=fps) as writer:
             for i, frame in enumerate(video):
                 if i in range(start, end, step):
@@ -127,20 +123,67 @@ def yolovo_video_seg(st:st, video, df, details, show, resume, response,  run, co
                     
                     image_predicted= yolov8_seg(st=st, df=df, shape=shape, show=show, response=response,
                         resume=None, return_sequence=True, colors=colors, alpha=alpha,mode=mode, 
-                                    only_mask=only_mask, with_names=with_names, **items)
-                    #s.image(image_predicted)
-                    #image_predicted = image_predicted.astype('float32')
+                                    only_mask=only_mask, with_names=with_names, model=model,**items)
+                    
                     writer.append_data(image_predicted)
+                    s.write('banary writing in progress ...')
                 else: pass
-        
+
+                if i == end: break
         # Ouvrir le fichier temporaire en mode lecture binaire (rb)
         with open(temp_video_file.name, 'rb') as temp_file:
             # Lire le contenu du fichier temporaire
             video_data = temp_file.read()
+            s.write('banary lecture in progress ...')
 
         shutil.rmtree(temp_video_file.name, ignore_errors=True)
-        my_bar.empty()
+        s.write('complete')
+        s.empty()
 
+        if video_data:  resume(st=st, df=df, file_type='video', show=show, **{'fps' : fps, 'video_reader' : video_data})
+        else: pass  
+    else: pass
+
+def yolovo_video_seg_youtube(st:st, video, df, details, show, resume, response,  
+                     run, colors, alpha, mode, only_mask, with_names, model, **items):
+    frame_count         = 0
+    fps                 = items["fps"]
+    (start, end, step)  = details
+    temp_video_file     = tempfile.NamedTemporaryFile(delete=False, suffix=".mp4")
+    
+    if run: 
+        s = st.empty()
+        i =-1
+        with imageio.get_writer(temp_video_file.name, mode='?', fps=fps) as writer:
+            while (video.isOpened()):
+                re, frame = video.read()
+                if re:
+                    i += 1
+                    if i in range(start, end, step):
+                        frame  = Image.fromarray(frame, mode='RGB')
+                        frame, frame_data, shape    = preprocess_image(img_path=frame, model_image_size = (608, 608), done=True) 
+                        frame_count                += 1
+                        items['image_file']         = [(frame,frame_data)]
+                        
+                        image_predicted= yolov8_seg(st=st, df=df, shape=shape, show=show, response=response,
+                            resume=None, return_sequence=True, colors=colors, alpha=alpha,mode=mode, 
+                                        only_mask=only_mask, with_names=with_names, model=model,**items)
+                        
+                        writer.append_data(image_predicted)
+                        s.write('banary writing in progress ...')
+                    else: pass
+
+                    if i == end: break
+        # Ouvrir le fichier temporaire en mode lecture binaire (rb)
+        with open(temp_video_file.name, 'rb') as temp_file:
+            # Lire le contenu du fichier temporaire
+            video_data = temp_file.read()
+            s.write('banary lecture in progress ...')
+
+        shutil.rmtree(temp_video_file.name, ignore_errors=True)
+        s.write('complete')
+        s.empty()
+        video.release()
         if video_data:  resume(st=st, df=df, file_type='video', show=show, **{'fps' : fps, 'video_reader' : video_data})
         else: pass  
     else: pass

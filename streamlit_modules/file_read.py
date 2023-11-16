@@ -129,8 +129,7 @@ def online_link(st, url : str = "", show_image : bool = True):
 def url_img_read( url : str, factor = False):
     from PIL import Image
     import requests
-    from io import BytesIO
-    import numpy as np 
+    from io import BytesIO 
 
     image, image_data, error, shape = None, None, None, None
     # Replace 'url' with the URL of the image you want to read
@@ -151,6 +150,41 @@ def url_img_read( url : str, factor = False):
         error = f"An error occurred: {str(e)}"
 
     return image, image_data, shape,  error
+
+def youtube(st:st, url):
+    from pytube import YouTube
+    import cv2
+
+    vid_cap = None 
+    [fps, total_frames, duration_seconds] = [None, None, None]
+
+    youtube_link = "https://www.youtube.com"
+
+    error = None 
+    try:
+        try:
+            if str(url).rstrip().lstrip()[:len(youtube_link)] == "https://www.youtube.com": pass 
+            else: error = "Your url is not a YouTube link."
+        except IndexError:
+             error = "Your url is not a YouTube link."
+            
+        if not error:
+            yt = YouTube(url)
+            stream = yt.streams.filter(file_extension="mp4", res=720).first()
+            vid_cap = cv2.VideoCapture(stream.url)
+
+            total_frames = int(vid_cap.get(cv2.CAP_PROP_FRAME_COUNT))
+            fps = vid_cap.get(cv2.CAP_PROP_FPS)
+
+            # Calculer la durée totale de la vidéo en secondes
+            duration_seconds = total_frames / fps
+            
+        else:
+            st.warning(error)
+    except Exception: 
+        st.warning('Cannot open this link')
+
+    return vid_cap, fps, total_frames, duration_seconds
 
 def camera(st : st):
     import cv2

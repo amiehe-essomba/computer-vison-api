@@ -13,10 +13,11 @@ import shutil
 import tensorflow as tf
 from PIL import Image
 import cv2
+from stqdm import stqdm 
 
-def ocr_yolov8(st, df, shape, show, response, resume, scaling, return_sequence, colors, **kwargs):
-    yolo_model_v8   = YOLO('./yolov8/yolov8n.pt')
-    yolo_model_ocr  = YOLO('./yolov8/license_plate_detector.pt')
+def ocr_yolov8(st, df, shape, show, response, resume, scaling, return_sequence, colors, models, **kwargs):
+    yolo_model_v8   = models[1]
+    yolo_model_ocr  = models[0]
     frame           = kwargs['image_file'][0][0].copy()
     score_threshold = kwargs['score_threshold']
     detections      = yolo_model_ocr(frame)[0]
@@ -92,21 +93,18 @@ def ocr_yolov8(st, df, shape, show, response, resume, scaling, return_sequence, 
     del class_names
     del use_classes
 
-def ocr_yolovo_video(st, video, df, details, show, resume, scaling, response,  run, colors, **items):
+def ocr_yolovo_video(st, video, df, details, show, resume, scaling, response,  run, colors, models, **items):
     frame_count         = 0
     fps                 = video.get_meta_data()['fps']
     (start, end, step)  = details
     temp_video_file     = tempfile.NamedTemporaryFile(delete=False, suffix=".mp4")
     
-    #s= st.empty()
+    s= st.empty()
 
     if run: 
-        # progress bar 
-        progress_text   = "Operation in progress. Please wait."
-        my_bar          = st.progress(0, text=progress_text)
-
         with imageio.get_writer(temp_video_file.name, mode='?', fps=fps) as writer:
-            for i, frame in enumerate(video):
+            #for i, frame in enumerate(video):
+            for i, frame in stqdm(enumerate(video), backend=False, frontend=True):
                 if i in range(start, end, step):
                     frame  = Image.fromarray(frame, mode='RGB')
                     frame, frame_data, shape    = preprocess_image(img_path=frame, model_image_size = (608, 608), done=True, factor=True) 
@@ -114,26 +112,26 @@ def ocr_yolovo_video(st, video, df, details, show, resume, scaling, response,  r
                     items['image_file']         = [(frame, frame_data)]
                     
                     image_predicted = ocr_yolov8(st=st, df=df, shape=shape, show=show, response=response, scaling=scaling,
-                                            resume=None, return_sequence=True, colors=colors, **items)
+                                resume=None, return_sequence=True, colors=colors, models=models, **items)
                     
                     image_predicted = image_predicted.astype('float32')
                     writer.append_data(image_predicted)
-                    #s.image(image_predicted)
-                    '''
-                    if i <= 100:
-                        my_bar.progress(i, text=progress_text)
-                    else: pass
-                    '''
+                    s.write('banary writing in progress ...')
                 else: pass
+
+                if i == end: break
         
-        
+        # Ouvrir le fichier temporaire en mode lecture binaire (rb)
         with open(temp_video_file.name, 'rb') as temp_file:
             # Lire le contenu du fichier temporaire
             video_data = temp_file.read()
+            s.write('banary lecture in progress ...')
 
         shutil.rmtree(temp_video_file.name, ignore_errors=True)
-        my_bar.empty()
 
+        s.write('complete')
+        s.empty()
+   
         if video_data:
             resume(st=st, df=df, file_type='video', show=show, **{'fps' : fps, 'video_reader' : video_data})
         else: pass   

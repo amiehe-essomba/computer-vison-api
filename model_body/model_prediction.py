@@ -1,7 +1,8 @@
 import tensorflow as tf  
 import pandas as pd 
-from yolo.utils.tools import total_precess
-from streamlit_modules.file_read import file_read, online_link, camera
+import cv2
+from yolo.utils.tools import total_precess, total_precess_youtuble
+from streamlit_modules.file_read import file_read, online_link, camera, youtube
 from yolo.utils.tools import read_classes, read_anchors
 from yolo.predictions import prediction
 from streamlit_modules.button_style import button_style
@@ -10,9 +11,11 @@ import logging
 from yolo import video_settings as vs 
 from yolov8_ops import ocr_yolov8, ocr, yolov8, yolov8_seg, yolov8_pose
 import streamlit 
-
+from model_in_cache.models import load_all_models
 
 def pred(st : streamlit):
+    all_models = load_all_models()
+
     st.write('<style>{}</style>'.format(styles()), unsafe_allow_html=True)
     st.write(f'<h1 class="header-text">Welcome in prediction section</h1>', unsafe_allow_html=True)
 
@@ -26,7 +29,7 @@ def pred(st : streamlit):
     
     locked_mod = True
     with col1:
-        label_select = st.selectbox('Local or Online File', options=('Local', 'Online', 'Camera'), index=None)
+        label_select = st.selectbox('Local or Online File', options=('Local', 'Online', 'Camera', 'YouTube'), index=None)
         if label_select: locked_mod = False
         else: locked_mod = True
     
@@ -46,7 +49,7 @@ def pred(st : streamlit):
         if tracking is False:
             if label_select != "Camera":
                 model_type = st.selectbox(label='Select models', 
-                                options=('yolov8', "yolov8-cls", 'yolov8-seg', 'ocr', 
+                                options=('yolov8', 'yolov8-seg', 'ocr', 
                                         'ocr+yolov8', 'yolov8-pose', 'my model'), 
                                 disabled=desable_scale)
             else:
@@ -59,7 +62,7 @@ def pred(st : streamlit):
     else: factor = False 
     
     if label_select:
-        if   label_select == 'Local':
+        if   label_select == 'Local' :
             if label_select: 
                 uploaded_file = st.file_uploader("upload local image or video", 
                                                 type=["jpg", "jpeg", "png", "gif", "webp", "mp4", "mov", "avi", "mkv"],
@@ -125,28 +128,26 @@ def pred(st : streamlit):
                                     'iou_threshold' : iou_threshold 
                                     }
                                     
-                                    tf.get_logger().setLevel(logging.ERROR)
-                                    yolo_model = tf.keras.models.load_model(yolo_model_path, compile=False)
                                     df = {'label' : [], 'score':[], 'top':[], "left":[], "bottom":[], 'right':[]}
 
                                     if file_type == 'image':
                                         items['image_file'] = [all_files['image'][index]]
                                         shape = all_files['image_shape'][index][:-1]
-                                        Image(st=st, yolo_model_path=yolo_model_path, df=df, col=cp_col5, 
+                                        Image(st=st, all_models=all_models, df=df, col=cp_col5, 
                                               shape=shape, model_type=model_type, show=show, **items)
                                     else:
                                         details = tuple( all_files['details'][index])
                                         details = vs.slider_video(st, *details)
                                         video   = all_files['video_reader'][index]
-                                        Video(st=st, prediction=prediction, yolo_model=yolo_model, video=video, model_type=model_type,
-                                                                             df=df, details=details, show=show, tracking=tracking, **items)
+                                        Video(st=st, prediction=prediction, all_models=all_models, video=video, model_type=model_type,
+                                                        df=df, details=details, show=show, tracking=tracking, youtube=False, **items)
                                 else: pass
                             else: pass
                         else: pass 
                     else: pass
                 else: pass
             else: pass 
-        elif label_select == 'Online': 
+        elif label_select == 'Online':
             if show : show = True 
 
             type_of_file = st.selectbox('File type', options=('image', 'video'), index=None)
@@ -198,21 +199,21 @@ def pred(st : streamlit):
                                 'image_file'   : [(image, image_data)]
                                 }
                             if file_type == 'image':
-                                tf.get_logger().setLevel(logging.ERROR)
-                                yolo_model = tf.keras.models.load_model(yolo_model_path, compile=False)
+                                #tf.get_logger().setLevel(logging.ERROR)
+                                #yolo_model = tf.keras.models.load_model(yolo_model_path, compile=False)
+                                
                                 df = {'label' : [], 'score':[], 'top':[], "left":[], "bottom":[], 'right':[]}
-                                Image(st=st, yolo_model_path=yolo_model_path, df=df, col=cp_col3, shape=shape, model_type=model_type,
+                                Image(st=st, all_models=all_models, df=df, col=cp_col3, shape=shape, model_type=model_type,
                                     show=show, **items) 
                             else: pass
                         else: pass
-                    else: pass 
+                    else: st.warning(f'{error}')
 
                 elif type_of_file == 'video':
                     if url:
                         st.write(f'<video width="640" height="360" controls><source src="{url}" type="video/mp4"></video>', unsafe_allow_html=True)
                 else: pass
             else: pass
-            #st.video()
         elif label_select == 'Camera':
             image, image_data, shape = camera(st=st)
 
@@ -255,16 +256,73 @@ def pred(st : streamlit):
                         'image_file'   : [(image, image_data)]
                         }
               
-                    tf.get_logger().setLevel(logging.ERROR)
-                    yolo_model = tf.keras.models.load_model(yolo_model_path, compile=False)
                     df = {'label' : [], 'score':[], 'top':[], "left":[], "bottom":[], 'right':[]}
-                    Image(st=st, yolo_model_path=yolo_model_path, df=df, col=cp_col3, shape=shape, model_type=model_type,
+                    Image(st=st, all_models=all_models, df=df, col=cp_col3, shape=shape, model_type=model_type,
                         show=show, **items) 
                
                 else: pass
-    else: pass
+            else: pass
+        else:
+            url = st.text_input("Insert YouTube url here please :")
+            
+            if url:
+                if show : show = True 
+                if model_type == 'my model': locked = False 
+                else: locked = True 
+                
+                [iou_threshold, score_threshold, max_boxes] = vs.slider_model(st=st, locked=locked)
 
-def Image(st:streamlit, yolo_model_path, df, col, shape, model_type, show, **kwargs):
+                # classses and anchors 
+                Class_names         = read_classes()
+                anchors             = read_anchors()
+
+                # five columns for use all classes, class probabilitiess etc....
+                cp_col1, cp_col2, _, _, _ = st.columns(5)
+
+                with cp_col2:
+                    cp_check = st.checkbox("Use all classes")
+                    st.write('state', cp_check)
+
+                with cp_col1:
+                    # if use all is true cp_disable become True 
+                    if cp_check :  cp_disable = True  
+                    else: cp_disable  = False 
+
+                    # select multi-classs probabilities 
+                    class_names = st.multiselect("Classes", options=Class_names, disabled=cp_disable)
+
+                    if class_names: pass 
+                    else: 
+                        # Class_names can be different ro class_name 
+                        if cp_check : class_names = Class_names
+                        else: pass 
+                
+                if class_names:
+                    
+                    items  = {
+                    'class_names' : class_names,
+                    'anchors' : anchors,
+                    'Class_names' : Class_names,
+                    'max_boxes' : max_boxes,
+                    'score_threshold' : score_threshold,
+                    'iou_threshold' : iou_threshold, 
+                    }
+
+                    df = {'label' : [], 'score':[], 'top':[], "left":[], "bottom":[], 'right':[]}
+                    video, *details = youtube(st=st, url=url) 
+                    items['fps'] = details[0]
+
+                    if video:
+                        details = tuple(details)
+                        details = vs.slider_video(st, *details)   
+
+                        Video(st=st, prediction=prediction, all_models=all_models, video=video, model_type=model_type,
+                                df=df, details=details, show=show, tracking=tracking, youtube=True, **items)
+                    else: pass 
+                else: pass
+            else: pass
+
+def Image(st:streamlit, all_models:dict, df, col, shape, model_type, show, **kwargs):
     import numpy as np 
     from yolo.utils.tools import get_colors_for_classes
     import random
@@ -327,7 +385,8 @@ def Image(st:streamlit, yolo_model_path, df, col, shape, model_type, show, **kwa
     if run_data:
         if model_type == 'my model':
             tf.get_logger().setLevel(logging.ERROR)
-            yolo_model = tf.keras.models.load_model(yolo_model_path, compile=False)
+            yolo_model = all_models['my_model'] 
+            #tf.keras.models.load_model(yolo_model_path, compile=False)
             df = {'label' : [], 'score':[], 'top':[], "left":[], "bottom":[], 'right':[]}
 
             image_predicted = prediction(
@@ -355,24 +414,29 @@ def Image(st:streamlit, yolo_model_path, df, col, shape, model_type, show, **kwa
                         st.image(guided_grad)
         
         if model_type == 'yolov8':
-            yolov8.yolov8(st, df, shape, show, response, resume, False, colors, **kwargs)
+            model = all_models['yolov8n.pt']
+            yolov8.yolov8(st, df, shape, show, response, resume, False, colors, model, **kwargs)
         
         if model_type == 'yolov8-seg':
-            yolov8_seg.yolov8_seg(st, df, shape, show, response, resume, False, colors, alpha, mode, only_mask, with_names, **kwargs)
+            model = all_models["yolov8n-seg.pt"]
+            yolov8_seg.yolov8_seg(st, df, shape, show, response, resume, False, colors, alpha, mode, 
+                                  only_mask, with_names, model, **kwargs)
         
         if model_type == 'yolov8-pose':
-            #st.warning("YOLOV8 for pose detection is not yet implimented.")
+            model = all_models["yolov8n-pose.pt"]
             yolov8_pose.yolov8_pose(st=st, df=df, colors=colors, radus=radius, line_width = line_width, 
-                                shape=shape, resume=resume, shwo=show, response=response, od=with_cls, **kwargs)
-        if model_type == 'yolov5':
-            st.warning("YOLOV5 for object detection is not yet implimented.")
+                        shape=shape, resume=resume, shwo=show, response=response, od=with_cls, model=model, **kwargs)
         
         if model_type == 'ocr+yolov8':
-            ocr_yolov8.ocr_yolov8(st, df, shape, show, response, resume, scaling, False, colors, **kwargs)
+            models = [all_models['license_plate_detector.pt'], all_models['yolov8n.pt']]
+            ocr_yolov8.ocr_yolov8(st, df, shape, show, response, resume, scaling, False, colors, models, **kwargs)
 
         if model_type == 'ocr':
-            ocr.ocr(st, df, shape, show, response, resume, scaling, colors, **kwargs)
+            model = all_models['license_plate_detector.pt']
+            ocr.ocr(st, df, shape, show, response, resume, scaling, colors, model, **kwargs)
 
+        if model_type == 'yolov8-cls':
+            pass
     else: pass
 
 def scaling(image = None, shape = (608, 608), boxes = None, S = None):
@@ -397,10 +461,11 @@ def scaling(image = None, shape = (608, 608), boxes = None, S = None):
 
     return scaled_boxes, scaled_image
 
-def Video(st, prediction, yolo_model, video, df, details, show, model_type, tracking, **kwargs):
+def Video(st, prediction, all_models:dict, video, df, details, show, model_type, tracking, youtube:bool=False, **kwargs):
 
     from yolo.utils.tools import get_colors_for_classes
     import random
+    import streamlit as st 
 
     class_names = kwargs['Class_names']
     colors_     = get_colors_for_classes(len(class_names) + 100)
@@ -421,77 +486,102 @@ def Video(st, prediction, yolo_model, video, df, details, show, model_type, trac
             'Class_names' : kwargs['Class_names'],
             'max_boxes' : kwargs['max_boxes'],
             'score_threshold' : kwargs['score_threshold'],
-            'iou_threshold' : kwargs['iou_threshold'] 
+            'iou_threshold' : kwargs['iou_threshold'],
+            "fps" : kwargs['fps'] if "fps" in list(kwargs.keys()) else None
             }
     
     if model_type == 'my model':
-        video_reader, fps = total_precess(st=st, prediction=prediction, 
+        yolo_model = all_models['my_model']
+        if youtube is False:
+            video_reader, fps = total_precess(st=st, prediction=prediction, 
                             estimator=yolo_model, video=video, df=df, details=details, colors=colors, **items)
-
+        else:
+            video_reader, fps = total_precess_youtuble(st=st, prediction=prediction, 
+                            estimator=yolo_model, video=video, df=df, details=details, colors=colors, **items)
         if video_reader:
             resume(st=st, df=df, file_type='video', show=show, **{'fps' : fps, 'video_reader' : video_reader})
         else: pass 
-    
-    if model_type in ['yolov8', 'yolov8-seg', 'ocr+yolov8']:
-        ct1, ct2, ct3, ct4 = st.columns(4)
-        dis = False if tracking else True
-        
-        with ct1:
-            tracker = st.selectbox('Tracking models', ("bytetrack.yaml", 
-                                                "botsort.yaml",), disabled=dis, index=0)
-        with ct2:
-            response = st.checkbox("With score")
-            st.write(response)
-        with ct3:
-            import streamlit as st 
-            track_all = st.checkbox("Track all", disabled=dis)
-            st.write(response)
-        with ct4:
-            if dis is False: dis = track_all
-            else: pass
-
-            track_num = st.multiselect('Object id', options=[str(x) for x in range(len(class_names))], disabled=True, default='0')
+    else:
+        if (model_type == 'yolov8') or (model_type == 'yolov8-seg') or  (model_type =='ocr+yolov8'):
+            ct1, ct2, ct3, ct4 = st.columns(4)
+            dis = False if tracking else True
             
-            if track_all: track_num = [x for x in range(len(class_names))]
-            else:  track_num = [int(float(x)) for x in track_num]
+            with ct1:
+                tracker = st.selectbox('Tracking models', ("bytetrack.yaml", 
+                                                    "botsort.yaml",), disabled=dis, index=0)
+            with ct2:
+                response = st.checkbox("With score")
+                st.write(response)
+            with ct3:
+                import streamlit as st 
+                track_all = st.checkbox("Track all", disabled=dis)
+                st.write(response)
+            with ct4:
+                if dis is False: dis = track_all
+                else: pass
 
-
-        if model_type not in ['yolov8-seg', 'ocr', 'ocr+yolov8'] : 
-            ctt1_, ctt2_, ctt3_ = st.columns(3)
-            with ctt1_:
-                if model_type == 'yolov8-seg':
-                    only_mask = st.checkbox('Only Mask')
-                else:
-                    only_mask = st.checkbox('Only Mask', disabled=True)
-                st.write('status', only_mask)
-            with ctt2_:
-                with_names = st.checkbox('With Names')
-                st.write('status', with_names)
-            with ctt3_:
-                run = st.button('run')
-
-        if tracking is False:
-            if model_type == 'yolov8':
-                yolov8.yolovo_video(st, video, df, details, show, resume, response, run, colors, **items)
-            if model_type == 'yolov8-seg':
-                ctt1, ctt2 = st.columns(2)
-
-                with ctt1:
-                    alpha = st.slider('alpha', min_value=1, max_value=255, value=30, step=1)
-                with ctt2:
-                    mode = st.selectbox('Background Mode', options=('gray', 'rbg'), index=0)
-                run = st.button('run')
-                yolov8_seg.yolovo_video_seg(st, video, df, details, show, resume, response, run, 
-                                                                    colors, alpha, mode, only_mask, with_names, **items)
-            else:
-                run = st.button('run')
-                ocr_yolov8.ocr_yolovo_video(st, video, df, details, show, resume, scaling, response, run, colors, **items)
-        else:
-            #if track_num:
-            track_num = [0]
-            yolov8.yolov8_video_track(st, video, df, details, show, resume, response, run, colors, tracker, track_num, **items)
-            #else: pass
+                track_num = st.multiselect('Object id', options=[str(x) for x in range(len(class_names))], disabled=True, default='0')
                 
+                if track_all: track_num = [x for x in range(len(class_names))]
+                else:  track_num = [int(float(x)) for x in track_num]
+            
+            if model_type != "yolov8":  
+                ctt1_, ctt2_ = st.columns(2)
+                with ctt1_:
+                    if model_type == 'yolov8-seg':
+                        only_mask = st.checkbox('Only Mask')
+                    else:
+                        only_mask = st.checkbox('Only Mask', disabled=True)
+                    st.write('status', only_mask)
+                with ctt2_:
+                    with_names = st.checkbox('With Names')
+                    st.write('status', with_names)
+                #with ctt3_:
+                #    run = st.button('run')
+           
+            if tracking is False:
+                if model_type == 'yolov8':
+                    run = st.button('run')
+                    model = all_models['yolov8n.pt']
+                    if run:
+                        if youtube is False:
+                            yolov8.yolovo_video(st, video, df, details, show, resume, 
+                                            response, run, colors, model, **items)
+                        else:
+                            yolov8.yolovo_video_youtube(st, video, df, details, show, resume, 
+                                            response, run, colors, model, **items)
+                if model_type == 'yolov8-seg':
+                    model = all_models["yolov8n-seg.pt"]
+                    ctt1, ctt2, ctt3 = st.columns(3)
+
+                    with ctt1:
+                        alpha = st.slider('alpha', min_value=1, max_value=255, value=30, step=1)
+                    with ctt2:
+                        mode = st.selectbox('Background Mode', options=('gray', 'rbg'), index=0)
+                    with ctt3:
+                        run = st.button('run')
+                    if run:
+                        yolov8_seg.yolovo_video_seg(st, video, df, details, show, resume, response, run, 
+                                                    colors, alpha, mode, only_mask, with_names, model, **items)
+                if model_type == 'ocr+yolov8':
+                    models = [all_models['license_plate_detector.pt'], all_models['yolov8n.pt']]
+                    run = st.button('run', key='run 1')
+                    if run:
+                        ocr_yolov8.ocr_yolovo_video(st, video, df, details, show, resume, scaling, 
+                                                    response, run, colors, models, **items)
+            else:
+                #if track_num:
+                track_num = [0]
+                model = all_models['yolov8n.pt']
+                if run:
+                    if youtube is False:
+                        yolov8.yolov8_video_track(st, video, df, details, show, resume, 
+                                              response, run, colors, tracker, track_num, model=model, **items)
+                    else:
+                        yolov8.yolovo_video_youtube_track(st, video, df, details, show, resume, 
+                                              response, run, colors, tracker, track_num, model=model, **items)
+
+                      
 def resume(st, df : dict, file_type: str='image', img=None, show=True, **kwargs):
     with st.expander("MODEL PERFORMANCES"):
         st.write("""
