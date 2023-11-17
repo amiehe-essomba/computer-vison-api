@@ -166,7 +166,7 @@ def youtube(st:st, url):
             if str(url).rstrip().lstrip()[:len(youtube_link)] == "https://www.youtube.com": pass 
             else: error = "Your url is not a YouTube link."
         except IndexError:
-             error = "Your url is not a YouTube link."
+             error = "Your url is not a YouTube link. expected : 'https://www.youtube.com/....'"
             
         if not error:
             yt = YouTube(url)

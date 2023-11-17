@@ -426,7 +426,6 @@ def total_precess(st, prediction, estimator, video, df, details, colors, **kwarg
     
     else: return None, None
 
-
 def total_precess_youtuble(st, prediction, estimator, video, df, details, colors, **kwargs):
     storage             = []
     frame_count         = 0
