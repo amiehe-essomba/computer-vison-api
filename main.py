@@ -39,7 +39,7 @@ def head_img(st, path='./images/img_pred.jpg', factor : int = 50, types : str='i
         video_file.close()
 
 def head(st = st):
-    
+   
     """
     st.set_page_config(
     page_title="FloraFlow",
