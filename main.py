@@ -145,7 +145,7 @@ def head(st = st):
         if contain_feedback == "Gallery":
             all_videos = de.data_cache()
             factor = None
-
+            
             st.write('<h2 class="custom-text-under">Object Detection</h2>', unsafe_allow_html=True)
             with st.expander("HAVE A LOOK"):
                 tab_od = st.tabs(['original', 'detection', 'pose'])

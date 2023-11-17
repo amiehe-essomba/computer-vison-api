@@ -2,7 +2,7 @@ import streamlit as st
 
 @st.cache_resource()
 def data_cache():
-    PATH            = "./video/"
+    PATH            = "./video/"         
     names           = ["yolo_video2.mp4", "yolo_video2_pred.mp4", "yolo_video3_pred.mp4"]
     all_videos      = []
 
