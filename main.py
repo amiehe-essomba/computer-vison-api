@@ -25,21 +25,8 @@ from model_body.conclusion import conclusion
 import matplotlib.pyplot as plt
 import cv2
 from skimage import io, transform
-import os 
+import model_in_cache.data as de 
 
-@st.cache_resource()
-def data_cache():
-    PATH            = "./video/"
-    names           = ["yolo_video2.mp4", "yolo_video2_pred.mp4", "yolo_video3_pred.mp4"]
-    all_videos      = []
-
-    for name in names:
-        abs_path = f"{PATH}{name}"
-        video_file = open(abs_path, 'rb')
-        video_bytes = video_file.read()
-        all_videos.append(video_bytes)
-
-    return all_videos
 
 def head_img(st, path='./images/img_pred.jpg', factor : int = 50, types : str='image'):
     if types == 'image':
@@ -156,7 +143,7 @@ def head(st = st):
         if contain_feedback == "Conclusion":
             conclusion(st=st)
         if contain_feedback == "Gallery":
-            all_videos = data_cache()
+            all_videos = de.data_cache()
             factor = None
 
             st.write('<h2 class="custom-text-under">Object Detection</h2>', unsafe_allow_html=True)
