@@ -161,7 +161,7 @@ def pred(st : streamlit):
                     image, image_data, shape,  error = online_link(st=st, url=url)
 
                     if error is None:
-                        [iou_threshold, score_threshold, max_boxes] = vs.slider_model(st=st)
+                        [iou_threshold, score_threshold, max_boxes] = vs.slider_model(st=st, locked=True)
 
                         # classses and anchors 
                         Class_names         = read_classes()
@@ -198,7 +198,7 @@ def pred(st : streamlit):
                                 'iou_threshold' : iou_threshold,
                                 'image_file'   : [(image, image_data)]
                                 }
-                            if file_type == 'image':
+                            if type_of_file == 'image':
                                 #tf.get_logger().setLevel(logging.ERROR)
                                 #yolo_model = tf.keras.models.load_model(yolo_model_path, compile=False)
                                 
@@ -209,10 +209,11 @@ def pred(st : streamlit):
                         else: pass
                     else: st.warning(f'{error}')
 
-                elif type_of_file == 'video':
-                    if url:
-                        st.write(f'<video width="640" height="360" controls><source src="{url}" type="video/mp4"></video>', unsafe_allow_html=True)
-                else: pass
+                #elif type_of_file == 'video':
+                #    if url:
+                #        st.write(f'<video width="640" height="360" controls><source src="{url}" type="video/mp4"></video>', unsafe_allow_html=True)
+                else:
+                    st.write("Cannot upload this video please use YouTube instead")
             else: pass
         elif label_select == 'Camera':
             image, image_data, shape = camera(st=st)

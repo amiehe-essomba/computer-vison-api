@@ -78,11 +78,10 @@ def ocr_yolov8(st, df, shape, show, response, resume, scaling, return_sequence, 
 
         image_predicted = draw_boxes_v8(image=frame, boxes=boxes, box_classes=box_classes, scores=scores, with_score=response,
                     class_names=class_names, use_classes=use_classes, df=df, C = None, return_sequence=False, width=4, colors=colors)
+        image_predicted = resize(image_predicted, output_shape=shape)
     else:
-        image_predicted = kwargs['image_file'][0][0]
+        image_predicted = resize( np.array( kwargs['image_file'][0][0]), output_shape=shape)
     
-    image_predicted = resize(image_predicted, output_shape=shape)
-
     if return_sequence is False:
         resume(st=st, df=df, show=show, img=kwargs['image_file'][0][0], **{"image_predicted" : image_predicted})
     else:  return image_predicted 
@@ -90,8 +89,6 @@ def ocr_yolov8(st, df, shape, show, response, resume, scaling, return_sequence, 
     del boxes
     del scores 
     del box_classes
-    del class_names
-    del use_classes
 
 def ocr_yolovo_video(st, video, df, details, show, resume, scaling, response,  run, colors, models, **items):
     frame_count         = 0

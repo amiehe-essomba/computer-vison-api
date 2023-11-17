@@ -41,9 +41,10 @@ def ocr(st, df, shape, show, response, resume, scaling, colors, model, **kwargs)
         image_predicted  = draw_boxes_v8(image=frame, boxes=boxes_plates, box_classes=box_classes_plates, scores=scores_plates, 
                             with_score=response, class_names=CLASSES, use_classes=CLASSES, colors=colors,
                             df=df, C=(255, 255, 0), return_sequence=False, width = 4)
+        image_predicted = resize(image_predicted, output_shape=shape)
     else:
-        image_predicted = kwargs['image_file'][0][0]
+        image_predicted = resize( np.array( kwargs['image_file'][0][0]), output_shape=shape)
     
-    image_predicted = resize(image_predicted, output_shape=shape)
+    
     resume(st=st, df=df, show=show, img=kwargs['image_file'][0][0], **{"image_predicted" : image_predicted})
      

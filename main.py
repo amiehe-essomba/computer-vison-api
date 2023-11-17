@@ -25,8 +25,21 @@ from model_body.conclusion import conclusion
 import matplotlib.pyplot as plt
 import cv2
 from skimage import io, transform
+import os 
 
+@st.cache_resource()
+def data_cache():
+    PATH            = "./video/"
+    names           = ["yolo_video2.mp4", "yolo_video2_pred.mp4", "yolo_video3_pred.mp4"]
+    all_videos      = []
 
+    for name in names:
+        abs_path = f"{PATH}{name}"
+        video_file = open(abs_path, 'rb')
+        video_bytes = video_file.read()
+        all_videos.append(video_bytes)
+
+    return all_videos
 
 def head_img(st, path='./images/img_pred.jpg', factor : int = 50, types : str='image'):
     if types == 'image':
@@ -39,7 +52,7 @@ def head_img(st, path='./images/img_pred.jpg', factor : int = 50, types : str='i
         video_file.close()
 
 def head(st = st):
-
+    
     """
     st.set_page_config(
     page_title="FloraFlow",
@@ -143,13 +156,14 @@ def head(st = st):
         if contain_feedback == "Conclusion":
             conclusion(st=st)
         if contain_feedback == "Gallery":
+            all_videos = data_cache()
             factor = None
 
             st.write('<h2 class="custom-text-under">Object Detection</h2>', unsafe_allow_html=True)
             with st.expander("HAVE A LOOK"):
-                tab_od = st.tabs(['image 1 pred',  'image 2', 'image 2 pred'])
-                image_location = ['./images/img_pred.jpg', './images/image2.jpg', 
-                                  './images/image2_pred.jpg']
+                tab_od = st.tabs(['original', 'detection', 'pose'])
+                image_location = ['./images/image2.jpg', 
+                                  './images/image2_pred.jpg', './images/img_pose.png', ]
                 
                 types = ['image', 'image', 'image']
 
@@ -159,7 +173,7 @@ def head(st = st):
 
             st.write('<h2 class="custom-text-under2">Semantic image Segmentation</h2>', unsafe_allow_html=True)
             with st.expander("HAVE A LOOK"):
-                tab_seg = st.tabs(['image 1', 'image 1 pred', 'image 2', 'image 2 pred'])
+                tab_seg = st.tabs(['original 1', 'original 1 pred', 'original 2', 'image 2 pred'])
                 image_location = ['./images/image2.jpg', './images/img_seg.png', './images/image3.jpg', './images/image3_seg.png']
                 
                 types = ['image', 'image', 'image', 'image']
@@ -170,17 +184,25 @@ def head(st = st):
                 
             st.write('<h2 class="custom-text-under3"> OCR and Object Detection</h2>', unsafe_allow_html=True)
             with st.expander("HAVE A LOOK"):
-                head_img(st=st, path='./images/tracked.jpg', factor=factor)
+                types = ['image', 'image', 'image']
+                tab_seg = st.tabs(['original', 'ocr', 'ocr + oject detection'])
+                image_location = ['./images/ocr_orig.jpg', './images/tracked.jpg', './images/ocr_yolo.jpg']
+
+                for i in range(len(tab_seg)):
+                    with tab_seg[i]:
+                        head_img(st=st, factor=factor, types=types[i], path=image_location[i])
+                #head_img(st=st, path='./images/tracked.jpg', factor=factor)
 
             st.write('<h2 class="custom-text-under4">Objects Tracking & Segmentation</h2>', unsafe_allow_html=True)
             with st.expander("HAVE A LOOK"):
-                tab_track = st.tabs(['original', 'tracking', 'segmentation'])
+                tab_track = st.tabs(['original', 'detection', 'segmentation'])
                 image_location = ['./video/yolo_video2.mp4', './video/yolo_video2_pred.mp4', './video/yolo_video3_pred.mp4']
                 types = ['video', 'video', 'video']
 
                 for i in range(len(tab_track)):
                     with tab_track[i]:
-                        head_img(st=st, types=types[i], path=image_location[i])
+                        st.video(all_videos[i])
+                        #head_img(st=st, types=types[i], path=image_location[i])
     else :
         if yolo_feedback_contrain :  
             st.code(code(yolo_feedback_contrain), language='python', line_numbers=True)    

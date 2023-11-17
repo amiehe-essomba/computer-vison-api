@@ -1,47 +1,60 @@
 from demo import encapsulation as lf 
 
 class demo(lf.Wrapper):
-    df          : dict = {'label' : [], 'score':[], 'top':[], "left":[], "bottom":[], 'right':[]}
-    colors      : dict = None 
-    tracker     : str  = None
-    youtube     : bool = False
-    PATH        : str  = None 
-    response    : bool = False
-    save_file   : str  = "video_data.mp4"
+    df                  : dict = {'label' : [], 'score':[], 'top':[], "left":[], "bottom":[], 'right':[]}
+    colors              : dict = None 
+    tracker             : str  = None
+    youtube             : bool = False
+    PATH                : str  = None 
+    response            : bool = False
+    save_file           : str  = "video_data.mp4"
     duration_in_second  : float = None 
     video_start         : int = None
     video_step          : int = 1
+    alpha               : int = 30
+    mode                : str = 'gray'
+    only_mask           : bool = False 
+    with_names          : bool = True
 
     def __init__(self, model_name: str = 'yolov8n.pt') -> None:
         super().__init__(model_name)
+        self.model_name = model_name
+    def build_model(self, is_seg : bool = False, **kwargs):
 
-    def build_model(self, **kwargs):
-
-        MODEL = self.models()
-        video_data = None 
+        MODEL       = self.models(is_seg=is_seg)
         
-    
         if MODEL is None: pass 
         else:
             self._mod_demo_ = model_demo(
                 duration_in_second=self.duration_in_second, 
                 video_start=self.video_start, video_step=self.video_step,
-                youtube=self.youtube, df=self.df, response=self.response, colors=self.colors, model=MODEL)
+                youtube=self.youtube, df=self.df, response=self.response, colors=self.colors, model=MODEL,
+                seg=is_seg
+                )
 
             self.tracker = self.tracker_check()
 
             if self.tracker is not True:
+                kwargs['alpha'] = self.alpha 
+                kwargs['mode'] = self.mode 
+                kwargs['only_mask'] = self.only_mask
+                kwargs['with_names'] = self.with_names 
+
                 if self.tracker is None:
-            
-                    video_data = self._mod_demo_.sumple_model(path_or_url=self.PATH, save=self.save_file, **kwargs)
+                    
+                    video_data = self._mod_demo_.sumple_model(path_or_url=self.PATH, 
+                                         name=self.model_name, save=self.save_file, **kwargs)
 
                 else:
-                
-                    video_data = self._mod_demo_.model_track(path_or_url=self.PATH, 
+                    if not is_seg:
+                        if self.model_name == "yolov8n.pt":
+
+                            video_data = self._mod_demo_.model_track(path_or_url=self.PATH, 
                                             tracker=self.tracker, save=self.save_file, **kwargs)
+                            
+                        else: print("Tracking only works with 'yolov8n.pt'")
+                    else: print("You cannot use segmentation and tracking together")
             else: pass
-        
-        #return video_data 
 
     def get_vido_info(self):
         self._mod_demo_ = model_demo(youtube=self.youtube )   
@@ -157,7 +170,8 @@ class model_demo(video_params, lf.YOLO_MODEL):
         df                      : dict = {}, 
         response                : bool = False, 
         colors                  : dict = {}, 
-        model                   : any = None 
+        model                   : any = None,
+        seg                     : bool  = False 
         ) -> None:
         
         super().__init__(duration_in_second, video_start, video_step)
@@ -167,6 +181,7 @@ class model_demo(video_params, lf.YOLO_MODEL):
         self.model      = model 
         self.colors     = colors 
         self.response   = response 
+        self.seg        = seg
 
     def read(self, path_or_url : str, youtube : bool=False, key : bool = False):
         if youtube is True:
@@ -207,7 +222,7 @@ class model_demo(video_params, lf.YOLO_MODEL):
           
         return video, details,  fps, error
 
-    def sumple_model(self, path_or_url, save,**kwargs):
+    def sumple_model(self, path_or_url, name : str, save: str, **kwargs):
         if self.youtube is True:
             video, details, fps, error = self.is_youtube(url=path_or_url)
         else:
@@ -217,10 +232,20 @@ class model_demo(video_params, lf.YOLO_MODEL):
         if error is None:
         
             kwargs["fps"] = fps
-            video_data = self.yolovo_video_demo(video=video, df=self.df, 
-                details=details, response=self.response, colors=self.colors, model=self.model, save=save, **kwargs)
-        else:
-            print(error)
+
+            if name in ['yolov8n.pt', 'yolov8n-seg.pt']:
+                if self.seg is False:
+                    video_data = self.yolovo_video_demo(video=video, df=self.df, 
+                        details=details, response=self.response, colors=self.colors, model=self.model, save=save, **kwargs)
+                elif self.seg is True:
+                    video_data = self.yolovo_video_seg_demo(video=video, df=self.df, 
+                        details=details, response=self.response, colors=self.colors, model=self.model, save=save, **kwargs)
+                else:
+                    print("is_seg is not a bool type")
+            else:
+                video_data = self.my_model(video=video, df=self.df, 
+                        details=details, response=self.response, colors=self.colors, model=self.model, save=save, **kwargs)
+        else:  print(error)
 
         return video_data
     
