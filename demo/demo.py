@@ -41,7 +41,7 @@ class demo(lf.Wrapper):
                                             tracker=self.tracker, save=self.save_file, **kwargs)
             else: pass
         
-        return video_data 
+        #return video_data 
 
     def get_vido_info(self):
         self._mod_demo_ = model_demo(youtube=self.youtube )   
