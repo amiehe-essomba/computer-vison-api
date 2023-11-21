@@ -23,6 +23,7 @@ def yolo_head(feats, anchors, num_classes):
     box_class_pred : tensor
         Probability distribution estimate for each box over class labels.
     """
+    
     num_anchors     = len(anchors)
     # Reshape to batch, height, width, num_anchors, box_params.
     anchors_tensor  = K.reshape(K.variable(anchors), [1, 1, 1, num_anchors, 2])

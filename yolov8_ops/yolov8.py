@@ -52,7 +52,6 @@ def yolov8(st, df, shape, show, response, resume, return_sequence, colors, model
 def yolov8_track(st, df, shape, show, response, resume, return_sequence, colors, tracker = None, 
                                 track_history = None, model=None, **kwargs):
     score_threshold = kwargs['score_threshold']
-    #yolo_model_v8   = YOLO('./yolov8/yolov8n.pt')
     frame           = kwargs['image_file'][0][0].copy()
     detections      = model.track(frame, conf=score_threshold, persist=True, tracker=tracker)[0]
     boxes           = []

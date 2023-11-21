@@ -62,6 +62,9 @@ def pred(st : streamlit):
     else: factor = False 
     
     if label_select:
+        if model_type == 'my model': locked = False 
+        else: locked = True 
+
         if   label_select == 'Local' :
             if label_select: 
                 uploaded_file = st.file_uploader("upload local image or video", 
@@ -72,9 +75,7 @@ def pred(st : streamlit):
                     if show : show = True 
                     # get the informations about the video or image s
                     # video, image, image shape, and more ...
-                    if model_type == 'my model': locked = False 
-                    else: locked = True 
-
+                    
                     all_files = file_read(st, uploaded_file=uploaded_file, show=False, factor=factor)
                     [iou_threshold, score_threshold, max_boxes] = vs.slider_model(st=st, locked=locked)
 
@@ -161,7 +162,7 @@ def pred(st : streamlit):
                     image, image_data, shape,  error = online_link(st=st, url=url)
 
                     if error is None:
-                        [iou_threshold, score_threshold, max_boxes] = vs.slider_model(st=st, locked=True)
+                        [iou_threshold, score_threshold, max_boxes] = vs.slider_model(st=st, locked=locked)
 
                         # classses and anchors 
                         Class_names         = read_classes()
@@ -268,14 +269,16 @@ def pred(st : streamlit):
             
             if url:
                 if show : show = True 
-                if model_type == 'my model': locked = False 
-                else: locked = True 
+
+                #if model_type == 'my model': locked = False 
+                #else: locked = True 
                 
                 [iou_threshold, score_threshold, max_boxes] = vs.slider_model(st=st, locked=locked)
 
                 # classses and anchors 
                 Class_names         = read_classes()
                 anchors             = read_anchors()
+                
 
                 # five columns for use all classes, class probabilitiess etc....
                 cp_col1, cp_col2, _, _, _ = st.columns(5)
