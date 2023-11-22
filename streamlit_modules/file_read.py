@@ -34,7 +34,7 @@ def file_read(st, uploaded_file : any, show: bool = True, factor : float = None)
                     
                     image, image_data, shape = preprocess_image(img_path=file, model_image_size = (608, 608), factor=factor)
                     
-                    if np.array([x for x in shape] < np.array([6000, 6000])).all():
+                    if np.array([x for x in shape[:-1]] < np.array([6000, 6000])).all():
                         files['image'].append((image, image_data))
                         _files.append('image')
                         list_types.append(f'image {image_id}')
