@@ -160,10 +160,24 @@ def head(st = st):
 
             st.write('<h2 class="custom-text-under2">Semantic image Segmentation</h2>', unsafe_allow_html=True)
             with st.expander("HAVE A LOOK"):
-                tab_seg = st.tabs(['original 1', 'original 1 pred', 'original 2', 'image 2 pred'])
-                image_location = ['./images/image2.jpg', './images/img_seg.png', './images/image3.jpg', './images/image3_seg.png']
+                tab_seg = st.tabs(['original 1', 'original 1 pred', 
+                                   'original 2', 'image 2 pred',
+                                   'original 3', 'image 3 pred',
+                                   'original 4', 'image 4 pred'
+                                   ])
+                image_location = [
+                    './images/image2.jpg', 
+                    './images/img_seg.png', 
+                    './images/image3.jpg', 
+                    './images/image3_seg.png',
+                    './images/image5.jpg', 
+                    './images/image5_seg.png',
+                    './images/image6.jpg', 
+                    './images/image6_seg.png'
+
+                    ]
                 
-                types = ['image', 'image', 'image', 'image']
+                types = ['image', 'image', 'image', 'image', 'image', 'image', 'image', 'image']
 
                 for i in range(len(tab_seg)):
                     with tab_seg[i]:
@@ -172,8 +186,8 @@ def head(st = st):
             st.write('<h2 class="custom-text-under3"> OCR and Object Detection</h2>', unsafe_allow_html=True)
             with st.expander("HAVE A LOOK"):
                 types = ['image', 'image', 'image']
-                tab_seg = st.tabs(['original', 'ocr', 'ocr + oject detection'])
-                image_location = ['./images/ocr_orig.jpg', './images/tracked.jpg', './images/ocr_yolo.jpg']
+                tab_seg = st.tabs(['original', 'ocr'])
+                image_location = ['./images/ocr_orig.jpg', './images/tracked.jpg']
 
                 for i in range(len(tab_seg)):
                     with tab_seg[i]:

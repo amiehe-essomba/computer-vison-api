@@ -11,6 +11,7 @@ from functools import reduce
 from streamlit_modules.button_style import button_style
 from stqdm import stqdm 
 
+
 def preprocess_image(img_path, model_image_size, done : bool = False, factor = False):
     #image_type = imghdr.what(img_path)
     if done is False : image           = Image.open(img_path)
@@ -21,7 +22,7 @@ def preprocess_image(img_path, model_image_size, done : bool = False, factor = F
     image_data      = np.array(resized_image, dtype='float32')
     image_data /= 255.
     # Add batch dimension.
-    image_data      = np.expand_dims(image_data, 0) 
+    image_data      = np.expand_dims(image_data, axis=0) 
 
     if factor is False : return image.resize(model_image_size), image_data, shape
     else: return image, image_data, shape

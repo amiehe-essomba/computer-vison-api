@@ -34,11 +34,16 @@ def file_read(st, uploaded_file : any, show: bool = True, factor : float = None)
                     
                     image, image_data, shape = preprocess_image(img_path=file, model_image_size = (608, 608), factor=factor)
                     
-                    files['image'].append((image, image_data))
-                    _files.append('image')
-                    list_types.append(f'image {image_id}')
-                    files['image_shape'].append(shape)
-                    image_id += 1
+                    if np.array([x for x in shape] < np.array([6000, 6000])).all():
+                        files['image'].append((image, image_data))
+                        _files.append('image')
+                        list_types.append(f'image {image_id}')
+                        files['image_shape'].append(shape)
+                        image_id += 1
+                    else: 
+                        process = False 
+                        st.write('image size out of range (6000, 6000)')
+                        break
                 except (FileNotFoundError, FileExistsError) : 
                     st.white("File loading error")
                     process = False
@@ -58,7 +63,7 @@ def file_read(st, uploaded_file : any, show: bool = True, factor : float = None)
                 files['details'].append(None)
             else:
                 process = False 
-                st.write("Fichier non pris en charge. Veuillez charger une image ou une vidéo.")
+                st.write("File not take into account. Please upload image or video")
                 break
         else: 
             process = False
@@ -121,7 +126,7 @@ def online_link(st, url : str = "", show_image : bool = True):
                 st.image(img_array, use_column_width=True)
                 st.markdown(f"file successfully upladed...")
             else: pass
-        else: st.markdown(f"{error}")
+        else: pass#st.markdown(f"{error}")
     else: pass 
 
     return (image, image_data, shape, error)
@@ -143,7 +148,11 @@ def url_img_read( url : str, factor = False):
             #Image.open(image_data)
             image = Image.open(image_data)
 
-            image, image_data, shape = preprocess_image(img_path=image, model_image_size = (608, 608), done=True, factor=factor)
+            shape = np.array( [x for x in image.size] )
+            if (shape < np.array([6000, 6000]) ).all() : 
+                image, image_data, shape = preprocess_image(img_path=image, model_image_size = (608, 608), done=True, factor=factor)
+            else:
+                error = 'image size out of range (6000, 6000)'
         else:
             error = f"Failed to retrieve image. Status code: {response.status_code}"
     except Exception as e:
