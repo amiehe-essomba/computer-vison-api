@@ -168,7 +168,7 @@ def yolov8_video_track(st:st, video, df, details, show, resume, response,  run, 
                     image_predicted = (np.array(image_predicted) * 255).astype(np.int32)
 
                     if points.all():
-                        cv2.polylines(image_predicted, [points], isClosed=False, color=color_track, thickness=10)
+                        cv2.polylines(image_predicted, [points], isClosed=False, color=color_track, thickness=2)
 
                     #image_predicted /= 255.
                     image_predicted = np.uint8(image_predicted)

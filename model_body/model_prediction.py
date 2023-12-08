@@ -585,8 +585,7 @@ def Video(st, prediction, all_models:dict, video, df, details, show, model_type,
                     else:
                         yolov8.yolovo_video_youtube_track(st, video, df, details, show, resume, 
                                               response, run, colors, tracker, track_num, model=model, **items)
-
-                      
+                  
 def resume(st, df : dict, file_type: str='image', img=None, show=True, **kwargs):
     with st.expander("MODEL PERFORMANCES"):
         st.write("""

@@ -2,7 +2,6 @@
 from PIL import Image
 import numpy as np
 import tempfile
-import shutil
 from skimage.transform import resize
 from yolo.utils.tools import preprocess_image, read_video
 from streamlit_cropper import st_cropper

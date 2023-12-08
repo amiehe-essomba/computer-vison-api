@@ -63,11 +63,11 @@ def yolo_filter_boxes(
     # using this mask to return the final result 
     # the mask should be applied on box_class_scores, boxes and box_classes
     # N is the number of bondings boxese
-    # score (N)
+    # score.shape =  (N, )
     scores      = tf.boolean_mask(tensor=box_class_scores, mask=mask, axis=None)
-    # score (N, 4)
+    # boxes.shape = (N, 4)
     boxes       = tf.boolean_mask(tensor=boxes, mask=mask, axis=None)
-    # score (N,)
+    # classes.shape =  (N,)
     classes     = tf.boolean_mask(tensor=box_classes, mask=mask, axis=None)
    
     return scores, boxes, classes
