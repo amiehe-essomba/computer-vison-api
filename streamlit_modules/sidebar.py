@@ -154,10 +154,15 @@ def sidebar(streamlit = st):
     col1_, col2_      = streamlit.sidebar.columns(2)
 
     with col1_:
-        streamlit.sidebar.markdown(f'<a class="photo" href="{linkidin_page}" target="_blank"><img src="{my_photo}"\
-        width="125" height="125" border="5px"></a>', unsafe_allow_html=True)
+        #streamlit.sidebar.markdown(f'<a class="photo" href="{linkidin_page}" target="_blank"><img src="{my_photo}"\
+        #width="125" height="125" border="5px"></a>', unsafe_allow_html=True)
+        st.sidebar.image(
+            plt.imread("./images/image_profile.png"), 
+            width=10, use_column_width="auto",
+            caption='Dr. Iréné Amiehe Essomba, Ph.D | Data scientist | Machine Learning Enginee'
+            )
     
-    streamlit.sidebar.write('<h5 class="author">Dr. Iréné Amiehe Essomba, Ph.D </h5>', unsafe_allow_html=True)
+    #streamlit.sidebar.write('<h5 class="author">Dr. Iréné Amiehe Essomba, Ph.D </h5>', unsafe_allow_html=True)
 
     with col2_:
         # Bibliograpy section 
