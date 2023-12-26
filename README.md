@@ -1,4 +1,4 @@
-# <!-- TITLE --> __``` OPTICAL CHARACTER RECOGNITION (OCR) & REAL TIME OBJECT DETECTION WITH YOLO ```__
+# <!-- TITLE --> __``` OBJECT DETECTION, IMAGE SEGMENTATION, OBJECT TRACKING AND OCR WITH YOLO ```__
 #### <!-- AUTHOR --> - Author : __Dr. Amiehe-Essomba__ (c) 2023
 ![Sample Video](/video/yolo_pred_gif.gif)
 
