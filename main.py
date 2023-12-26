@@ -126,7 +126,7 @@ def head(st = st):
     """, unsafe_allow_html=True)
 
     # Utiliser le style CSS personnalisé pour afficher du texte en surbrillance
-    st.write('<h1 class="custom-text">Optical Character Recognition (OCR) & Object Detection and tracking</h1>', unsafe_allow_html=True)
+    st.write('<h1 class="custom-text">Object Detection, Image Segmentation, Object tracking and OCR</h1>', unsafe_allow_html=True)
    
     [contain_feedback, yolo_feedback_contrain] = sidebar(streamlit=st)
     #st.write('<h1 class="custom-text-under"></h1>', unsafe_allow_html=True)
