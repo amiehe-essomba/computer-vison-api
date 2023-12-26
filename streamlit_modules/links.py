@@ -20,7 +20,7 @@ def links(name : str = ''):
         string = "https://media.licdn.com/dms/image/C4E03AQFX-O9seqbhHQ/profile-displayphoto-shrink_800_800/0/1602072737304?e=1702512000&v=beta&t=7KE5t7wGkeBSj04-yexhZViGecVZcfd0zuTMI1MbFe8"
 
     if name == 'computer-vis':
-        string = "https://th.bing.com/th/id/OIP.e-aXUAZhsVAedoTjGaLJ2gAAAA?pid=ImgDet&w=415&h=345&rs=1"
+        string = "https://images.ctfassets.net/3viuren4us1n/1Ghw96A2tcYRfRezOwtmjx/e646778f3f53e50ea3e857e9cdb23120/Computer_vision.jpg"
 
     if name == 'email':
         string = 'https://th.bing.com/th/id/OIP.ugDgTkIwn4zkgnWbA2MMKQHaHI?pid=ImgDet&rs=1'

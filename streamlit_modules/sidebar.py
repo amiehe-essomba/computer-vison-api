@@ -3,6 +3,7 @@ from streamlit_modules.sidebar_styles import sidebar_styles as ss
 import streamlit as st
 from streamlit_modules.info import info
 from streamlit_option_menu import option_menu
+import matplotlib.pyplot as plt
 
 def example(st, file : str = "./video/yolo_pred.mp4"):
     """
@@ -64,6 +65,8 @@ def sidebar(streamlit = st):
     cm          = links(name='computer-vis')
     # git hub link page 
     git_page    = links('git_page')
+    # logo side bar
+    side_bar_logo = plt.imread("./images/Computer_vision.jpg")
     # create image with associtated link 
     streamlit.sidebar.markdown(f'<a href="{git_page}" target="_blank"><img src="{cm}" width="320" height="270"></a>', unsafe_allow_html=True)
     
