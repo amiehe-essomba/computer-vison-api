@@ -68,7 +68,7 @@ def sidebar(streamlit = st):
     # logo side bar
     side_bar_logo = plt.imread("./images/Computer_vision.jpg")
     # create image with associtated link 
-    streamlit.sidebar.markdown(f'<a href="{git_page}" target="_blank"><img src="{cm}" width="320" height="270"></a>', unsafe_allow_html=True)
+    streamlit.sidebar.markdown(f'<a href="{git_page}" target="_blank"><img src="{cm}" width="360" height="200"></a>', unsafe_allow_html=True)
     
     # contains section : create the table of constains 
     streamlit.sidebar.write('<h3 class="sidebar-text">Table of contains</h3>', unsafe_allow_html=True)
