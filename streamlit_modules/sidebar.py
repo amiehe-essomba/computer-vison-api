@@ -159,7 +159,8 @@ def sidebar(streamlit = st):
         st.sidebar.image(
             plt.imread("./images/image_profile.png"), 
             width=10, use_column_width="auto",
-            caption='Dr. Iréné Amiehe Essomba, Ph.D | Data scientist | Machine Learning Enginee'
+            caption="""Dr. Iréné Amiehe Essomba, Ph.D\n
+            | Data scientist | Computer Vision expert | NLP expert"""
             )
     
     #streamlit.sidebar.write('<h5 class="author">Dr. Iréné Amiehe Essomba, Ph.D </h5>', unsafe_allow_html=True)
@@ -207,4 +208,19 @@ def sidebar(streamlit = st):
         unsafe_allow_html=True
         )
     """
+    streamlit.sidebar.write('<h3 class="sidebar-text">My other projets</h3>', unsafe_allow_html=True)
+    vision1 = "https://vision-api.streamlit.app/"
+    vision2 = "https://floraflow-api.streamlit.app/"
+    path   = "./images/computer_vision.jpg"
+    streamlit.sidebar.markdown(
+        f'<div style="text-align: left;">'
+        f'<li style="text-align: left;">'
+        f'<a href="{vision1}" target="_blank"> Vision API ( Computer Vision Projet )</a>'
+        f'</li>' 
+        f'<li style="text-align: left;">'
+        f'<a href="{vision2}" target="_blank"> FloraFlow ( Cultivate Better with AI )</a>'
+        f'</li>'
+        f'</div>',
+        unsafe_allow_html=True
+    )
     return [contain_feedback, yolo_feedback_contrain]

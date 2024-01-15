@@ -14,7 +14,8 @@ class demo(lf.Wrapper):
     alpha               : int = 30
     mode                : str = 'gray'
     only_mask           : bool = False 
-    with_names          : bool = True
+    with_names          : bool = True,
+    rescaling           : any  = None
 
     def __init__(self, model_name: str = 'yolov8n.pt') -> None:
         super().__init__(model_name)
@@ -29,7 +30,7 @@ class demo(lf.Wrapper):
                 duration_in_second=self.duration_in_second, 
                 video_start=self.video_start, video_step=self.video_step,
                 youtube=self.youtube, df=self.df, response=self.response, colors=self.colors, model=MODEL,
-                seg=is_seg
+                seg=is_seg, rescaling=self.rescaling
                 )
 
             self.tracker = self.tracker_check()
@@ -59,8 +60,7 @@ class demo(lf.Wrapper):
     def get_vido_info(self):
         self._mod_demo_ = model_demo(youtube=self.youtube )   
         self._mod_demo_.read(path_or_url=self.PATH, youtube=self.youtube, key=False)
-        
-  
+         
 class video_params:
     def __init__(self,
                 duration_in_second : float = None, 
@@ -116,7 +116,7 @@ class video_params:
             error = None 
             try:   
                 if not error:
-                    vid_cap     = cv2.VideoCapture(path)
+                    vid_cap             = cv2.VideoCapture(path)
                     total_frames        = int(vid_cap.get(cv2.CAP_PROP_FRAME_COUNT))
                     fps                 = vid_cap.get(cv2.CAP_PROP_FPS)
                     duration_seconds    = total_frames / fps
@@ -161,6 +161,16 @@ class video_params:
 
         return vid_cap, fps, total_frames, duration_seconds
     
+    def read_video(self, path):
+        
+        import imageio
+        video_reader    = imageio.get_reader(path, mode='?')
+        fps             = video_reader.get_meta_data()['fps']
+        video_frame     = video_reader.count_frames()
+        duration        = float(video_frame / fps)
+
+        return video_reader, fps, video_frame, duration
+    
 class model_demo(video_params, lf.YOLO_MODEL):
     def __init__(self, 
         duration_in_second      : float = None, 
@@ -171,7 +181,8 @@ class model_demo(video_params, lf.YOLO_MODEL):
         response                : bool = False, 
         colors                  : dict = {}, 
         model                   : any = None,
-        seg                     : bool  = False 
+        seg                     : bool  = False,
+        rescaling               : any   = None
         ) -> None:
         
         super().__init__(duration_in_second, video_start, video_step)
@@ -182,12 +193,14 @@ class model_demo(video_params, lf.YOLO_MODEL):
         self.colors     = colors 
         self.response   = response 
         self.seg        = seg
+        self.rescaling  = rescaling
 
     def read(self, path_or_url : str, youtube : bool=False, key : bool = False):
         if youtube is True:
             video, *details         = self.read_youtube_link(url=path_or_url)
         else:
-            video, *details         = self.read_local_link(path=path_or_url )
+            video, *details         = self.read_video(path=path_or_url) 
+            #video, *details = self.read_local_link(path=path_or_url )
 
         if key is False:
             if video:
@@ -196,7 +209,6 @@ class model_demo(video_params, lf.YOLO_MODEL):
                 print(f'frame per second : {details[0]}\nvideo frame : {details[1]}\nduration : {round(details[-1], 4)}')
                 print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
         else:
-
             return video, details
         
     def is_youtube(self, url : str):
@@ -233,12 +245,15 @@ class model_demo(video_params, lf.YOLO_MODEL):
         
             kwargs["fps"] = fps
 
-            if name in ['yolov8n.pt', 'yolov8n-seg.pt']:
+            if name in ['yolov8n.pt', 'yolov8n-seg.pt', "license_plate_detector.pt"]:
                 if self.seg is False:
                     video_data = self.yolovo_video_demo(video=video, df=self.df, 
                         details=details, response=self.response, colors=self.colors, model=self.model, save=save, **kwargs)
                 elif self.seg is True:
                     video_data = self.yolovo_video_seg_demo(video=video, df=self.df, 
+                        details=details, response=self.response, colors=self.colors, model=self.model, save=save, **kwargs)
+                elif self.seg is None:
+                    video_data = self.video_ocr(video=video, df=self.df, rescaling=self.rescaling,
                         details=details, response=self.response, colors=self.colors, model=self.model, save=save, **kwargs)
                 else:
                     print("is_seg is not a bool type")
