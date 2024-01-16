@@ -153,21 +153,21 @@ def sidebar(streamlit = st):
     my_photo        = links('my_picture')
     col1_, col2_      = streamlit.sidebar.columns(2)
 
-    with col1_:
-        #streamlit.sidebar.markdown(f'<a class="photo" href="{linkidin_page}" target="_blank"><img src="{my_photo}"\
-        #width="125" height="125" border="5px"></a>', unsafe_allow_html=True)
-        st.sidebar.image(
-            plt.imread("./images/image_profile.png"), 
-            width=10, use_column_width="auto",
-            caption="""Dr. Iréné Amiehe Essomba, Ph.D\n
-            | Data scientist | Computer Vision expert | NLP expert"""
-            )
+    #with col1_:
+    #streamlit.sidebar.markdown(f'<a class="photo" href="{linkidin_page}" target="_blank"><img src="{my_photo}"\
+    #width="125" height="125" border="5px"></a>', unsafe_allow_html=True)
+    st.sidebar.image(
+        plt.imread("./images/image_profile.png"), 
+        width=10, use_column_width="auto",
+        caption="""Dr. Iréné Amiehe Essomba, Ph.D\n
+        | Data scientist | Computer Vision expert | NLP expert"""
+        )
     
     #streamlit.sidebar.write('<h5 class="author">Dr. Iréné Amiehe Essomba, Ph.D </h5>', unsafe_allow_html=True)
 
-    with col2_:
-        # Bibliograpy section 
-        streamlit.sidebar.markdown(f'<p class="author-info ">{info()}</p>', unsafe_allow_html=True)
+    #with col2_:
+    #    # Bibliograpy section 
+    #    streamlit.sidebar.markdown(f'<p class="author-info ">{info()}</p>', unsafe_allow_html=True)
 
     # github and likidin logo 
     for i in range(1):
@@ -209,7 +209,7 @@ def sidebar(streamlit = st):
         )
     """
     streamlit.sidebar.write('<h3 class="sidebar-text">My other projets</h3>', unsafe_allow_html=True)
-    vision1 = "https://vision-api.streamlit.app/"
+    vision1 = "https://nlp-viz.streamlit.app/"
     vision2 = "https://floraflow-api.streamlit.app/"
     path   = "./images/computer_vision.jpg"
     streamlit.sidebar.markdown(
