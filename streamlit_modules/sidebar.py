@@ -209,7 +209,7 @@ def sidebar(streamlit = st):
         )
     """
     streamlit.sidebar.write('<h3 class="sidebar-text">My other projets</h3>', unsafe_allow_html=True)
-    vision1 = "https://nlp-viz.streamlit.app/"
+    vision1 = "https://nlp-vision.streamlit.app/"
     vision2 = "https://floraflow-api.streamlit.app/"
     path   = "./images/computer_vision.jpg"
     streamlit.sidebar.markdown(
