@@ -215,7 +215,7 @@ def sidebar(streamlit = st):
     streamlit.sidebar.markdown(
         f'<div style="text-align: left;">'
         f'<li style="text-align: left;">'
-        f'<a href="{vision1}" target="_blank"> Vision API ( Computer Vision Projet )</a>'
+        f'<a href="{vision1}" target="_blank"> NLP-Vision API ( NLP Projet )</a>'
         f'</li>' 
         f'<li style="text-align: left;">'
         f'<a href="{vision2}" target="_blank"> FloraFlow ( Cultivate Better with AI )</a>'
