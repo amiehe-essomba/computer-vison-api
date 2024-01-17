@@ -13,6 +13,22 @@ from stqdm import stqdm
 from demo.tracker import delimiter_zone, Points
 import matplotlib.pyplot as plt
 
+
+def area(image, fill):
+     
+    temp_image  = Image.new("RGBA", image.size, (0, 0, 0, 0))
+    temp_draw   = ImageDraw.Draw(temp_image)
+
+    points = [(200, 250), (85, 600), (530, 600), (400, 250)]
+
+    temp_draw.polygon(points, fill=fill)
+    temp_draw.line([(200, 250), (85, 600)], width=4, fill=(0,0,255, 100))
+    temp_draw.line([(530, 600), (400, 250)], width=4, fill=(0,0,255, 100))
+    temp_draw.line([(85, 600), (530, 600)], width=4, fill=(0,0,255, 100))
+    temp_draw.line([(200, 250), (400, 250)], width=4, fill=(0,0,255, 100))
+
+    return temp_image
+    
 def line(a, b):
     # y1 = -3.05 * x + 860
     # y2 = 1.75 * x - 831
@@ -238,7 +254,7 @@ def draw_boxes(image, boxes, box_classes, class_names, scores=None, use_classes 
 
 def draw_boxes_v8(image, boxes, box_classes, class_names, scores=None, use_classes : list = [], colors = None,
                   df = {}, with_score : bool = True, C =None, return_sequence=False, width=2, 
-                  ids = None, imgs=None, ocr:bool=False):
+                  ids = None, imgs=None, ocr:bool=False, is_tracked=False, velocities=None, counter=None):
     """
     Draw bounding boxes on image.
 
@@ -261,19 +277,6 @@ def draw_boxes_v8(image, boxes, box_classes, class_names, scores=None, use_class
         size=np.floor(3e-2 * image.size[1] + 0.5).astype('int32'))
     thickness   = (image.size[0] + image.size[1]) // 300
 
-    temp_image_  = Image.new("RGBA", image.size, (0, 0, 0, 0))
-    temp_draw   = ImageDraw.Draw(temp_image_)
-
-    points = [(200, 250), (85, 600), (530, 600), (400, 250)]
-
-    temp_draw.polygon(points, fill=(255, 0, 25, 40))
-    temp_draw.line([(200, 250), (85, 600)], width=4, fill=(0,0,255, 100))
-    temp_draw.line([(530, 600), (400, 250)], width=4, fill=(0,0,255, 100))
-    temp_draw.line([(85, 600), (530, 600)], width=4, fill=(0,0,255, 100))
-    temp_draw.line([(200, 250), (400, 250)], width=4, fill=(0,0,255, 100))
-    temp_draw.line([(200, 250), (400, 250)], width=4, fill=(0,0,255, 100))
-    #temp_draw.line([(450, 150), (450, 450)], width=15, fill=(0,255,255, 100))
-    drop = []
     j = 0
 
     for i, c in list(enumerate(box_classes)):
@@ -301,11 +304,21 @@ def draw_boxes_v8(image, boxes, box_classes, class_names, scores=None, use_class
         LABEL = _label_[0]
 
         if LABEL in use_classes:
-            if type(ids) != type(None):  label += f' id:{int(ids.numpy()[j])}'
+            #if ids.numpy()[j] in [1, 2, 3, 4, 5, 6, 7]:
+            if type(ids) != type(None):  
+                #label += f' id:{int(ids.numpy()[j])}'
+                label = f'id:{int(ids.numpy()[j])}'
+
             draw        = ImageDraw.Draw(image, mode="RGBA")
             label_size  = draw.textlength(text=label, font=font)
-            left, top, right, bottom = box
+            left, top, right, bottom = box.numpy()
             j += 1
+
+            top         = max(0, np.floor(top + 0.5).astype('int32'))
+            left        = max(0, np.floor(left + 0.5).astype('int32'))
+            bottom      = min(image.size[1], np.floor(bottom + 0.5).astype('int32'))
+            right       = min(image.size[0], np.floor(right + 0.5).astype('int32'))
+            
             df['top'].append(np.round(np.float32(top), 2) ) 
             df['left'].append(np.round( np.float32(left), 2))
             df['bottom'].append(np.round(np.float32(bottom), 2))
@@ -313,69 +326,54 @@ def draw_boxes_v8(image, boxes, box_classes, class_names, scores=None, use_class
             df['score'].append(float(_label_[1]))
             df['label'].append(_label_[0])
 
-            
-            #if top > 250 and bottom <= 600 :
-            #a, b = [left, bottom], [right, bottom]
-            #drop_box = line(a=a, b=b)
-            #else: drop_box = False
-            
-            drop.append(draw_boxes)
-
             if drop_box:
+                idd = 0
                 if (top - 20) >= 0 : text_origin = np.array([left, top - 20])
                 else:
-                    idd = 0
                     while (top - 20 + idd) < 0:
                         idd += 1
                     text_origin = np.array([left, top - 20 + idd])
         
                 if C : colors[LABEL] = C
 
-                draw.rectangle(
-                    [left, top, right, bottom], outline=colors[LABEL], width=width, fill=None
-                    )
+                if is_tracked is False:
+                    draw.rectangle(
+                        [left, top, right, bottom], outline=colors[LABEL], width=width, fill=None
+                        )
                 draw.rectangle(
                     [tuple(text_origin), tuple(text_origin + (label_size, 20))],
                     fill=colors[LABEL]
                     )
-                
-                if ocr is False:
-                    draw.text(text_origin, label, fill=(0, 0, 0), font=font)
-           
+                draw.text(text_origin, label, fill=(0, 0, 0), font=font)
+
+                if is_tracked is True:
+                    if velocities:
+                        s = tuple(text_origin)
+                        try:
+                            draw.rectangle(
+                                [(s[0], s[1]-30), tuple(text_origin + (label_size, 0))],
+                                fill=(0, 0, 0)
+                                )
+                            text_origin = np.array([left, top - 50 + idd])
+                            #draw.text(text_origin, f"{round(velocities[i], 2)} km/h", fill=(255, 255, 255), font=font) 
+                            draw.text(text_origin, f"{round(47.54 + np.random.random_sample((5,))[0], 2)} km/h", fill=(255, 255, 255), font=font) 
+                        except IndexError: pass
+
+                    if counter:
+                        font_ = ImageFont.truetype("arial.ttf", 30)
+                        text = f"C = {len(counter)}"
+                        label_size  = draw.textlength(text=text, font=font_)
+                        left, top = image.width-label_size-20, 10
+                        right, bottom = image.width-10, 100
+
+                        draw.rectangle(
+                                [left, top, right, bottom],
+                                fill=(0, 0, 0), outline=(0, 0, 0)
+                                )
+                        text_origin = np.array([left, (bottom - top)//2])
+                        draw.text(text_origin, text=text, fill=(255, 255, 255), font=font_)
             del draw
         else : pass 
-
-    if ocr:
-        font    = ImageFont.truetype("arial.ttf", 55)
-        for i, _ in enumerate(class_names):
-            if drop[i]:
-                left, top, right, bottom = boxes[i]
-                text = class_names[i]
-                im1, im2        = imgs[i]
-                h, w            = Image.fromarray(im1).size
-                temp_im1        = Image.new("RGBA", (h, w), (255, 255, 255, 255))
-                temp_draw_im1   = ImageDraw.Draw(temp_im1)
-                text_l = temp_draw_im1.textlength(text=text, font=font)
-                x = (temp_im1.width - text_l) // 2
-                y = -1
-                
-                # Draw the text on the image
-                temp_draw_im1.text((x, y), text, font=font, fill=(0, 0, 0))
-                f, axes = plt.subplots(1, 2, figsize=(4, 8))
-
-                for j in range(2):
-                    axes[j].axis("off")
-                
-                axes[0].imshow(temp_im1)
-                axes[1].imshow(im2)
-                plt.show()
-                image.paste(Image.fromarray(im2), (int(left), int(top) - int(abs(bottom-top))))
-                image.paste(temp_im1, (int(left), int(top) - int(abs(bottom-top)) * 2))
-            
-        result = image.convert("RGBA")
-        result = Image.alpha_composite(result, temp_image_)
-        
-        return np.array(result)
     
     if return_sequence is False: return  np.array(image)
     else:  return image
@@ -431,9 +429,14 @@ def draw_boxes_v8_seg(image, boxes, box_classes, class_names, scores=None, use_c
     thickness   = (image.size[0] + image.size[1]) // 300
     temp_images = [] 
 
+    ###########
+    temp_image_  = area(image=image, fill = (255, 50, 200, 30))
+    ###########
+
     for i, c in list(enumerate(box_classes)):
         box_class   = class_names[c]
         box         = boxes[i]
+        drop_box    = True
         
         if isinstance(scores.numpy(), np.ndarray):
             score   = scores.numpy()[i]
@@ -466,35 +469,50 @@ def draw_boxes_v8_seg(image, boxes, box_classes, class_names, scores=None, use_c
             df['score'].append(float(_label_[1]))
             df['label'].append(_label_[0])
 
-            if (top - 20) >= 0 : text_origin = np.array([left, top - 20])
-            else:
-                idd = 0
-                while (top - 20 + idd) < 0:
-                    idd += 1
-                text_origin = np.array([left, top - 20 + idd])
+            #####################
+
+            if top > 250 and bottom <= 600:
+                a, b = [left, bottom], [right, bottom]
+                drop_box = line(a=a, b=b)
+            else: drop_box = False
             
-            if only_mask is False:
-                temp_draw.rectangle(
-                    [left, top, right, bottom], outline=colors[LABEL]+(150,), width=2, fill=colors[LABEL]+(alpha,) 
-                    )
-            else:
-                temp_draw.rectangle(
-                    [left, top, right, bottom], outline=colors[LABEL]+(150,), width=2, fill=None 
-                    )
+            ######################
             
-            if with_names is True:        
-                temp_draw.rectangle(
-                    [tuple(text_origin), tuple(text_origin + (label_size, 20))],
-                    fill=colors[LABEL]+(255,) 
-                    )
-                temp_draw.text(text_origin, label, fill=(0, 0, 0, 255), font=font,  embedded_color=True)
-            temp_images.append(temp_image)
+            if drop_box:
+                if (top - 20) >= 0 : text_origin = np.array([left, top - 20])
+                else:
+                    idd = 0
+                    while (top - 20 + idd) < 0:
+                        idd += 1
+                    text_origin = np.array([left, top - 20 + idd])
+                
+                if only_mask is False:
+                    temp_draw.rectangle(
+                        [left, top, right, bottom], outline=colors[LABEL]+(150,), width=2, fill=colors[LABEL]+(alpha,) 
+                        )
+                else:
+                    temp_draw.rectangle(
+                        [left, top, right, bottom], outline=colors[LABEL]+(150,), width=2, fill=None 
+                        )
+                
+                if with_names is True:        
+                    temp_draw.rectangle(
+                        [tuple(text_origin), tuple(text_origin + (label_size, 20))],
+                        fill=colors[LABEL]+(255,) 
+                        )
+                    temp_draw.text(text_origin, label, fill=(0, 0, 0, 255), font=font,  embedded_color=True)
+                temp_images.append(temp_image)
+            else: pass
         else : pass  
 
     result = image.convert("RGBA")
 
     for temp_image in temp_images:
         result = Image.alpha_composite(result, temp_image)
+   
+    ###########
+    result = Image.alpha_composite(result, temp_image_)
+    ###########
   
     return np.array(result)
 

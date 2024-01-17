@@ -84,6 +84,22 @@ def styles():
             font-size: 25px; /* Taille de police */
         }
 
+        .custom-text-under5 {
+            color: darkgray; /* Couleur du texte */
+            text-align: left; /* Alignement du texte */
+            height: 40px; /* longueur */
+            line-height: 1.5; /* Hauteur de ligne */
+            background-image: linear-gradient(to bottom, rgb(20, 255, 200), rgb(30, 30, 30), gray);
+            border-radius: 5px; /* Coins arrondis */
+            margin: 3px; /* Marge extérieure */
+            border: 2px solid #555; /* Bordure */
+            padding: 5px; /* Marge intérieure pour le texte */
+            text-transform: capitalize; /* Texte en majuscules capitalize, lowercase*/
+            /*display: inline-block;*/
+            font-family: Arial, sans-serif; /* font family*/
+            font-size: 25px; /* Taille de police */
+        }
+
         .custom-button {
             background-color: #4CAF50; /* Green background color */
             border: none; /* Remove border */

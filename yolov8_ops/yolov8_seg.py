@@ -11,6 +11,24 @@ import pandas as pd
 import cv2
 import streamlit as st
 
+def line(a, b):
+    # y1 = -3.05 * x + 860
+    # y2 = 1.75 * x - 831
+
+    isin = False 
+
+    if (a[1] + 3.05 * a[0]) >= 800:
+        if (b[1] - 2.7 * b[0]) >= -831:
+            isin = True 
+
+    return isin
+
+    
+    c1 = ()
+    a = (alpha[1] - c ) / alpha[0]
+
+    return (a, c)
+
 def yolov8_seg(st:st, df, shape, show, response, resume, return_sequence, colors, alpha, mode, only_mask, with_names, model, **kwargs):
     frame           = kwargs['image_file'][0][0].copy()
     detections      = model.predict(frame)[0]
@@ -24,7 +42,6 @@ def yolov8_seg(st:st, df, shape, show, response, resume, return_sequence, colors
     masks           = detections.masks.data.numpy()
     #if seg is True:
     class_id        = detections.boxes.data.numpy()[:, -1].astype("int32")
-    frame = draw_mask(frame, masks=masks, Colors=colors, class_names=kwargs['Class_names'], alpha=100, class_id = class_id, mode=mode)
     #else: pass 
 
     for detection in detections.boxes.data.tolist():
@@ -33,6 +50,9 @@ def yolov8_seg(st:st, df, shape, show, response, resume, return_sequence, colors
             box_classes.append(int(class_id))
             boxes.append([x1, y1, x2, y2])
             scores.append(score)
+    
+    frame = draw_mask(frame, masks=masks, Colors=colors, class_names=kwargs['Class_names'],
+                       alpha=100, class_id = class_id, mode=mode, boxes=None)
     
     if scores:
         scores          = tf.constant(scores, dtype=tf.float32)
@@ -188,7 +208,7 @@ def yolovo_video_seg_youtube(st:st, video, df, details, show, resume, response,
         else: pass  
     else: pass
 
-def draw_mask(image, masks, Colors, class_names, alpha=80, class_id=None, mode: str="gray"):
+def draw_mask(image, masks, Colors, class_names, alpha=80, class_id=None, mode: str="gray", boxes=None):
     from PIL import Image, ImageDraw, ImageFont, ImageOps
     import streamlit as st 
     # Assurez-vous que les masques ont les mêmes dimensions que l'image de fond
@@ -198,22 +218,31 @@ def draw_mask(image, masks, Colors, class_names, alpha=80, class_id=None, mode: 
     #draw = ImageDraw.Draw(result)
     
     temp_images = []
-
+    
     for i in range(len(masks)):
         temp_image  = Image.new("RGBA", image.size, (0, 0, 0, 0))
         temp_draw   = ImageDraw.Draw(temp_image) 
         mask = masks[i]
         color = Colors[class_names[class_id[i]]]
+        draw_mask = True 
 
-        for x in range(mask.width):
-            for y in range(mask.height):
-                if mask.getpixel((x, y)) > 0:
-                    # Récupérez la couleur du pixel existant
-                    r, g, b = color
-                    # Créez une nouvelle couleur avec la valeur alpha spécifiée
-                    color_with_alpha = (r, g, b, alpha)
-                    temp_draw.point((x, y), fill=color_with_alpha)
-        temp_images.append(temp_image)
+        if boxes:
+            left, top, right, bottom = boxes[i]
+            if top > 250 and bottom <= 600:
+                a, b = [left, bottom], [right, bottom]
+                draw_mask = line(a=a, b=b)
+            else: draw_mask = False
+
+        if draw_mask:
+            for x in range(mask.width):
+                for y in range(mask.height):
+                    if mask.getpixel((x, y)) > 0:
+                        # Récupérez la couleur du pixel existant
+                        r, g, b = color
+                        # Créez une nouvelle couleur avec la valeur alpha spécifiée
+                        color_with_alpha = (r, g, b, alpha)
+                        temp_draw.point((x, y), fill=color_with_alpha)
+            temp_images.append(temp_image)
     
     result = image.convert("RGBA")
 

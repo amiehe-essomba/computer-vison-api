@@ -194,11 +194,23 @@ def head(st = st):
                         head_img(st=st, factor=factor, types=types[i], path=image_location[i])
                 #head_img(st=st, path='./images/tracked.jpg', factor=factor)
 
-            st.write('<h2 class="custom-text-under4">Objects Tracking & Segmentation</h2>', unsafe_allow_html=True)
+            st.write('<h2 class="custom-text-under4">Objects Detection & Segmentation</h2>', unsafe_allow_html=True)
             with st.expander("HAVE A LOOK"):
-                tab_track = st.tabs(['original', 'detection', 'segmentation'])
-                image_location = ['./video/yolo_video2.mp4', './video/yolo_video2_pred.mp4', './video/yolo_video3_pred.mp4']
-                types = ['video', 'video', 'video']
+                tab_track = st.tabs(['original', 'detection', 'segmentation', 'area of interest'])
+                image_location = ['./video/yolo_video2.mp4', './video/yolo_video2_pred.mp4', 
+                                  './video/yolo_video3_pred.mp4', './video/sample_pred.mp4']
+                types = ['video', 'video', 'video', "video"]
+
+                for i in range(len(tab_track)):
+                    with tab_track[i]:
+                        st.video(all_videos[i])
+                        #head_img(st=st, types=types[i], path=image_location[i])
+            
+            st.write('<h2 class="custom-text-under5">Objects Tracking</h2>', unsafe_allow_html=True)
+            with st.expander("HAVE A LOOK"):
+                tab_track = st.tabs(['Counting', 'Speed'])
+                image_location = ['./video/counting.mp4', './video/velocity.mp4']
+                types = ['video', 'video']
 
                 for i in range(len(tab_track)):
                     with tab_track[i]:

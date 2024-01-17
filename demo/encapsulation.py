@@ -1,5 +1,6 @@
 import tempfile
 import imageio
+import time
 import numpy as np
 from PIL import Image
 from yolo.utils.tools import preprocess_image
@@ -157,14 +158,18 @@ class YOLO_MODEL:
     
         masks           = detections.masks.data.numpy()
         class_id        = detections.boxes.data.numpy()[:, -1].astype("int32")
-        frame = draw_mask(frame, masks=masks, Colors=colors, class_names=items['Class_names'], alpha=100, class_id = class_id, mode=mode)
+        
 
         for detection in detections.boxes.data.tolist():
-            x1, y1, x2, y2, score, class_id = detection
+            x1, y1, x2, y2, score, class_id_ = detection
+
             if score >= score_threshold:
-                box_classes.append(int(class_id))
+                box_classes.append(int(class_id_))
                 boxes.append([x1, y1, x2, y2])
                 scores.append(score)
+        
+        frame = draw_mask(frame, masks=masks, Colors=colors, class_names=items['Class_names'], 
+                          alpha=100, class_id = class_id, mode=mode, boxes=boxes)
         
         if scores:
             scores          = tf.constant(scores, dtype=tf.float32)
@@ -188,7 +193,7 @@ class YOLO_MODEL:
         return image_predicted
 
     def yolov8_track_demo(self, df, shape,  response, colors, tracker = None, 
-                                track_history = None, model=None, **items):
+                                track_history = None, model=None, times=None, counter=None, **items):
         score_threshold = items['score_threshold']
         frame           = items['image_file'][0][0].copy()
         detections      = model.track(frame, conf=score_threshold, persist=True, tracker=tracker)[0]
@@ -197,27 +202,42 @@ class YOLO_MODEL:
         scores          = []
         ids             = []
         points          = None 
+        velocities      = []
 
         for detection in detections.boxes.data.tolist():
             try:
                 x1, y1, x2, y2, id_tracker, score, class_id = detection
+                if id_tracker not in counter:
+                    counter.append(id_tracker)
+
                 track = track_history[id_tracker]
                 track.append((float(x1), float(y1)))   
-                if len(track) > 30:   
+                if len(track) > 100:   
                     track.pop(0)
                 points = np.hstack(track).astype(np.int32).reshape((-1, 1, 2))
+
+                if times:
+                    if len(track) > 1:
+                        dt = times
+                        x1, y1 = track[-1]
+                        x2, y2 = track[-2]
+                        dx = np.sqrt((x1-x2) ** 2 + (y1-y2) ** 2)# * pixel 
+                        v = (dx / dt) * 3.6
+                        velocities.append(v)
+                
+                if score >=  score_threshold:
+                    #if int(id_tracker) in track_num:
+                    box_classes.append(int(class_id))
+                    boxes.append([x1, y1, x2, y2])
+                    scores.append(score)
+                    ids.append(int(id_tracker))
+
             except ValueError: 
                 x1, y1, x2, y2, score, class_id = detection
                 id_tracker = -1
 
-            if score >=  score_threshold:
-                #if int(id_tracker) in track_num:
-                box_classes.append(int(class_id))
-                boxes.append([x1, y1, x2, y2])
-                scores.append(score)
-                ids.append(int(id_tracker))
-
         if scores:
+            print(len(velocities), len(box_classes))
             scores          = tf.constant(scores, dtype=tf.float32)
             box_classes     = tf.constant(box_classes, dtype=tf.int32)
             boxes           = tf.constant(boxes, dtype=tf.float32)
@@ -227,7 +247,8 @@ class YOLO_MODEL:
 
             image_predicted = draw_boxes_v8(image=frame, boxes=boxes, box_classes=box_classes, scores=scores, 
                                             with_score=response, colors=colors, class_names=class_names, 
-                                            use_classes=use_classes, df=df, width=4, ids=ids)
+                                            use_classes=use_classes, df=df, width=4, ids=ids, is_tracked=True, 
+                                            velocities=None, counter=counter)
 
             image_predicted = resize(image_predicted, output_shape=shape)
         else:
@@ -297,27 +318,22 @@ class YOLO_MODEL:
         i                   = -1
 
         with imageio.get_writer(temp_video_file.name,  fps=fps, format='FFMPEG', mode='I') as writer:
-            while (video.isOpened()):
-                re, frame = video.read()
-                if re:
-                    i += 1
+            for i, frame in enumerate(video):
+                if i in range(start, end, step):
+                    frame  = Image.fromarray(frame, mode='RGB')
+                    frame, frame_data, shape    = preprocess_image(img_path=frame, model_image_size = (608, 608), done=True) 
+                    frame_count                += 1
+                    items['image_file']         = [(frame,frame_data)]
                     
-                    if i in range(start, end, step):
-                        frame  = Image.fromarray(frame, mode='RGB')
-                        frame, frame_data, shape    = preprocess_image(img_path=frame, model_image_size = (608, 608), done=True) 
-                        frame_count                += 1
-                        items['image_file']         = [(frame,frame_data)]
-                        
-                        image_predicted = self.yolov8_seg_demo(df=df, shape=shape, response=response,
-                                        colors=colors,  model=model, **items)
-                        image_predicted = image_predicted.astype('float32')
-                        #image_predicted = (np.array(image_predicted) * 255).astype(np.int32)
-                        #image_predicted = np.uint8(image_predicted)
-                        writer.append_data(image_predicted)
-                    else: pass
-
+                    image_predicted = self.yolov8_seg_demo(df=df, shape=shape, response=response,
+                                    colors=colors,  model=model, **items)
+                    image_predicted = image_predicted.astype('float32')
+                    #image_predicted = (np.array(image_predicted) * 255).astype(np.int32)
+                    #image_predicted = np.uint8(image_predicted)
+                    writer.append_data(image_predicted)
+                    
                     if i == end: break
-                else: break
+                else: pass
         
         print("\n\n>>>> banary lecture in progress ...")
         # Ouvrir le fichier temporaire en mode lecture binaire (rb)
@@ -344,37 +360,40 @@ class YOLO_MODEL:
         temp_video_file     = tempfile.NamedTemporaryFile(delete=False, suffix=".mp4")
         video_data          = None 
         i                   = -1
-        color_track         = (0, 255, 0)
+        color_track         = (0, 255, 255)
         track_history       = defaultdict(lambda: []) 
-        
+        time_init           = 0.
+        counter             = []
+    
         with imageio.get_writer(temp_video_file.name, mode='?', fps=fps) as writer:
-            while (video.isOpened()):
-                re, frame = video.read()
-                if re:
-                    i += 1
+            for i, frame in enumerate(video):
+                if i in range(start, end, step):
+                    if i == start:
+                        pass 
+                    time_init = (i / fps)
+                    frame  = Image.fromarray(frame, mode='RGB')
+                    frame, frame_data, shape    = preprocess_image(img_path=frame, model_image_size = (608, 608), done=True) 
+                    frame_count                += 1
+                    items['image_file']         = [(frame,frame_data)]
                     
-                    if i in range(start, end, step):
-                        frame  = Image.fromarray(frame, mode='RGB')
-                        frame, frame_data, shape    = preprocess_image(img_path=frame, model_image_size = (608, 608), done=True) 
-                        frame_count                += 1
-                        items['image_file']         = [(frame,frame_data)]
-                        
-                        image_predicted, points = self.yolov8_track_demo(df=df, shape=shape, response=response,
-                                        colors=colors, tracker=tracker, track_history=track_history, model=model, **items)
-                      
-                        image_predicted = (np.array(image_predicted) * 255).astype(np.int32)
+                    image_predicted, points = self.yolov8_track_demo(df=df, shape=shape, response=response,
+                                    colors=colors, tracker=tracker, track_history=track_history, 
+                                        model=model, times=time_init, counter=counter, **items)
+                    
+                    image_predicted = (np.array(image_predicted) * 255).astype(np.int32)
 
-                        if points.all():
-                            cv2.polylines(image_predicted, [points], isClosed=False, color=color_track, thickness=10)
-                        
-                        image_predicted = np.uint8(image_predicted)
-                        writer.append_data(image_predicted)
-                 
-                    else: pass
+                    if points.all():
+                        cv2.polylines(image_predicted, [points], isClosed=False, color=color_track, thickness=5)
+                    
+                    image_predicted = np.uint8(image_predicted)
+                    writer.append_data(image_predicted)
+                    plt.imshow(image_predicted)
+                    plt.show()
+                
+                else: pass
 
-                    if i == end: break
-                else: break
-        
+                if i == end: break
+                
         # Ouvrir le fichier temporaire en mode lecture binaire (rb)
         print("\n\n>>>> banary lecture in progress ...")
         # Ouvrir le fichier temporaire en mode lecture binaire (rb)
