@@ -50,7 +50,7 @@ def pred(st : streamlit):
             if label_select != "Camera":
                 model_type = st.selectbox(label='Select models', 
                                 options=('yolov8', 'yolov8-seg', 'ocr', 
-                                        'ocr+yolov8', 'yolov8-pose', 'my model'), 
+                                        'yolov8-pose', 'my model'), 
                                 disabled=desable_scale)
             else:
                 model_type = st.selectbox(label='Select models', 
@@ -367,11 +367,11 @@ def Image(st:streamlit, all_models:dict, df, col, shape, model_type, show, **kwa
     if model_type == 'yolov8-pose':
         ctt1, ctt2, ctt3 = st.columns(3)
         with ctt1:
-            radius = st.slider('radius', min_value=1, max_value=10, value=1, step=1)
+            radius = st.slider('radius', min_value=1, max_value=20, value=1, step=1)
         with ctt2:
-            line_width = st.slider('line width', min_value=1, max_value=5, step=1)
+            line_width = st.slider('line width', min_value=1, max_value=20, step=1)
         with ctt3:
-            with_cls = st.checkbox('with OD')
+            with_cls = st.checkbox('with Oject detection')
             st.write('state', with_cls)
 
     if model_type == 'my model': grad_cam_dis = False 

@@ -45,9 +45,9 @@ def yolov8_seg(st:st, df, shape, show, response, resume, return_sequence, colors
     #else: pass 
 
     for detection in detections.boxes.data.tolist():
-        x1, y1, x2, y2, score, class_id = detection
+        x1, y1, x2, y2, score, class_id_ = detection
         if score >= score_threshold:
-            box_classes.append(int(class_id))
+            box_classes.append(int(class_id_))
             boxes.append([x1, y1, x2, y2])
             scores.append(score)
     

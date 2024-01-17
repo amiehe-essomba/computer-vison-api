@@ -430,7 +430,7 @@ def draw_boxes_v8_seg(image, boxes, box_classes, class_names, scores=None, use_c
     temp_images = [] 
 
     ###########
-    temp_image_  = area(image=image, fill = (255, 50, 200, 30))
+    #temp_image_  = area(image=image, fill = (255, 50, 200, 30))
     ###########
 
     for i, c in list(enumerate(box_classes)):
@@ -511,7 +511,7 @@ def draw_boxes_v8_seg(image, boxes, box_classes, class_names, scores=None, use_c
         result = Image.alpha_composite(result, temp_image)
    
     ###########
-    result = Image.alpha_composite(result, temp_image_)
+    #result = Image.alpha_composite(result, temp_image_)
     ###########
   
     return np.array(result)

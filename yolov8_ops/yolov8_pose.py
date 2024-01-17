@@ -155,5 +155,5 @@ def connections(image, kpts, shape=(640, 640), point_radius=5, kpt_line=True, co
         result = Image.alpha_composite(result, temp_image)
 
         
-    return result
+    return result.convert("RGB")
 
