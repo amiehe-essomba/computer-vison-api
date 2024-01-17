@@ -71,7 +71,7 @@ def sidebar(streamlit = st):
     streamlit.sidebar.markdown(f'<a href="{git_page}" target="_blank"><img src="{cm}" width="360" height="200"></a>', unsafe_allow_html=True)
     
     # contains section : create the table of constains 
-    streamlit.sidebar.write('<h3 class="sidebar-text">Table of contains</h3>', unsafe_allow_html=True)
+    streamlit.sidebar.write('<h3 class="sidebar-text">Contains</h3>', unsafe_allow_html=True)
     for i in range(2):
         streamlit.sidebar.write('', unsafe_allow_html=True)
     # list of contains 
@@ -124,7 +124,7 @@ def sidebar(streamlit = st):
         contain_feedback = None 
         index = None   
     # Scripts python section : 
-    streamlit.sidebar.write('<h3 class="sidebar-text">Scripts of Project </h3>', unsafe_allow_html=True)
+    streamlit.sidebar.write('<h3 class="sidebar-text">Scripts</h3>', unsafe_allow_html=True)
     # liste of python scripts to create yolo model
     yolo_contrains = ("IoU", "yolo filter boxes", "yolo-non-max suppression", 
                 "yolo boxes to corners", "yolo evaluation", "yolo model")

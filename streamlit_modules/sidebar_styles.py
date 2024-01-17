@@ -10,6 +10,7 @@ def sidebar_styles():
         text-decoration: none; /* Souligné underline overline */ 
         /*display: inline-block;*/
         height: 40px; /* longueur */
+        "width": "250px";
         box-shadow: 2px 4px 3px 0 rgba(20, 0, 0.5, 5); /* Ombre */
         font-family: Arial, sans-serif; /* font family*/
         font-size: 1px; /* Taille de police */

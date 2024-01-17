@@ -203,8 +203,8 @@ def head(st = st):
 
                 for i in range(len(tab_track)):
                     with tab_track[i]:
-                        st.video(all_videos[i])
-                        #head_img(st=st, types=types[i], path=image_location[i])
+                        #st.video(all_videos[i])
+                        head_img(st=st, types=types[i], path=image_location[i])
             
             st.write('<h2 class="custom-text-under5">Objects Tracking</h2>', unsafe_allow_html=True)
             with st.expander("HAVE A LOOK"):
@@ -214,8 +214,8 @@ def head(st = st):
 
                 for i in range(len(tab_track)):
                     with tab_track[i]:
-                        st.video(all_videos[i])
-                        #head_img(st=st, types=types[i], path=image_location[i])
+                        #st.video(all_videos[i])
+                        head_img(st=st, types=types[i], path=image_location[i])
     else :
         if yolo_feedback_contrain :  
             st.code(code(yolo_feedback_contrain), language='python', line_numbers=True)    
