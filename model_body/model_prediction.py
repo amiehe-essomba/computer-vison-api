@@ -19,8 +19,8 @@ def pred(st : streamlit):
         "segmentation" : [("yolov8-seg", ""), True],
         "detection"    : [("my model", "yolov8"), False],
         "ocr"          : [("ocr", ""), True],
-        "count"        : [("yolov8", 'yolov8-seg'), False],
-        "localization" : [("my model", ""), True],
+        #"count"        : [("yolov8", 'yolov8-seg'), False],
+        #"localization" : [("my model", ""), True],
         "tracking"     : [("yolov8", "yolov8-seg"), False],
         "pose"         : [("yolov8-pose", ""), True]
         }
