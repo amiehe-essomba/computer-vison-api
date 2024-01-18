@@ -19,8 +19,8 @@ def pred(st : streamlit):
         "segmentation" : [("yolov8-seg", ""), True],
         "detection"    : [("my model", "yolov8"), False],
         "ocr"          : [("ocr", ""), True],
-        #"count"        : [("yolov8", 'yolov8-seg'), False],
-        #"localization" : [("my model", ""), True],
+        "count"        : [("yolov8", 'yolov8-seg'), False],
+        "localization" : [("my model", ""), True],
         "tracking"     : [("yolov8", "yolov8-seg"), False],
         "pose"         : [("yolov8-pose", ""), True]
         }
@@ -58,7 +58,7 @@ def pred(st : streamlit):
 
     with col3:
         method_cal = st.selectbox('Select method', options=("segmentation", "detection", 
-                                    "ocr", "count", "localization", "tracking", "pose"), index=None, disabled=locked_mod)
+                                    "ocr", "tracking", "pose"), index=None, disabled=locked_mod)
         tracking = True if method_cal=="tracking" else False 
 
     with col4:
