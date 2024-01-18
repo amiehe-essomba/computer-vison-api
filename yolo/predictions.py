@@ -6,6 +6,12 @@ from yolo.utils.tools import  draw_boxes
 from skimage.transform import resize
 from grad_cam.grad_cam import CompGradcam
 
+def area_conv(area, shape):
+    for key, value in area.items():
+        area[key] = ( ((value[0] * 608) / shape[1]), ((value[1] * 608) / shape[0]) )
+    
+    return area
+
 def prediction(
         yolo_model  : any, 
         image_file  : list, 
@@ -24,7 +30,8 @@ def prediction(
         file_type       : str   = 'image',
         with_score      : bool  = True,
         colors          : dict  = {},
-        grad_cam        : str   = False
+        grad_cam        : bool  = False,
+        area            : dict  = {}
         ):
 
     out_scores, out_boxes, out_classes  = [[], [], []]
@@ -54,8 +61,11 @@ def prediction(
                                         image.size[0]], max_boxes, score_threshold, iou_threshold)
 
                 # Draw bounding boxes on the image file
+                if area:
+                    area = area_conv(area=area, shape=shape)
                 draw_image = draw_boxes(image=image, boxes=out_boxe, box_classes=out_classe, with_score=with_score, 
-                                        class_names=class_names, scores=out_score, use_classes=use_classes, df=data_dict, colors=colors)
+                                        class_names=class_names, scores=out_score, use_classes=use_classes, 
+                                        df=data_dict, colors=colors, area=area)
                 
                 r = shape[0] / shape[1] 
 

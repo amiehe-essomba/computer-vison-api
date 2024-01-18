@@ -15,6 +15,15 @@ from model_in_cache.models import load_all_models
 
 def pred(st : streamlit):
     all_models = load_all_models()
+    modeltype  = {
+        "segmentation" : [("yolov8-seg", ""), True],
+        "detection"    : [("my model", "yolov8"), False],
+        "ocr"          : [("ocr", ""), True],
+        "count"        : [("yolov8", 'yolov8-seg'), False],
+        "localization" : [("my model", ""), True],
+        "tracking"     : [("yolov8", "yolov8-seg"), False],
+        "pose"         : [("yolov8-pose", ""), True]
+        }
 
     st.write('<style>{}</style>'.format(styles()), unsafe_allow_html=True)
     st.write(f'<h1 class="header-text">Welcome in prediction section</h1>', unsafe_allow_html=True)
@@ -36,6 +45,8 @@ def pred(st : streamlit):
     with col2:
         show = st.checkbox('Show files uploaded', disabled=locked_mod, value=True)
         st.write('state', show)
+
+    """
     with col3:
         if label_select == "Camera":
             tracking = st.checkbox('Tracking', disabled=True)
@@ -43,9 +54,23 @@ def pred(st : streamlit):
         st.write('state', tracking)
         if tracking : tracking = True 
         else: tracking = False
+    """
+
+    with col3:
+        method_cal = st.selectbox('Select method', options=("segmentation", "detection", 
+                                    "ocr", "count", "localization", "tracking", "pose"), index=None, disabled=locked_mod)
+        tracking = True if method_cal=="tracking" else False 
+
     with col4:
         #if show : desable_scale = False 
-        desable_scale  = locked_mod
+        #desable_scale  = locked_mod
+        if method_cal:
+            disable_scale = modeltype[method_cal][1]
+            options = modeltype[method_cal][0]
+            model_type = st.selectbox(label='Select models', options=options, disabled=disable_scale, index=0)
+        else: model_type = None 
+
+        """
         if tracking is False:
             if label_select != "Camera":
                 model_type = st.selectbox(label='Select models', 
@@ -57,11 +82,12 @@ def pred(st : streamlit):
                                 options=('yolov8', "yolov8-cls", 'yolov8-seg', 'yolov8-pose', 'my model'), 
                                 disabled=desable_scale)
         else: model_type = st.selectbox(label='Select models', options=('yolov8', ''),  disabled=True)
+        """
 
     if model_type in ['ocr', 'ocr+yolov8']: factor = True 
     else: factor = False 
     
-    if label_select:
+    if model_type:#label_select:
         if model_type == 'my model': locked = False 
         else: locked = True 
 
@@ -377,14 +403,59 @@ def Image(st:streamlit, all_models:dict, df, col, shape, model_type, show, **kwa
     if model_type == 'my model': grad_cam_dis = False 
     else: grad_cam_dis = True 
 
-    grad_cam_col, run_data_col = st.columns(2)
+    grad_cam_col, area_of_in = st.columns(2)
 
     with grad_cam_col:
         grad_cam = st.checkbox("show grad cam", disabled=grad_cam_dis)
         st.write('state', grad_cam)
+    
+    with area_of_in:
+        is_area = st.checkbox('Draw Area', disabled=True)
+        st.write('state', is_area)
 
-    with run_data_col:
-        run_data = button_style(st=st, name='run')
+        domaine_area = {}
+
+        if is_area:
+            x, y = st.columns(2)
+            with x:
+                Ax = st.select_slider("coordinates A(x)", options=range(shape[1]), value=0)
+                st.write(f'A(x) = {Ax}')
+            with y :
+                Ay = st.select_slider("coordinates A(y)", options=range(shape[0]), value=0)
+                st.write(f'A(y) = {Ay}')
+            A = [Ax, Ay]
+
+            x, y = st.columns(2)
+            with x:
+                Ax = st.select_slider("coordinates B(x)", options=range(shape[1]), value=0)
+                st.write(f'B(x) = {Ax}')
+            with y :
+                Ay = st.select_slider("coordinates B(y)", options=range(shape[0]), value=0)
+                st.write(f'B(y) = {Ay}')
+            B = [Ax, Ay]
+
+            x, y = st.columns(2)
+            with x:
+                Ax = st.select_slider("coordinates C(x)", options=range(shape[1]), value=0)
+                st.write(f'B(x) = {Ax}')
+            with y :
+                Ay = st.select_slider("coordinates C(y)", options=range(shape[0]), value=0)
+                st.write(f'B(y) = {Ay}')
+            C = [Ax, Ay]
+
+            x, y = st.columns(2)
+            with x:
+                Ax = st.select_slider("coordinates D(x)", options=range(shape[1]), value=0)
+                st.write(f'B(x) = {Ax}')
+            with y :
+                Ay = st.select_slider("coordinates D(y)", options=range(shape[0]), value=0)
+                st.write(f'B(y) = {Ay}')
+            D = [Ax, Ay]
+
+            domaine_area = dict(A=A, B=B, C=C, D=D)
+
+    #with run_data_col:
+    run_data = button_style(st=st, name='run')
 
     if run_data:
         if model_type == 'my model':
@@ -397,7 +468,7 @@ def Image(st:streamlit, all_models:dict, df, col, shape, model_type, show, **kwa
                 yolo_model=yolo_model, use_classes=kwargs['class_names'],
                 image_file=kwargs['image_file'], anchors=kwargs['anchors'], class_names=kwargs['Class_names'], img_size=(608, 608),
                 max_boxes=kwargs['max_boxes'], score_threshold=kwargs['score_threshold'], iou_threshold=kwargs['iou_threshold'], data_dict=df,
-                shape=shape, file_type='image', with_score=response, colors=colors, grad_cam=grad_cam
+                shape=shape, file_type='image', with_score=response, colors=colors, grad_cam=grad_cam, area=domaine_area
             )
             if grad_cam is False: pass 
             else:

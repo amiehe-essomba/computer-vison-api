@@ -205,6 +205,7 @@ class YOLO_MODEL:
         velocities      = []
 
         for detection in detections.boxes.data.tolist():
+            
             try:
                 x1, y1, x2, y2, id_tracker, score, class_id = detection
                 if id_tracker not in counter:
@@ -212,8 +213,10 @@ class YOLO_MODEL:
 
                 track = track_history[id_tracker]
                 track.append((float(x1), float(y1)))   
+                
                 if len(track) > 100:   
                     track.pop(0)
+                
                 points = np.hstack(track).astype(np.int32).reshape((-1, 1, 2))
 
                 if times:
@@ -237,7 +240,6 @@ class YOLO_MODEL:
                 id_tracker = -1
 
         if scores:
-            print(len(velocities), len(box_classes))
             scores          = tf.constant(scores, dtype=tf.float32)
             box_classes     = tf.constant(box_classes, dtype=tf.int32)
             boxes           = tf.constant(boxes, dtype=tf.float32)
@@ -248,7 +250,7 @@ class YOLO_MODEL:
             image_predicted = draw_boxes_v8(image=frame, boxes=boxes, box_classes=box_classes, scores=scores, 
                                             with_score=response, colors=colors, class_names=class_names, 
                                             use_classes=use_classes, df=df, width=4, ids=ids, is_tracked=True, 
-                                            velocities=None, counter=counter)
+                                            velocities=None, counter=None)
 
             image_predicted = resize(image_predicted, output_shape=shape)
         else:
@@ -360,7 +362,7 @@ class YOLO_MODEL:
         temp_video_file     = tempfile.NamedTemporaryFile(delete=False, suffix=".mp4")
         video_data          = None 
         i                   = -1
-        color_track         = (0, 255, 255)
+        color_track         = (255, 255, 0)
         track_history       = defaultdict(lambda: []) 
         time_init           = 0.
         counter             = []
@@ -383,7 +385,7 @@ class YOLO_MODEL:
                     image_predicted = (np.array(image_predicted) * 255).astype(np.int32)
 
                     if points.all():
-                        cv2.polylines(image_predicted, [points], isClosed=False, color=color_track, thickness=5)
+                        cv2.polylines(image_predicted, [points], isClosed=False, color=color_track, thickness=10)
                     
                     image_predicted = np.uint8(image_predicted)
                     writer.append_data(image_predicted)

@@ -14,20 +14,36 @@ from demo.tracker import delimiter_zone, Points
 import matplotlib.pyplot as plt
 
 
-def area(image, fill):
+def draw_area(image, fill, A=(200, 250), B=(85, 600), C=(530, 600), D=(400, 250)):
      
     temp_image  = Image.new("RGBA", image.size, (0, 0, 0, 0))
     temp_draw   = ImageDraw.Draw(temp_image)
 
-    points = [(200, 250), (85, 600), (530, 600), (400, 250)]
+    points = [A, B, C, D]
 
     temp_draw.polygon(points, fill=fill)
-    temp_draw.line([(200, 250), (85, 600)], width=4, fill=(0,0,255, 100))
-    temp_draw.line([(530, 600), (400, 250)], width=4, fill=(0,0,255, 100))
-    temp_draw.line([(85, 600), (530, 600)], width=4, fill=(0,0,255, 100))
-    temp_draw.line([(200, 250), (400, 250)], width=4, fill=(0,0,255, 100))
+    temp_draw.line([A, B], width=4, fill=(0,0,255, 100))
+    temp_draw.line([C, D], width=4, fill=(0,0,255, 100))
+    temp_draw.line([B, C], width=4, fill=(0,0,255, 100))
+    temp_draw.line([A, D], width=4, fill=(0,0,255, 100))
 
     return temp_image
+
+def draw_line(A, B, center, inv=False):
+    a = (A[1] - B[1]) / (A[0] - B[0])
+    c = A[1] - A[0] * a
+
+    isin = False 
+
+    if inv is False:
+        if (center[1] - a * center[0]) >= c:  
+            isin = True 
+    else:
+        if (center[1] - a * center[0]) <= c:  
+            isin = True 
+
+    return isin
+
     
 def line(a, b):
     # y1 = -3.05 * x + 860
@@ -35,17 +51,12 @@ def line(a, b):
 
     isin = False 
 
-    if (a[1] + 3.05 * a[0]) >= 800:
+    if (a[1] + 3.05 * a[0]) >= 860:
         if (b[1] - 2.7 * b[0]) >= -831:
             isin = True 
 
     return isin
 
-    
-    c1 = ()
-    a = (alpha[1] - c ) / alpha[0]
-
-    return (a, c)
 
 def preprocess_image(img_path, model_image_size, done : bool = False, factor = False):
     #image_type = imghdr.what(img_path)
@@ -115,7 +126,8 @@ def get_colors_for_classes(num_classes):
 
     return colors
 
-def draw_boxes(image, boxes, box_classes, class_names, scores=None, use_classes : list = [], df = {}, with_score : bool = True, colors=None):
+def draw_boxes(image, boxes, box_classes, class_names, scores=None, use_classes : list = [], 
+               df = {}, with_score : bool = True, colors=None, area : dict={}):
     """
     Draw bounding boxes on image.
 
@@ -138,6 +150,13 @@ def draw_boxes(image, boxes, box_classes, class_names, scores=None, use_classes 
         size=np.floor(3e-2 * image.size[1] + 0.5).astype('int32'))
     thickness   = (image.size[0] + image.size[1]) // 300
     #colors      = get_colors_for_classes(len(class_names))
+
+    if area:
+        A, B, C, D = area['A'], area['B'], area['C'], area['D']
+        fill=(255, 0, 25, 40)
+        temp_im = draw_area(image=image, fill=fill, A=A, B=B, C=C, D=D)
+    else:
+        temp_im = None
     
     """
     temp_image_  = Image.new("RGBA", image.size, (0, 0, 0, 0))
@@ -199,14 +218,14 @@ def draw_boxes(image, boxes, box_classes, class_names, scores=None, use_classes 
             else:  text_origin = np.array([left, top + 1])
             """
 
-            """
-            if top > 250 and bottom <= 600:
-                a, b = [left, bottom], [right, bottom]
-                drop_box = line(a=a, b=b)
-            else:
-                drop_box = False
-            """
-
+            
+            if area:
+                center = [left + abs(right-left)//2, top + abs(bottom-top)//2]
+                if A[1] < bottom <= B[1]:
+                    drop_box = draw_line(A=A, B=B, center=center, inv=False)
+                    drop_box = draw_line(A=C, B=D, center=center, inv=True)
+                else:  drop_box = False
+            
             if drop_box:
                 if (top - 20) >= 0 : text_origin = np.array([left, top - 20])
                 else:
@@ -247,10 +266,12 @@ def draw_boxes(image, boxes, box_classes, class_names, scores=None, use_classes 
 
         else : pass 
 
-    #result = image.convert("RGBA")
-    #result = Image.alpha_composite(result, temp_image_)
-    
-    return np.array(image)#, np.array(result) # np.array(image)
+    if area:
+        result = image.convert("RGBA")
+        result = Image.alpha_composite(result, temp_im)
+
+        return np.array(result.convert('RGB'))
+    else: return np.array(image)
 
 def draw_boxes_v8(image, boxes, box_classes, class_names, scores=None, use_classes : list = [], colors = None,
                   df = {}, with_score : bool = True, C =None, return_sequence=False, width=2, 
@@ -306,8 +327,8 @@ def draw_boxes_v8(image, boxes, box_classes, class_names, scores=None, use_class
         if LABEL in use_classes:
             #if ids.numpy()[j] in [1, 2, 3, 4, 5, 6, 7]:
             if type(ids) != type(None):  
-                #label += f' id:{int(ids.numpy()[j])}'
-                label = f'id:{int(ids.numpy()[j])}'
+                label += f' id:{int(ids.numpy()[j])}'
+                #label = f'id:{int(ids.numpy()[j])}'
 
             draw        = ImageDraw.Draw(image, mode="RGBA")
             label_size  = draw.textlength(text=label, font=font)
