@@ -12,6 +12,7 @@ from yolo import video_settings as vs
 from yolov8_ops import ocr_yolov8, ocr, yolov8, yolov8_seg, yolov8_pose
 import streamlit 
 from model_in_cache.models import load_all_models
+from collections import defaultdict
 
 def pred(st : streamlit):
     all_models = load_all_models()
@@ -19,7 +20,7 @@ def pred(st : streamlit):
         "segmentation" : [("yolov8-seg", ""), True],
         "detection"    : [("my model", "yolov8"), False],
         "ocr"          : [("ocr", ""), True],
-        "count"        : [("yolov8", 'yolov8-seg'), False],
+        "counting"     : [("yolov8", ''), True],
         "localization" : [("my model", ""), True],
         "tracking"     : [("yolov8", "yolov8-seg"), False],
         "pose"         : [("yolov8-pose", ""), True]
@@ -32,6 +33,7 @@ def pred(st : streamlit):
         st.write('', unsafe_allow_html=True)
 
     yolo_model_path = './yolo_model/' 
+    is_yolo = False
 
     # three columns for local file, show file updated, image scale factor 
     col1, col2, col3, col4 = st.columns(4)
@@ -46,18 +48,8 @@ def pred(st : streamlit):
         show = st.checkbox('Show files uploaded', disabled=locked_mod, value=True)
         st.write('state', show)
 
-    """
     with col3:
-        if label_select == "Camera":
-            tracking = st.checkbox('Tracking', disabled=True)
-        else: tracking = st.checkbox('Tracking', disabled=locked_mod)
-        st.write('state', tracking)
-        if tracking : tracking = True 
-        else: tracking = False
-    """
-
-    with col3:
-        method_cal = st.selectbox('Select method', options=("segmentation", "detection", 
+        method_cal = st.selectbox('Select method', options=("segmentation", "detection", "localization", "counting", 
                                     "ocr", "tracking", "pose"), index=None, disabled=locked_mod)
         tracking = True if method_cal=="tracking" else False 
 
@@ -68,26 +60,15 @@ def pred(st : streamlit):
             disable_scale = modeltype[method_cal][1]
             options = modeltype[method_cal][0]
             model_type = st.selectbox(label='Select models', options=options, disabled=disable_scale, index=0)
+            if model_type == "my model":
+                is_yolo = False 
+            else: is_yolo = True
         else: model_type = None 
-
-        """
-        if tracking is False:
-            if label_select != "Camera":
-                model_type = st.selectbox(label='Select models', 
-                                options=('yolov8', 'yolov8-seg', 'ocr', 
-                                        'yolov8-pose', 'my model'), 
-                                disabled=desable_scale)
-            else:
-                model_type = st.selectbox(label='Select models', 
-                                options=('yolov8', "yolov8-cls", 'yolov8-seg', 'yolov8-pose', 'my model'), 
-                                disabled=desable_scale)
-        else: model_type = st.selectbox(label='Select models', options=('yolov8', ''),  disabled=True)
-        """
 
     if model_type in ['ocr', 'ocr+yolov8']: factor = True 
     else: factor = False 
     
-    if model_type:#label_select:
+    if model_type:
         if model_type == 'my model': locked = False 
         else: locked = True 
 
@@ -152,7 +133,8 @@ def pred(st : streamlit):
                                     'Class_names' : Class_names,
                                     'max_boxes' : max_boxes,
                                     'score_threshold' : score_threshold,
-                                    'iou_threshold' : iou_threshold 
+                                    'iou_threshold' : iou_threshold,
+                                    "method_cal" : method_cal
                                     }
                                     
                                     df = {'label' : [], 'score':[], 'top':[], "left":[], "bottom":[], 'right':[]}
@@ -177,15 +159,15 @@ def pred(st : streamlit):
         elif label_select == 'Online':
             if show : show = True 
 
-            type_of_file = st.selectbox('File type', options=('image', 'video'), index=None)
+            type_of_file ="image" #st.selectbox('File type', options=('image', 'video'), index=None)
 
             if type_of_file:
-                url = st.text_input("Insert your url here please :")
+                url = st.text_input("Insert your image url here please :")
             else: url = ""
 
             if url:
                 if type_of_file == 'image':
-                    image, image_data, shape,  error = online_link(st=st, url=url)
+                    image, image_data, shape,  error = online_link(st=st, url=url, is_yolo=is_yolo)
 
                     if error is None:
                         [iou_threshold, score_threshold, max_boxes] = vs.slider_model(st=st, locked=locked)
@@ -223,7 +205,8 @@ def pred(st : streamlit):
                                 'max_boxes' : max_boxes,
                                 'score_threshold' : score_threshold,
                                 'iou_threshold' : iou_threshold,
-                                'image_file'   : [(image, image_data)]
+                                'image_file'   : [(image, image_data)],
+                                "method_cal" : method_cal
                                 }
                             if type_of_file == 'image':
                                 #tf.get_logger().setLevel(logging.ERROR)
@@ -235,10 +218,6 @@ def pred(st : streamlit):
                             else: pass
                         else: pass
                     else: st.warning(f'{error}')
-
-                #elif type_of_file == 'video':
-                #    if url:
-                #        st.write(f'<video width="640" height="360" controls><source src="{url}" type="video/mp4"></video>', unsafe_allow_html=True)
                 else:
                     st.write("Cannot upload this video please use YouTube instead")
             else: pass
@@ -281,7 +260,8 @@ def pred(st : streamlit):
                         'max_boxes' : max_boxes,
                         'score_threshold' : score_threshold,
                         'iou_threshold' : iou_threshold,
-                        'image_file'   : [(image, image_data)]
+                        'image_file'   : [(image, image_data)],
+                        "method_cal" : method_cal
                         }
               
                     df = {'label' : [], 'score':[], 'top':[], "left":[], "bottom":[], 'right':[]}
@@ -336,6 +316,7 @@ def pred(st : streamlit):
                     'max_boxes' : max_boxes,
                     'score_threshold' : score_threshold,
                     'iou_threshold' : iou_threshold, 
+                    "method_cal" : method_cal
                     }
 
                     df = {'label' : [], 'score':[], 'top':[], "left":[], "bottom":[], 'right':[]}
@@ -403,10 +384,10 @@ def Image(st:streamlit, all_models:dict, df, col, shape, model_type, show, **kwa
     if model_type == 'my model': grad_cam_dis = False 
     else: grad_cam_dis = True 
 
-    grad_cam_col, area_of_in = st.columns(2)
+    grad_cam_col, area_of_in, c_ = st.columns(3)
 
     with grad_cam_col:
-        grad_cam = st.checkbox("show grad cam", disabled=grad_cam_dis)
+        grad_cam = st.checkbox("show gradCAM", disabled=grad_cam_dis)
         st.write('state', grad_cam)
     
     with area_of_in:
@@ -454,6 +435,10 @@ def Image(st:streamlit, all_models:dict, df, col, shape, model_type, show, **kwa
 
             domaine_area = dict(A=A, B=B, C=C, D=D)
 
+    with c_:
+        font = st.selectbox("Font", options=["arial", 'arialbd', "calibri", "calibril", 
+                                      'consolai', "consolab", "calibriz", "corbell", 'micross'], index=3)
+        font = f"{font}.ttf"
     #with run_data_col:
     run_data = button_style(st=st, name='run')
 
@@ -468,7 +453,8 @@ def Image(st:streamlit, all_models:dict, df, col, shape, model_type, show, **kwa
                 yolo_model=yolo_model, use_classes=kwargs['class_names'],
                 image_file=kwargs['image_file'], anchors=kwargs['anchors'], class_names=kwargs['Class_names'], img_size=(608, 608),
                 max_boxes=kwargs['max_boxes'], score_threshold=kwargs['score_threshold'], iou_threshold=kwargs['iou_threshold'], data_dict=df,
-                shape=shape, file_type='image', with_score=response, colors=colors, grad_cam=grad_cam, area=domaine_area
+                shape=shape, file_type='image', with_score=response, colors=colors, grad_cam=grad_cam, area=domaine_area, font=font,
+                type_of_cal=kwargs['method_cal']
             )
             if grad_cam is False: pass 
             else:
@@ -478,37 +464,43 @@ def Image(st:streamlit, all_models:dict, df, col, shape, model_type, show, **kwa
             resume(st=st, df=df, show=show, img = kwargs['image_file'][0][0], **{"image_predicted" : image_predicted})
 
             if grad_cam:
-                with st.expander('see the grad cam here'):
+                with st.expander('see the gradCAM here'):
                     g1, g2 = st.columns(2)
 
                     with g1:
-                        st.header('Grad cam')
+                        st.header('GradCAM')
                         st.image(grad)
                     with g2:
-                        st.header('Guided grad cam')
+                        st.header('Guided gradCAM')
                         st.image(guided_grad)
         
         if model_type == 'yolov8':
             model = all_models['yolov8n.pt']
-            yolov8.yolov8(st, df, shape, show, response, resume, False, colors, model, **kwargs)
+            if kwargs["method_cal"] == 'detection':
+                yolov8.yolov8(st, df, shape, show, response, resume, False, colors, model, font, **kwargs)
+            else:
+                track_history   = defaultdict(lambda: []) 
+                tracker = ("bytetrack.yaml", "botsort.yaml")
+                yolov8.yolov8_track(st, df, shape, show, response, resume, False, colors, tracker[1], track_history,
+                                     model, font, **kwargs)
         
         if model_type == 'yolov8-seg':
             model = all_models["yolov8n-seg.pt"]
             yolov8_seg.yolov8_seg(st, df, shape, show, response, resume, False, colors, alpha, mode, 
-                                  only_mask, with_names, model, **kwargs)
+                                  only_mask, with_names, model, font, **kwargs)
         
         if model_type == 'yolov8-pose':
             model = all_models["yolov8n-pose.pt"]
             yolov8_pose.yolov8_pose(st=st, df=df, colors=colors, radus=radius, line_width = line_width, 
-                        shape=shape, resume=resume, shwo=show, response=response, od=with_cls, model=model, **kwargs)
-        
+                        shape=shape, resume=resume, shwo=show, response=response, od=with_cls, model=model, font=font, **kwargs)
+            
         if model_type == 'ocr+yolov8':
             models = [all_models['license_plate_detector.pt'], all_models['yolov8n.pt']]
             ocr_yolov8.ocr_yolov8(st, df, shape, show, response, resume, scaling, False, colors, models, **kwargs)
 
         if model_type == 'ocr':
             model = all_models['license_plate_detector.pt']
-            ocr.ocr(st, df, shape, show, response, resume, scaling, colors, model, **kwargs)
+            ocr.ocr(st, df, shape, show, response, resume, scaling, colors, model, font=font, **kwargs)
 
         if model_type == 'yolov8-cls':
             pass
@@ -583,7 +575,7 @@ def Video(st, prediction, all_models:dict, video, df, details, show, model_type,
             
             with ct1:
                 tracker = st.selectbox('Tracking models', ("bytetrack.yaml", 
-                                                    "botsort.yaml",), disabled=dis, index=0)
+                                                    "botsort.yaml"), disabled=dis, index=0)
             with ct2:
                 response = st.checkbox("With score")
                 st.write(response)

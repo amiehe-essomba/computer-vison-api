@@ -24,6 +24,7 @@ def yolov8_pose(
         od              :bool = False,
         response        :bool = False,
         model           :any  = None,
+        font            : str = 'calibril.ttf',
         **kwargs
         ) -> None | np.ndarray:
     
@@ -33,7 +34,7 @@ def yolov8_pose(
     
     if od:
         obj = object_detection(frame=frame, detections=detections, 
-                            df=df, colors=colors, response=response, width=line_width, **kwargs)
+                            df=df, colors=colors, response=response, width=line_width, font=font, **kwargs)
     try:
         keypoints = detections.keypoints.data.numpy()
         ndim = keypoints.shape[0]
@@ -49,7 +50,7 @@ def yolov8_pose(
         resume(st=st, df=df, show=show, img = kwargs['image_file'][0][0], **{"image_predicted" : image_predicted})
     else: return image_predicted
 
-def object_detection(frame, detections, df, colors, response, width, **kwargs):
+def object_detection(frame, detections, df, colors, response, width, font, **kwargs):
     box_classes, boxes, scores = [[], [], []]
     score_threshold = kwargs['score_threshold']
     for detection in detections.boxes.data.tolist():
@@ -66,7 +67,7 @@ def object_detection(frame, detections, df, colors, response, width, **kwargs):
         class_names     = kwargs['Class_names']
         use_classes     = kwargs['class_names']
         image_predicted = draw_boxes_v8(image=frame, boxes=boxes, box_classes=box_classes, scores=scores, with_score=response,
-                class_names=class_names, use_classes=use_classes, df=df, colors=colors, width=width, return_sequence=True)
+                class_names=class_names, use_classes=use_classes, df=df, colors=colors, width=width, return_sequence=True, f=font, pose=True)
     else:
         image_predicted = frame
     
@@ -147,7 +148,7 @@ def connections(image, kpts, shape=(640, 640), point_radius=5, kpt_line=True, co
                 continue
 
             temp_images.append(temp_image)
-            temp_draw.line([pos1, pos2], fill=colors[palette[i]], width=width)
+            temp_draw.line([pos1, pos2], fill=colors[palette[i]]+(70, ), width=width)
 
     result = image.convert("RGBA")
 

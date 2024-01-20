@@ -110,18 +110,18 @@ def file_read(st, uploaded_file : any, show: bool = True, factor : float = None)
 
     return files
 
-def online_link(st, url : str = "", show_image : bool = True):
+def online_link(st, url : str = "", show_image : bool = True, is_yolo : bool =False):
     image, image_data, shape, error = None, None, None, None
     # Vérifie si le champ de saisie n'est pas vide
     if url:
         # Affiche le lien hypertexte
         st.markdown(f"You enter this link : [{url}]({url})")
-        image, image_data, shape, error = url_img_read(url=url)
-
+        image, image_data, shape, error = url_img_read(url=url, is_yolo=is_yolo)
+        
         if error is None:
             if show_image is True:
                 st.header(f"image 0, shape = {shape}")
-                img_array = resize(np.array(image), output_shape=shape[:-1])
+                img_array = np.array(image)#resize(np.array(image), output_shape=shape[:-1])
                 st.image(img_array, use_column_width=True)
                 st.markdown(f"file successfully upladed...")
             else: pass
@@ -130,7 +130,7 @@ def online_link(st, url : str = "", show_image : bool = True):
 
     return (image, image_data, shape, error)
 
-def url_img_read( url : str, factor = False):
+def url_img_read( url : str, factor = False, is_yolo=False):
     from PIL import Image
     import requests
     from io import BytesIO 
@@ -146,10 +146,13 @@ def url_img_read( url : str, factor = False):
             image_data = BytesIO(response.content)
             #Image.open(image_data)
             image = Image.open(image_data)
-
             shape = np.array( [x for x in image.size] )
             if (shape < np.array([6000, 6000]) ).all() : 
-                image, image_data, shape = preprocess_image(img_path=image, model_image_size = (608, 608), done=True, factor=factor)
+                if is_yolo is False:
+                    image, image_data, shape = preprocess_image(img_path=image, model_image_size = (608, 608), done=True, factor=factor)
+                else:
+                    image_data = np.array(image)
+                    shape = image_data.shape
             else:
                 error = 'image size out of range (6000, 6000)'
         else:

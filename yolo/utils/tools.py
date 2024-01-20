@@ -44,7 +44,6 @@ def draw_line(A, B, center, inv=False):
 
     return isin
 
-    
 def line(a, b):
     # y1 = -3.05 * x + 860
     # y2 = 1.75 * x - 831
@@ -57,13 +56,15 @@ def line(a, b):
 
     return isin
 
-
-def preprocess_image(img_path, model_image_size, done : bool = False, factor = False):
+def preprocess_image(img_path, model_image_size, done : bool = False, factor = False, is_yolo=False):
     #image_type = imghdr.what(img_path)
     if done is False : image           = Image.open(img_path)
     else: image = img_path
     shape           = np.array(image).shape
-    resized_image   = image.resize(tuple(reversed(model_image_size)), Image.BICUBIC)
+    if is_yolo is False:
+        resized_image   = image.resize(tuple(reversed(model_image_size)), Image.BICUBIC)
+    else:
+        resized_image   = image.resize(tuple(reversed(640, 640)), Image.BICUBIC)
     image_data      = np.array(resized_image, dtype='float32')
     image_data /= 255.
     # Add batch dimension.
@@ -127,7 +128,7 @@ def get_colors_for_classes(num_classes):
     return colors
 
 def draw_boxes(image, boxes, box_classes, class_names, scores=None, use_classes : list = [], 
-               df = {}, with_score : bool = True, colors=None, area : dict={}):
+               df = {}, with_score : bool = True, colors=None, area : dict={}, f="calibril.ttf"):
     """
     Draw bounding boxes on image.
 
@@ -144,12 +145,13 @@ def draw_boxes(image, boxes, box_classes, class_names, scores=None, use_classes 
     Returns:
         A copy of `image` modified with given bounding boxes.
     """
-
+    """
     font = ImageFont.truetype(
         font='font/FiraMono-Medium.otf',
         size=np.floor(3e-2 * image.size[1] + 0.5).astype('int32'))
     thickness   = (image.size[0] + image.size[1]) // 300
     #colors      = get_colors_for_classes(len(class_names))
+    """
 
     if area:
         A, B, C, D = area['A'], area['B'], area['C'], area['D']
@@ -196,13 +198,15 @@ def draw_boxes(image, boxes, box_classes, class_names, scores=None, use_classes 
 
         LABEL = _label_[0]
         if LABEL in use_classes:
-            draw        = ImageDraw.Draw(image)
-            label_size  = draw.textlength(text=label, font=font)
+            draw        = ImageDraw.Draw(image, 'RGBA')
             top, left, bottom, right = box
             top         = max(0, np.floor(top + 0.5).astype('int32'))
             left        = max(0, np.floor(left + 0.5).astype('int32'))
             bottom      = min(image.size[1], np.floor(bottom + 0.5).astype('int32'))
             right       = min(image.size[0], np.floor(right + 0.5).astype('int32'))
+            size        = 3 + int(3e-1 * (abs(right-left)))
+            font        = ImageFont.truetype(font=f, size=size)
+            label_size  = draw.textlength(text=label, font=font)
 
             df['top'].append(top)
             df['left'].append(left)
@@ -211,7 +215,7 @@ def draw_boxes(image, boxes, box_classes, class_names, scores=None, use_classes 
             df['score'].append(float(_label_[1]))
             df['label'].append(_label_[0])
 
-
+            
             """
             if top -  >= 0: #label_size[1] >= 0:
                 text_origin = np.array([left, top - label_size]) # label_size[1]])
@@ -227,23 +231,24 @@ def draw_boxes(image, boxes, box_classes, class_names, scores=None, use_classes 
                 else:  drop_box = False
             
             if drop_box:
-                if (top - 20) >= 0 : text_origin = np.array([left, top - 20])
+                if (top - size) >= 0 : text_origin = np.array([left, top - size])
                 else:
                     idd = 0
-                    while (top - 20 + idd) < 0:
+                    while (top - size + idd) < 0:
                         idd += 1
-                    text_origin = np.array([left, top - 20 + idd])
+                    text_origin = np.array([left, top - size + idd])
                 # My kingdom for a good redistributable image drawing library.
-                for i in range(thickness):
+                for i in range(1):#(thickness):
                     try:
                         draw.rectangle(
-                            [left + i, top + i, right - i, bottom - i], outline=colors[LABEL]
+                            [left, top+i, right, bottom-i], outline=colors[LABEL], fill=colors[LABEL]+(30,)
                             )
                     except ValueError:
                         done = None 
                         if left + i >= right - i:
                             draw.rectangle(
                                 [left + i, top + i, left + i + abs(left-right), bottom - i], outline=colors[LABEL]
+                                , fill=colors[LABEL]+(30,)
                                 )
                             done = True 
 
@@ -251,15 +256,17 @@ def draw_boxes(image, boxes, box_classes, class_names, scores=None, use_classes 
                             if done is True : 
                                 draw.rectangle(
                                     [left + i, top - i, left + i + abs(left-right), top + i + abs(top-bottom)], outline=colors[LABEL]
+                                    , fill=colors[LABEL]+(30,)
                                     )
                             else:
                                 draw.rectangle(
                                     [left + i, top - i, right - i, top + i + abs(top-bottom)], outline=colors[LABEL]
+                                    , fill=colors[LABEL]+(30,)
                                     )
 
                 draw.rectangle(
-                    [tuple(text_origin), tuple(text_origin + (label_size, 20))],
-                    fill=colors[LABEL]
+                    [tuple(text_origin), tuple(text_origin + (label_size, size))],
+                    fill=colors[LABEL] + (70, ), outline=colors[LABEL]
                     )
                 draw.text(text_origin, label, fill=(0, 0, 0), font=font)
             del draw
@@ -273,9 +280,184 @@ def draw_boxes(image, boxes, box_classes, class_names, scores=None, use_classes 
         return np.array(result.convert('RGB'))
     else: return np.array(image)
 
+def draw_boxes_localalization(image, boxes, box_classes, class_names, scores=None, use_classes : list = [], 
+               df = {}, with_score : bool = True, colors=None, area : dict={}, shape=None, f="calibril.ttf"):
+    """
+    Draw bounding boxes on image.
+
+    Draw bounding boxes with class name and optional box score on image.
+
+    Args:
+        image: An `array` of shape (width, height, 3) with values in [0, 1].
+        boxes: An `array` of shape (num_boxes, 4) containing box corners as
+            (y_min, x_min, y_max, x_max).
+        box_classes: A `list` of indicies into `class_names`.
+        class_names: A `list` of `string` class names.
+        `scores`: A `list` of scores for each box.
+
+    Returns:
+        A copy of `image` modified with given bounding boxes.
+    """
+    """
+    font = ImageFont.truetype(
+        font='font/FiraMono-Medium.otf',
+        size=np.floor(3e-2 * image.size[1] + 0.5).astype('int32')) 
+    thickness   = (image.size[0] + image.size[1]) // 300
+    #colors      = get_colors_for_classes(len(class_names))
+    """
+
+    if area:
+        A, B, C, D = area['A'], area['B'], area['C'], area['D']
+        fill=(255, 0, 25, 40)
+        temp_im = draw_area(image=image, fill=fill, A=A, B=B, C=C, D=D)
+    else:
+        temp_im = None
+    
+    """
+    temp_image_  = Image.new("RGBA", image.size, (0, 0, 0, 0))
+    temp_draw   = ImageDraw.Draw(temp_image_)
+
+    points = [(200, 250), (85, 600), (530, 600), (400, 250)]
+
+    temp_draw.polygon(points, fill=(255, 0, 25, 40))
+    temp_draw.line([(200, 250), (85, 600)], width=4, fill=(0,0,255, 100))
+    temp_draw.line([(530, 600), (400, 250)], width=4, fill=(0,0,255, 100))
+    temp_draw.line([(85, 600), (530, 600)], width=4, fill=(0,0,255, 100))
+    temp_draw.line([(200, 250), (400, 250)], width=4, fill=(0,0,255, 100))
+    """
+
+    for i, c in list(enumerate(box_classes)):
+        box_class   = class_names[c]
+        box         = boxes[i]
+        drop_box    = True 
+         
+        if isinstance(scores.numpy(), np.ndarray):
+            score   = scores.numpy()[i]
+            label   = '{} {:.2f}'.format(box_class, score)
+        else: label = '{}'.format(box_class)
+
+        
+        _label_ = label.split()
+        if len(_label_) <= 2 : 
+            if with_score : pass 
+            else : label = _label_[0]
+        else:
+            string = ""
+            for i, s in enumerate(_label_[:-1]) : string = string + s + " " if (i != len(_label_)-2) else string  + s
+            _label_ = [string, _label_[-1]]
+
+            if with_score : pass 
+            else: label = string
+
+        LABEL = _label_[0]
+        if LABEL in use_classes:
+            draw        = ImageDraw.Draw(image, mode='RGBA')
+            top, left, bottom, right = box
+            top         = max(0, np.floor(top + 0.5).astype('int32'))
+            left        = max(0, np.floor(left + 0.5).astype('int32'))
+            bottom      = min(image.size[1], np.floor(bottom + 0.5).astype('int32'))
+            right       = min(image.size[0], np.floor(right + 0.5).astype('int32'))
+            size        = 3 + int(3e-1 * (abs(right-left)))
+            font        = ImageFont.truetype(font=f, size=size)
+            label_size  = draw.textlength(text=label, font=font)
+           
+            df['top'].append(top)
+            df['left'].append(left)
+            df['bottom'].append(bottom)
+            df['right'].append(right)
+            df['score'].append(float(_label_[1]))
+            df['label'].append(_label_[0])
+            
+            if area:
+                center = [left + abs(right-left)//2, top + abs(bottom-top)//2]
+                if A[1] < bottom <= B[1]:
+                    drop_box = draw_line(A=A, B=B, center=center, inv=False)
+                    drop_box = draw_line(A=C, B=D, center=center, inv=True)
+                else:  drop_box = False
+            
+            if drop_box:
+                if (top - size) >= 0 : text_origin = np.array([left, top - size])
+                else:
+                    idd = 0
+                    while (top - size + idd) < 0:
+                        idd += 1
+                    text_origin = np.array([left, top - size + idd])
+                # My kingdom for a good redistributable image drawing library.
+                for i in range(1):#thickness):
+                    try:
+                        l, t, r, b = left + i, top + i, right - i, bottom - i
+                        draw.rectangle(
+                            [l, t, r, b], outline=colors[LABEL], fill=colors[LABEL] + (30, )
+                            )
+                    except ValueError:
+                        done = None 
+                        if left + i >= right - i:
+                            l, t, r, b = left + i, top + i, left + i + abs(left-right), bottom - i
+                            draw.rectangle(
+                                [l, t, r, b], outline=colors[LABEL], fill=colors[LABEL] + (30, )
+                                )
+                            done = True 
+
+                        if top + i >= bottom - i :
+                            if done is True : 
+                                l, t, r, b = left + i, top - i, left + i + abs(left-right), top + i + abs(top-bottom)
+                                draw.rectangle(
+                                    [l, t, r, b], outline=colors[LABEL], fill=colors[LABEL] + (30, )
+                                    )
+                            else:
+                                l, t, r, b = left + i, top - i, right - i, top + i + abs(top-bottom)
+                                draw.rectangle(
+                                    [l, t, r, b], outline=colors[LABEL], fill=colors[LABEL] + (30, )
+                                    )
+
+                
+                draw.rectangle(
+                    [tuple(text_origin), tuple(text_origin + (label_size, size))],
+                    fill=colors[LABEL] + (70, ), outline=colors[LABEL]
+                    )
+                draw.text(text_origin, label, fill=(0, 0, 0), font=font)
+                
+                x, y = left + (r-l) // 2, t + (b - t) // 2
+                text = f"{int((x * shape[0])/608)},{int((y * shape[1])/608)}"
+                size        = 3 + int(2.3e-1 * (abs(r-l)))
+                font = ImageFont.truetype(font=f, size=size)
+                label_size  = draw.textlength(text=text, font=font)
+
+                if label_size <= abs(r-l):pass
+                else:
+                    _ = 1e-2
+                    s = 0
+                    while label_size > abs(r-l):
+                        s += _
+                        size        = 3 + int((2.3e-1 - s )* (abs(r-l)))
+                        font = ImageFont.truetype(font=f, size=size)
+                        label_size  = draw.textlength(text=text, font=font)
+                
+                point_radius = 2 + int(0.1 * size)
+                draw.ellipse((x - point_radius, y - point_radius, x + point_radius, y + point_radius), fill=colors[LABEL])
+                text_origin = np.array([x-label_size//2, y+8])
+           
+                draw.rectangle(
+                    [tuple(text_origin), tuple(text_origin + (label_size, size))],
+                    fill=colors[LABEL], outline=colors[LABEL]
+                    )
+            
+                draw.text(text_origin, text, font=font, fill=(0, 0, 0))
+            
+            del draw
+
+        else : pass 
+
+    if area:
+        result = image.convert("RGBA")
+        result = Image.alpha_composite(result, temp_im)
+
+        return np.array(result.convert('RGB'))
+    else: return np.array(image)
+
 def draw_boxes_v8(image, boxes, box_classes, class_names, scores=None, use_classes : list = [], colors = None,
-                  df = {}, with_score : bool = True, C =None, return_sequence=False, width=2, 
-                  ids = None, imgs=None, ocr:bool=False, is_tracked=False, velocities=None, counter=None):
+                  df = {}, with_score : bool = True, C =None, return_sequence=False, width=1, 
+                  ids = None, is_tracked=False, velocities=None, counter=None, f="calibril.ttf", pose=False):
     """
     Draw bounding boxes on image.
 
@@ -293,10 +475,12 @@ def draw_boxes_v8(image, boxes, box_classes, class_names, scores=None, use_class
         A copy of `image` modified with given bounding boxes.
     """
 
+    """
     font = ImageFont.truetype(
         font='font/FiraMono-Medium.otf',
         size=np.floor(3e-2 * image.size[1] + 0.5).astype('int32'))
     thickness   = (image.size[0] + image.size[1]) // 300
+    """
 
     j = 0
 
@@ -331,7 +515,7 @@ def draw_boxes_v8(image, boxes, box_classes, class_names, scores=None, use_class
                 #label = f'id:{int(ids.numpy()[j])}'
 
             draw        = ImageDraw.Draw(image, mode="RGBA")
-            label_size  = draw.textlength(text=label, font=font)
+            #label_size  = draw.textlength(text=label, font=font)
             left, top, right, bottom = box.numpy()
             j += 1
 
@@ -339,6 +523,10 @@ def draw_boxes_v8(image, boxes, box_classes, class_names, scores=None, use_class
             left        = max(0, np.floor(left + 0.5).astype('int32'))
             bottom      = min(image.size[1], np.floor(bottom + 0.5).astype('int32'))
             right       = min(image.size[0], np.floor(right + 0.5).astype('int32'))
+
+            size        = 3 + int(3e-1 * (abs(right-left)))
+            font        = ImageFont.truetype(font=f, size=size)
+            label_size  = draw.textlength(text=label, font=font)
             
             df['top'].append(np.round(np.float32(top), 2) ) 
             df['left'].append(np.round( np.float32(left), 2))
@@ -349,21 +537,26 @@ def draw_boxes_v8(image, boxes, box_classes, class_names, scores=None, use_class
 
             if drop_box:
                 idd = 0
-                if (top - 20) >= 0 : text_origin = np.array([left, top - 20])
+                if (top - size) >= 0 : text_origin = np.array([left, top - size])
                 else:
-                    while (top - 20 + idd) < 0:
+                    while (top - size + idd) < 0:
                         idd += 1
-                    text_origin = np.array([left, top - 20 + idd])
+                    text_origin = np.array([left, top - size + idd])
         
                 if C : colors[LABEL] = C
 
                 if is_tracked is False:
+                    if pose is True:
+                        fill = None 
+                    else:
+                        fill = colors[LABEL]+(30, )
                     draw.rectangle(
-                        [left, top, right, bottom], outline=colors[LABEL], width=width, fill=None
+                        [left, top, right, bottom], outline=colors[LABEL], width=1, fill= fill
                         )
+                
                 draw.rectangle(
-                    [tuple(text_origin), tuple(text_origin + (label_size, 20))],
-                    fill=colors[LABEL]
+                    [tuple(text_origin), tuple(text_origin + (label_size, size))],
+                    fill=colors[LABEL] + (70, )
                     )
                 draw.text(text_origin, label, fill=(0, 0, 0), font=font)
 
@@ -442,12 +635,14 @@ def draw_ocr(image, boxes, box_classes, class_names, scores=None, use_classes : 
         return np.array(result)
     
 def draw_boxes_v8_seg(image, boxes, box_classes, class_names, scores=None, use_classes : list = [], colors=None,
-                  df = {}, with_score : bool = True, with_names=True, alpha = 30, only_mask:bool=False):
+                  df = {}, with_score : bool = True, with_names=True, alpha = 30, only_mask:bool=False, f="calibril.ttf"):
 
+    """
     font = ImageFont.truetype(
         font='font/FiraMono-Medium.otf',
         size=np.floor(3e-2 * image.size[1] + 0.5).astype('int32'))
     thickness   = (image.size[0] + image.size[1]) // 300
+    """
     temp_images = [] 
 
     ###########
@@ -480,8 +675,12 @@ def draw_boxes_v8_seg(image, boxes, box_classes, class_names, scores=None, use_c
         if LABEL in use_classes:
             temp_image  = Image.new("RGBA", image.size, (0, 0, 0, 0))
             temp_draw   = ImageDraw.Draw(temp_image) 
-            label_size  = temp_draw.textlength(text=label, font=font)
+            #label_size  = temp_draw.textlength(text=label, font=font)
             left, top, right, bottom = box
+
+            size        = 3 + int(3e-1 * (abs(right-left)))
+            font        = ImageFont.truetype(font=f, size=size)
+            label_size  = temp_draw.textlength(text=label, font=font)
         
             df['top'].append(np.round(np.float32(top), 2) ) 
             df['left'].append(np.round( np.float32(left), 2))
@@ -491,35 +690,35 @@ def draw_boxes_v8_seg(image, boxes, box_classes, class_names, scores=None, use_c
             df['label'].append(_label_[0])
 
             #####################
-
+            """
             if top > 250 and bottom <= 600:
                 a, b = [left, bottom], [right, bottom]
                 drop_box = line(a=a, b=b)
             else: drop_box = False
-            
+            """
             ######################
             
             if drop_box:
-                if (top - 20) >= 0 : text_origin = np.array([left, top - 20])
+                if (top - 20) >= 0 : text_origin = np.array([left, top - size])
                 else:
                     idd = 0
-                    while (top - 20 + idd) < 0:
+                    while (top - size + idd) < 0:
                         idd += 1
-                    text_origin = np.array([left, top - 20 + idd])
+                    text_origin = np.array([left, top - size + idd])
                 
                 if only_mask is False:
                     temp_draw.rectangle(
-                        [left, top, right, bottom], outline=colors[LABEL]+(150,), width=2, fill=colors[LABEL]+(alpha,) 
+                        [left, top, right, bottom], outline=colors[LABEL], width=2, fill=colors[LABEL]+(alpha,) 
                         )
                 else:
                     temp_draw.rectangle(
                         [left, top, right, bottom], outline=colors[LABEL]+(150,), width=2, fill=None 
                         )
-                
+            
                 if with_names is True:        
                     temp_draw.rectangle(
-                        [tuple(text_origin), tuple(text_origin + (label_size, 20))],
-                        fill=colors[LABEL]+(255,) 
+                        [tuple(text_origin), tuple(text_origin + (label_size, size))],
+                        fill=colors[LABEL]+(70,) 
                         )
                     temp_draw.text(text_origin, label, fill=(0, 0, 0, 255), font=font,  embedded_color=True)
                 temp_images.append(temp_image)
@@ -535,7 +734,7 @@ def draw_boxes_v8_seg(image, boxes, box_classes, class_names, scores=None, use_c
     #result = Image.alpha_composite(result, temp_image_)
     ###########
   
-    return np.array(result)
+    return np.array(result.convert('RGB'))
 
 def read_video(image):
     import imageio

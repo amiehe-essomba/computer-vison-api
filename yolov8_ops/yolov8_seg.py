@@ -29,7 +29,8 @@ def line(a, b):
 
     return (a, c)
 
-def yolov8_seg(st:st, df, shape, show, response, resume, return_sequence, colors, alpha, mode, only_mask, with_names, model, **kwargs):
+def yolov8_seg(st:st, df, shape, show, response, resume, return_sequence, colors, alpha, mode,
+               only_mask, with_names, model, font="calibril.ttf", **kwargs):
     frame           = kwargs['image_file'][0][0].copy()
     detections      = model.predict(frame)[0]
     score_threshold = kwargs['score_threshold']
@@ -63,7 +64,8 @@ def yolov8_seg(st:st, df, shape, show, response, resume, return_sequence, colors
 
         if with_names is True or only_mask is False:
             image_predicted = draw_boxes_v8_seg(image=frame, boxes=boxes, box_classes=box_classes, scores=scores, with_score=response,
-                class_names=class_names, use_classes=use_classes, df=df, colors=colors, alpha=alpha, only_mask=only_mask, with_names=with_names)
+                class_names=class_names, use_classes=use_classes, df=df, colors=colors, alpha=alpha, only_mask=only_mask, 
+                with_names=with_names, f=font)
         else:
             image_predicted = np.array(frame)
         if len(shape) > 2 : shape = shape[:2]

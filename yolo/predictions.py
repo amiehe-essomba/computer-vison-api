@@ -2,7 +2,7 @@ from PIL import Image
 import os
 from yolo.yolo_head import yolo_head
 from yolo.eval import yolo_eval
-from yolo.utils.tools import  draw_boxes
+from yolo.utils.tools import  draw_boxes, draw_boxes_localalization
 from skimage.transform import resize
 from grad_cam.grad_cam import CompGradcam
 
@@ -31,7 +31,9 @@ def prediction(
         with_score      : bool  = True,
         colors          : dict  = {},
         grad_cam        : bool  = False,
-        area            : dict  = {}
+        area            : dict  = {},
+        type_of_cal     : str   = "detection",
+        font            : str   = "calibril.ttf"
         ):
 
     out_scores, out_boxes, out_classes  = [[], [], []]
@@ -63,10 +65,15 @@ def prediction(
                 # Draw bounding boxes on the image file
                 if area:
                     area = area_conv(area=area, shape=shape)
-                draw_image = draw_boxes(image=image, boxes=out_boxe, box_classes=out_classe, with_score=with_score, 
-                                        class_names=class_names, scores=out_score, use_classes=use_classes, 
-                                        df=data_dict, colors=colors, area=area)
                 
+                if type_of_cal == 'localization':
+                    draw_image = draw_boxes_localalization(image=image, boxes=out_boxe, box_classes=out_classe, with_score=with_score, 
+                                        class_names=class_names, scores=out_score, use_classes=use_classes, 
+                                        df=data_dict, colors=colors, area=area, shape=shape)
+                else:
+                    draw_image = draw_boxes(image=image, boxes=out_boxe, box_classes=out_classe, with_score=with_score, 
+                                        class_names=class_names, scores=out_score, use_classes=use_classes, 
+                                        df=data_dict, colors=colors, area=area, f=font)
                 r = shape[0] / shape[1] 
 
                 if file_type == 'image':
