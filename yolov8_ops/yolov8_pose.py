@@ -24,7 +24,7 @@ def yolov8_pose(
         od              :bool = False,
         response        :bool = False,
         model           :any  = None,
-        font            : str = 'calibril.ttf',
+        font            : str = './font/FiraMono-Medium.otf',
         **kwargs
         ) -> None | np.ndarray:
     

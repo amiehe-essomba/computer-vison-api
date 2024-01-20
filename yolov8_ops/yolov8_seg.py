@@ -30,7 +30,7 @@ def line(a, b):
     return (a, c)
 
 def yolov8_seg(st:st, df, shape, show, response, resume, return_sequence, colors, alpha, mode,
-               only_mask, with_names, model, font="calibril.ttf", **kwargs):
+               only_mask, with_names, model, font='./font/FiraMono-Medium.otf', **kwargs):
     frame           = kwargs['image_file'][0][0].copy()
     detections      = model.predict(frame)[0]
     score_threshold = kwargs['score_threshold']

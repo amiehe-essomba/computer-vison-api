@@ -12,7 +12,7 @@ import streamlit as st
 from stqdm import stqdm 
 
 
-def yolov8(st, df, shape, show, response, resume, return_sequence, colors, model, font='calibril.ttf', **kwargs):
+def yolov8(st, df, shape, show, response, resume, return_sequence, colors, model, font='./font/FiraMono-Medium.otf', **kwargs):
     score_threshold = kwargs['score_threshold']
     frame           = kwargs['image_file'][0][0].copy()
     detections      = model.predict(frame)[0]
@@ -50,7 +50,7 @@ def yolov8(st, df, shape, show, response, resume, return_sequence, colors, model
     else: return image_predicted
 
 def yolov8_track(st, df, shape, show, response, resume, return_sequence, colors, tracker = None, 
-                                track_history = None, model=None, font='calibril.ttf', **kwargs):
+                                track_history = None, model=None, font='./font/FiraMono-Medium.otf', **kwargs):
     score_threshold = kwargs['score_threshold']
     frame           = kwargs['image_file'][0][0].copy()
     detections      = model.track(frame, conf=score_threshold, persist=True, tracker=tracker)[0]

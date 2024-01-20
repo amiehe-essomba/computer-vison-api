@@ -33,7 +33,7 @@ def prediction(
         grad_cam        : bool  = False,
         area            : dict  = {},
         type_of_cal     : str   = "detection",
-        font            : str   = "calibril.ttf"
+        font            : str   = './font/FiraMono-Medium.otf'
         ):
 
     out_scores, out_boxes, out_classes  = [[], [], []]

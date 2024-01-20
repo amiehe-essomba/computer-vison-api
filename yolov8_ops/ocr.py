@@ -6,7 +6,7 @@ import cv2
 from ocr_modules.utils import read_license_plate
 import numpy as np
 
-def ocr(st, df, shape, show, response, resume, scaling, colors, model, font='calibril.ttf', **kwargs):
+def ocr(st, df, shape, show, response, resume, scaling, colors, model, font='./font/FiraMono-Medium.otf', **kwargs):
     frame           = kwargs['image_file'][0][0].copy()
     score_threshold = kwargs['score_threshold']
     detections      = model(frame)[0]

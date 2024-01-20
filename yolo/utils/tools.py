@@ -128,7 +128,7 @@ def get_colors_for_classes(num_classes):
     return colors
 
 def draw_boxes(image, boxes, box_classes, class_names, scores=None, use_classes : list = [], 
-               df = {}, with_score : bool = True, colors=None, area : dict={}, f="calibril.ttf"):
+               df = {}, with_score : bool = True, colors=None, area : dict={}, f='./font/FiraMono-Medium.otf'):
     """
     Draw bounding boxes on image.
 
@@ -281,7 +281,7 @@ def draw_boxes(image, boxes, box_classes, class_names, scores=None, use_classes 
     else: return np.array(image)
 
 def draw_boxes_localalization(image, boxes, box_classes, class_names, scores=None, use_classes : list = [], 
-               df = {}, with_score : bool = True, colors=None, area : dict={}, shape=None, f="calibril.ttf"):
+               df = {}, with_score : bool = True, colors=None, area : dict={}, shape=None, f='./font/FiraMono-Medium.otf'):
     """
     Draw bounding boxes on image.
 
@@ -457,7 +457,7 @@ def draw_boxes_localalization(image, boxes, box_classes, class_names, scores=Non
 
 def draw_boxes_v8(image, boxes, box_classes, class_names, scores=None, use_classes : list = [], colors = None,
                   df = {}, with_score : bool = True, C =None, return_sequence=False, width=1, 
-                  ids = None, is_tracked=False, velocities=None, counter=None, f="calibril.ttf", pose=False):
+                  ids = None, is_tracked=False, velocities=None, counter=None, f='./font/FiraMono-Medium.otf', pose=False):
     """
     Draw bounding boxes on image.
 
@@ -635,7 +635,7 @@ def draw_ocr(image, boxes, box_classes, class_names, scores=None, use_classes : 
         return np.array(result)
     
 def draw_boxes_v8_seg(image, boxes, box_classes, class_names, scores=None, use_classes : list = [], colors=None,
-                  df = {}, with_score : bool = True, with_names=True, alpha = 30, only_mask:bool=False, f="calibril.ttf"):
+                  df = {}, with_score : bool = True, with_names=True, alpha = 30, only_mask:bool=False, f='./font/FiraMono-Medium.otf'):
 
     """
     font = ImageFont.truetype(
