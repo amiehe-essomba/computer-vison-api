@@ -121,7 +121,7 @@ def online_link(st, url : str = "", show_image : bool = True, is_yolo : bool =Fa
         if error is None:
             if show_image is True:
                 st.header(f"image 0, shape = {shape}")
-                img_array = np.array(image)#resize(np.array(image), output_shape=shape[:-1])
+                img_array = resize(np.array(image), output_shape=shape[:-1])
                 st.image(img_array, use_column_width=True)
                 st.markdown(f"file successfully upladed...")
             else: pass
@@ -148,11 +148,9 @@ def url_img_read( url : str, factor = False, is_yolo=False):
             image = Image.open(image_data)
             shape = np.array( [x for x in image.size] )
             if (shape < np.array([6000, 6000]) ).all() : 
-                if is_yolo is False:
-                    image, image_data, shape = preprocess_image(img_path=image, model_image_size = (608, 608), done=True, factor=factor)
-                else:
-                    image_data = np.array(image)
-                    shape = image_data.shape
+                #if is_yolo is False:
+                image, image_data, shape = preprocess_image(img_path=image, model_image_size = (608, 608), done=True, factor=factor)
+                
             else:
                 error = 'image size out of range (6000, 6000)'
         else:
