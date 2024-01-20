@@ -438,7 +438,8 @@ def Image(st:streamlit, all_models:dict, df, col, shape, model_type, show, **kwa
     with c_:
         font = st.selectbox("Font", options=["arial", 'arialbd', "calibri", "calibril", 
                                       'consolai', "consolab", "calibriz", "corbell", 'micross'], index=3)
-        font = f"{font}.ttf"
+        #font = f"{font}.ttf"
+        font = './font/FiraMono-Medium.otf'
     #with run_data_col:
     run_data = button_style(st=st, name='run')
 
