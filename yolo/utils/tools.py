@@ -679,7 +679,7 @@ def draw_boxes_v8_seg(image, boxes, box_classes, class_names, scores=None, use_c
             left, top, right, bottom = box
 
             size        = 3 + int(3e-1 * (abs(right-left)))
-            font        = ImageFont.truetype(font="calibril.ttf", size=size)
+            font        = ImageFont.truetype(font=f, size=size)
             label_size  = temp_draw.textlength(text=label, font=font)
         
             df['top'].append(np.round(np.float32(top), 2) ) 
