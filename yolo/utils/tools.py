@@ -699,7 +699,7 @@ def draw_boxes_v8_seg(image, boxes, box_classes, class_names, scores=None, use_c
             ######################
             
             if drop_box:
-                if (top - 20) >= 0 : text_origin = np.array([left, top - size])
+                if (top - size) >= 0 : text_origin = np.array([left, top - size])
                 else:
                     idd = 0
                     while (top - size + idd) < 0:
@@ -708,11 +708,11 @@ def draw_boxes_v8_seg(image, boxes, box_classes, class_names, scores=None, use_c
                 
                 if only_mask is False:
                     temp_draw.rectangle(
-                        [left, top, right, bottom], outline=colors[LABEL], width=2, fill=colors[LABEL]+(alpha,) 
+                        [left, top, right, bottom], outline=colors[LABEL], width=1, fill=colors[LABEL]+(alpha,) 
                         )
                 else:
                     temp_draw.rectangle(
-                        [left, top, right, bottom], outline=colors[LABEL]+(150,), width=2, fill=None 
+                        [left, top, right, bottom], outline=colors[LABEL]+(150,), width=1, fill=None 
                         )
             
                 if with_names is True:        
