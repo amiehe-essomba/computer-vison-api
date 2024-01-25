@@ -527,6 +527,17 @@ def draw_boxes_v8(image, boxes, box_classes, class_names, scores=None, use_class
             size        = 3 + int(3e-1 * (abs(right-left)))
             font        = ImageFont.truetype(font=f, size=size)
             label_size  = draw.textlength(text=label, font=font)
+
+            if left + label_size < image.width:
+                pass
+            else:
+                _ = 1e-2
+                s = 0
+                while left + label_size > image.width:
+                    s += _
+                    size = 3 + int((3.e-1 - s ) * (abs(right-left)))
+                    font        = ImageFont.truetype(font=f, size=size)
+                    label_size  = draw.textlength(text=label, font=font)
             
             df['top'].append(np.round(np.float32(top), 2) ) 
             df['left'].append(np.round( np.float32(left), 2))

@@ -5,6 +5,7 @@ import tensorflow as tf
 import cv2
 from ocr_modules.utils import read_license_plate
 import numpy as np
+import matplotlib.pyplot as plt
 
 def ocr(st, df, shape, show, response, resume, scaling, colors, model, font='./font/FiraMono-Medium.otf', **kwargs):
     frame           = kwargs['image_file'][0][0].copy()
@@ -27,13 +28,12 @@ def ocr(st, df, shape, show, response, resume, scaling, colors, model, font='./f
 
             license_plate_drop                      = np.array(frame)[int(y1) : int(y2), int(x1) : int(x2), :]
             license_plate_drop_gray                 = cv2.cvtColor(license_plate_drop, cv2.COLOR_BGR2GRAY)
-            s, license_plate_drop_threshold         = cv2.threshold(license_plate_drop_gray, 64, 255, cv2.THRESH_BINARY_INV)
-            license_plate_text, license_plate_score = read_license_plate(license_plate_drop_gray)
+            s, license_plate_drop_threshold         = cv2.threshold(license_plate_drop_gray, 60, 255, cv2.THRESH_BINARY_INV)
+            license_plate_text, license_plate_score = read_license_plate( license_plate_drop_threshold  )
             
             if license_plate_text: 
                 CLASSES.append(license_plate_text)
                 imgs.append([license_plate_drop, license_plate_drop_threshold ])
-    
     if CLASSES:
         boxes_plates, frame    = scaling(frame, boxes=boxes_plates, S=frame.size)
         scores_plates          = tf.constant(scores_plates, dtype=tf.float32)

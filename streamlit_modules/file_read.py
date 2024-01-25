@@ -123,7 +123,7 @@ def online_link(st, url : str = "", show_image : bool = True, is_yolo : bool =Fa
                 st.header(f"image 0, shape = {shape}")
                 img_array = resize(np.array(image), output_shape=shape[:-1])
                 st.image(img_array, use_column_width=True)
-                st.markdown(f"file successfully upladed...")
+                st.markdown(f"file successfully uploaded...")
             else: pass
         else: pass#st.markdown(f"{error}")
     else: pass 

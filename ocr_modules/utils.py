@@ -8,7 +8,7 @@ from functools import reduce
 
 def read_license_plate(license_plate_crop):
     # Initialize the OCR reader
-    reader = easyocr.Reader(['en'], gpu=False)
+    reader = easyocr.Reader(['en'], gpu=True)
     detections = reader.readtext(license_plate_crop)
     
     for detection in detections:
